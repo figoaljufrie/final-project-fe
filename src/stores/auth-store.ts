@@ -3,7 +3,7 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { setAuthToken } from "@/lib/api";
-import * as authService from "@/app/auth/services/auth-service";
+import * as authService from "@/lib/services/auth/auth-service";
 import type { User } from "@/lib/types/users/user-type";
 import type { LoginResponse } from "@/lib/types/users/auth-type";
 
