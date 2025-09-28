@@ -54,9 +54,9 @@ export default function LoginPage() {
       } else {
         toast.error("Social login failed");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Google login error", err);
-      toast.error("Google login failed: " + (err.message || err));
+      toast.error("Google login failed: " + (err as Error).message);
     }
   };
 

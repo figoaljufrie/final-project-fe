@@ -17,6 +17,8 @@ import {
   Wifi,
 } from "lucide-react";
 import { useState } from "react";
+import Image from "next/image";
+
 export default function PropertyGrid() {
   const [properties, setProperties] = useState<Property[]>(exploreProperties);
   const [currentPage, setCurrentPage] = useState(1);
@@ -75,11 +77,16 @@ export default function PropertyGrid() {
             className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-[#D6D5C9] group cursor-pointer"
           >
             {/* Property Image */}
-            <div className="relative h-48 overflow-hidden">
-              <img
+            <div className="relative h-48 w-full overflow-hidden">
+              <Image
                 src={property.image}
                 alt={property.name}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                fill
+                className="object-cover group-hover:scale-110 transition-transform duration-500"
+                sizes="(max-width: 768px) 100vw, 
+                       (max-width: 1200px) 50vw, 
+                       33vw"
+                priority={index < 3} // preload first few images for performance
               />
 
               {/* Save Button */}

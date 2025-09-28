@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Heart, Star, MapPin, Users, Wifi, Coffee } from "lucide-react";
-
+import Image from "next/image";
 
 interface CardProps {
   id: number;
@@ -43,10 +43,12 @@ export default function PropertyCard({
     >
       {/* Image */}
       <div className="relative h-48 overflow-hidden">
-        <img
+        <Image
           src={image}
           alt={name}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          fill
+          className="object-cover group-hover:scale-110 transition-transform duration-500"
+          priority={false}
         />
 
         {/* Save button */}
@@ -113,7 +115,9 @@ export default function PropertyCard({
             <span className="text-lg font-bold text-[#8B7355]">${price}</span>
             <span className="text-sm text-gray-500"> / night</span>
           </div>
-          <button className="px-4 py-2 bg-[#8B7355] text-white rounded-lg hover:bg-[#7a6348] transition">Book</button>
+          <button className="px-4 py-2 bg-[#8B7355] text-white rounded-lg hover:bg-[#7a6348] transition">
+            Book
+          </button>
         </div>
       </div>
     </motion.div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 const images = [
   "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?auto=format&fit=crop&w=1400&q=80",
@@ -17,11 +18,13 @@ export default function HeroCarousel() {
         transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
       >
         {images.concat(images).map((img, idx) => (
-          <div key={idx} className="w-full h-full flex-shrink-0">
-            <img
+          <div key={idx} className="relative w-full h-full flex-shrink-0">
+            <Image
               src={img}
               alt="Hero"
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              priority={idx === 0} // only prioritize the first image
             />
           </div>
         ))}
