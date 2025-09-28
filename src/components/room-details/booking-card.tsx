@@ -210,7 +210,7 @@ export default function BookingCard() {
         Reserve
       </Button>
 
-      <p className="text-center text-sm text-gray-500 mb-6">You won't be charged yet</p>
+      <p className="text-center text-sm text-gray-500 mb-6">You wont be charged yet</p>
 
       {/* Price Breakdown */}
       <div className="space-y-3 pt-6 border-t border-[#D6D5C9]">

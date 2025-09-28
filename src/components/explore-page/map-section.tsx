@@ -5,6 +5,7 @@ import { MapProperty, mapProperties } from "@/mock-data/explore/mock-map";
 import { motion } from "framer-motion";
 import { Heart, MapPin, Maximize2, Star } from "lucide-react";
 import { useState } from "react";
+import Image from "next/image";
 
 export default function MapSection() {
   const [selectedProperty, setSelectedProperty] = useState<MapProperty | null>(
@@ -107,7 +108,7 @@ export default function MapSection() {
             <div className="flex">
               {/* Property Image */}
               <div className="w-24 h-24 flex-shrink-0">
-                <img
+                <Image
                   src={selectedProperty.image}
                   alt={selectedProperty.name}
                   className="w-full h-full object-cover"

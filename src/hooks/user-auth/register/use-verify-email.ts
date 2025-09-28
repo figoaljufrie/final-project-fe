@@ -15,16 +15,13 @@ export function useVerifyEmail() {
     setSuccess(null);
 
     try {
-      console.log("Sending token to API:", token);
-
       const user = await verifyEmailAndSetPassword(token, password);
-
-      console.log("API success:", user);
       setSuccess("Email verified and password successfully set!");
       return user;
-    } catch (err: any) {
-      console.error("Verification error:", err.response?.data || err);
-      setError(err?.response?.data?.message || "Verification failed.");
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Verification failed.";
+      setError(message);
       return null;
     } finally {
       setLoading(false);

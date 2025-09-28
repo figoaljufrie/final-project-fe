@@ -1,9 +1,9 @@
 "use client";
 
+import { Suspense, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useVerifyEmail } from "@/hooks/user-auth/register/use-verify-email";
-import { useEffect } from "react";
 import toast from "react-hot-toast";
 
 type FormData = {
@@ -11,12 +11,11 @@ type FormData = {
   confirmPassword: string;
 };
 
-export default function VerifyEmailPage() {
+// Inner component to allow Suspense boundary
+function VerifyEmailForm() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const router = useRouter();
-
-  console.log("Token from params:", token); // 🔍 debug
 
   const {
     register,
@@ -32,8 +31,6 @@ export default function VerifyEmailPage() {
   }, [token]);
 
   const onSubmit = async (data: FormData) => {
-    console.log("Form submitted", data, token); // 🔍 debug
-
     if (!token) {
       toast.error("Missing token.");
       return;
@@ -69,7 +66,7 @@ export default function VerifyEmailPage() {
             <input
               type="password"
               id="password"
-              {...register("password", { required: true, minLength: 5 })}
+              {...register("password", { required: true, minLength: 6 })}
               className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
               placeholder="Enter new password"
               disabled={loading}
@@ -82,7 +79,10 @@ export default function VerifyEmailPage() {
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium mb-1">
+            <label
+              htmlFor="confirmPassword"
+              className="block text-sm font-medium mb-1"
+            >
               Confirm Password
             </label>
             <input
@@ -113,5 +113,13 @@ export default function VerifyEmailPage() {
         {success && <p className="text-green-600 mt-4 text-center">{success}</p>}
       </div>
     </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<div className="text-center p-6">Loading...</div>}>
+      <VerifyEmailForm />
+    </Suspense>
   );
 }

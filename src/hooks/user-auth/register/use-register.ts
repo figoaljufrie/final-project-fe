@@ -19,8 +19,8 @@ export function useRegister() {
       const response = await registerUser(email);
       setSuccess(response.message);
       return response;
-    } catch (error: any) {
-      setError(error?.response?.data?.message || "Registration Failed.");
+    } catch (error: unknown) {
+      setError((error as Error).message || "Registration Failed.");
       return null;
     } finally {
       setLoading(false);

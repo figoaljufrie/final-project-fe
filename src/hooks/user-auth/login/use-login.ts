@@ -16,8 +16,8 @@ export function useLogin() {
       const res = await authStore.login(email, password);
       setLoading(false);
       return res;
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || "Login failed");
+    } catch (err: unknown) {
+      setError((err as Error).message || "Login failed");
       setLoading(false);
       return null;
     }
