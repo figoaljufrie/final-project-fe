@@ -3,8 +3,9 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { CalendarDays, Users, Plus, Minus, Star } from "lucide-react";
+import { CalendarDays, Users, Plus, Minus, Star, CreditCard, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import PaymentMethodModal from "@/components/payment/PaymentMethodModal";
 
 interface BookingData {
   checkIn: string;
@@ -20,9 +21,13 @@ export default function BookingCard() {
   });
 
   const [showCalendar, setShowCalendar] = useState<'checkIn' | 'checkOut' | null>(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [isBooking, setIsBooking] = useState(false);
 
   const pricePerNight = 320;
-  const nights = 5; // This would be calculated based on selected dates
+  const nights = bookingData.checkIn && bookingData.checkOut 
+    ? Math.ceil((new Date(bookingData.checkOut).getTime() - new Date(bookingData.checkIn).getTime()) / (1000 * 60 * 60 * 24))
+    : 0;
   const serviceFee = 50;
   const taxes = 25;
   const totalPrice = (pricePerNight * nights) + serviceFee + taxes;
@@ -34,6 +39,45 @@ export default function BookingCard() {
         ? Math.min(prev.guests + 1, 8) 
         : Math.max(prev.guests - 1, 1)
     }));
+  };
+
+  const handleDateSelect = (date: string, type: 'checkIn' | 'checkOut') => {
+    setBookingData(prev => ({
+      ...prev,
+      [type]: date
+    }));
+    setShowCalendar(null);
+  };
+
+  const handleReserve = () => {
+    if (!bookingData.checkIn || !bookingData.checkOut) {
+      alert('Please select check-in and check-out dates');
+      return;
+    }
+    setShowPaymentModal(true);
+  };
+
+  const handlePaymentMethodSelect = async (paymentMethod: 'manual_transfer' | 'payment_gateway') => {
+    setIsBooking(true);
+    setShowPaymentModal(false);
+    
+    // Simulate booking process
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      if (paymentMethod === 'payment_gateway') {
+        // In real implementation, redirect to Midtrans payment
+        alert('Redirecting to payment gateway...');
+      } else {
+        // In real implementation, redirect to payment proof upload
+        alert('Redirecting to payment proof upload...');
+      }
+    } catch (error) {
+      console.error('Booking failed:', error);
+      alert('Booking failed. Please try again.');
+    } finally {
+      setIsBooking(false);
+    }
   };
 
   const generateCalendarDays = () => {
@@ -69,6 +113,7 @@ export default function BookingCard() {
   const currentDate = new Date();
   const currentMonth = monthNames[currentDate.getMonth()];
   const nextMonth = monthNames[(currentDate.getMonth() + 1) % 12];
+  const currentYear = currentDate.getFullYear();
 
   return (
     <motion.div
@@ -136,6 +181,7 @@ export default function BookingCard() {
                     <button
                       key={index}
                       disabled={!day}
+                      onClick={() => day && handleDateSelect(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`, 'checkIn')}
                       className={`text-center p-1 text-sm rounded hover:bg-[#8B7355] hover:text-white transition-colors ${
                         !day ? 'invisible' : ''
                       }`}
@@ -159,6 +205,7 @@ export default function BookingCard() {
                     <button
                       key={index}
                       disabled={!day}
+                      onClick={() => day && handleDateSelect(`${currentYear}-${String(currentMonth + 2).padStart(2, '0')}-${String(day).padStart(2, '0')}`, 'checkOut')}
                       className={`text-center p-1 text-sm rounded hover:bg-[#8B7355] hover:text-white transition-colors ${
                         !day ? 'invisible' : ''
                       }`}
@@ -205,9 +252,18 @@ export default function BookingCard() {
       {/* Reserve Button */}
       <Button 
         size="lg"
-        className="w-full mb-4 bg-[#8B7355] hover:bg-[#7A6349] text-white"
+        onClick={handleReserve}
+        disabled={isBooking || !bookingData.checkIn || !bookingData.checkOut}
+        className="w-full mb-4 bg-[#8B7355] hover:bg-[#7A6349] text-white disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Reserve
+        {isBooking ? (
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            Processing...
+          </div>
+        ) : (
+          'Reserve'
+        )}
       </Button>
 
       <p className="text-center text-sm text-gray-500 mb-6">You wont be charged yet</p>
@@ -247,6 +303,20 @@ export default function BookingCard() {
           <span>This is a rare find - this property is highly rated</span>
         </div>
       </div>
+
+      {/* Payment Method Modal */}
+      <PaymentMethodModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onSelectMethod={handlePaymentMethodSelect}
+        totalAmount={totalPrice}
+        bookingData={{
+          checkIn: bookingData.checkIn,
+          checkOut: bookingData.checkOut,
+          guests: bookingData.guests,
+          nights: nights
+        }}
+      />
     </motion.div>
   );
 }
