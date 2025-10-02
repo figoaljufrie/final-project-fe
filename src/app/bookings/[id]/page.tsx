@@ -30,6 +30,7 @@ export default function BookingDetails() {
   const [activeTab, setActiveTab] = useState<'details' | 'payment' | 'contact'>('details');
 
   // Mock booking data - replace with actual data from props/API
+  console.log("test commit");
   const bookingData = {
     id: 1,
     bookingNo: "BK-2024-001234",
