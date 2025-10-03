@@ -27,11 +27,11 @@ import PaymentMethodModal from "@/components/payment/PaymentMethodModal";
 import Link from "next/link";
 import Image from "next/image";
 
-export default function BookingDetails() {
+export default function ManualTransferTest() {
   const [activeTab, setActiveTab] = useState<'details' | 'payment' | 'contact'>('details');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
-  // Mock booking data - replace with actual data from props/API
+  // Mock booking data for manual transfer testing
   const bookingData = {
     id: 1,
     bookingNo: "BK-2024-001234",
@@ -44,7 +44,7 @@ export default function BookingDetails() {
     guests: 4,
     nights: 3,
     totalAmount: 960,
-    paymentMethod: "payment_gateway" as const, // Changed to payment_gateway for testing
+    paymentMethod: "manual_transfer" as const, // Manual transfer for testing
     paymentProofUrl: null,
     paymentDeadline: "2024-03-10T14:30:00Z",
     createdAt: "2024-03-08T10:30:00Z",
@@ -137,6 +137,15 @@ export default function BookingDetails() {
           <span>Back to My Bookings</span>
         </Link>
 
+        {/* Test Info */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <h3 className="font-semibold text-blue-800 mb-2">🧪 Testing: Manual Transfer Payment</h3>
+          <p className="text-sm text-blue-700">
+            This page shows the booking details with <strong>manual transfer</strong> payment method. 
+            You should see "Upload Payment Proof" button instead of "Pay with Payment Gateway".
+          </p>
+        </div>
+
         {/* Header Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -202,79 +211,6 @@ export default function BookingDetails() {
               </div>
 
               <div className="p-6">
-                {/* Booking Details Tab */}
-                {activeTab === 'details' && (
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="space-y-6"
-                  >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <h3 className="font-semibold text-[#8B7355] flex items-center gap-2">
-                          <Calendar size={20} />
-                          Check-in & Check-out
-                        </h3>
-                        <div className="space-y-2">
-                          <div>
-                            <span className="text-sm text-gray-600">Check-in:</span>
-                            <p className="font-medium">{formatDate(bookingData.checkIn)}</p>
-                          </div>
-                          <div>
-                            <span className="text-sm text-gray-600">Check-out:</span>
-                            <p className="font-medium">{formatDate(bookingData.checkOut)}</p>
-                          </div>
-                          <div>
-                            <span className="text-sm text-gray-600">Duration:</span>
-                            <p className="font-medium">{bookingData.nights} nights</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-4">
-                        <h3 className="font-semibold text-[#8B7355] flex items-center gap-2">
-                          <Users size={20} />
-                          Guest Information
-                        </h3>
-                        <div className="space-y-2">
-                          <div>
-                            <span className="text-sm text-gray-600">Number of Guests:</span>
-                            <p className="font-medium">{bookingData.guests} guests</p>
-                          </div>
-                          {bookingData.notes && (
-                            <div>
-                              <span className="text-sm text-gray-600">Special Requests:</span>
-                              <p className="font-medium">{bookingData.notes}</p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h3 className="font-semibold text-[#8B7355] mb-4">Room Details</h3>
-                      <div className="space-y-3">
-                        {bookingData.items.map((item) => (
-                          <div key={item.id} className="border border-gray-200 rounded-lg p-4">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h4 className="font-medium">{item.roomName}</h4>
-                                <p className="text-sm text-gray-600">
-                                  {item.unitCount} unit{item.unitCount > 1 ? 's' : ''} × {item.nights} night{item.nights > 1 ? 's' : ''}
-                                </p>
-                              </div>
-                              <div className="text-right">
-                                <p className="font-medium">${item.unitPrice}/night</p>
-                                <p className="text-sm text-gray-600">Subtotal: ${item.subTotal}</p>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-
                 {/* Payment Info Tab */}
                 {activeTab === 'payment' && (
                   <motion.div
@@ -322,31 +258,6 @@ export default function BookingDetails() {
                       </div>
                     </div>
 
-                    {bookingData.paymentProofUrl && (
-                      <div>
-                        <h3 className="font-semibold text-[#8B7355] mb-4">Payment Proof</h3>
-                        <div className="border border-gray-200 rounded-lg p-4">
-                          <div className="flex items-center gap-4">
-                            <Image
-                              src={bookingData.paymentProofUrl}
-                              alt="Payment Proof"
-                              width={100}
-                              height={100}
-                              className="w-24 h-24 object-cover rounded-lg"
-                            />
-                            <div className="flex-1">
-                              <p className="font-medium">Payment proof uploaded</p>
-                              <p className="text-sm text-gray-600">Waiting for verification</p>
-                            </div>
-                            <Button variant="outline" size="sm">
-                              <Download size={16} className="mr-2" />
-                              Download
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
                     {/* Action Buttons */}
                     {bookingData.status === 'waiting_for_payment' && !bookingData.paymentProofUrl && (
                       <div className="pt-6 border-t">
@@ -372,9 +283,7 @@ export default function BookingDetails() {
                               <Button 
                                 className="bg-[#8B7355] hover:bg-[#7A6349] text-white"
                                 onClick={() => {
-                                  // In real implementation, this would call the Midtrans API
                                   console.log('Redirecting to Midtrans payment gateway...');
-                                  // window.location.href = '/bookings/1/payment-pending';
                                 }}
                               >
                                 Pay with Payment Gateway
@@ -398,67 +307,6 @@ export default function BookingDetails() {
                         </div>
                       </div>
                     )}
-                  </motion.div>
-                )}
-
-                {/* Contact Host Tab */}
-                {activeTab === 'contact' && (
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="space-y-6"
-                  >
-                    <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-                      <Image
-                        src={bookingData.tenant.avatar}
-                        alt={bookingData.tenant.name}
-                        width={60}
-                        height={60}
-                        className="w-15 h-15 rounded-full object-cover"
-                      />
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-[#8B7355]">{bookingData.tenant.name}</h3>
-                        <p className="text-sm text-gray-600">Property Host</p>
-                        <div className="flex items-center gap-1 mt-1">
-                          <Star size={14} className="fill-yellow-400 text-yellow-400" />
-                          <span className="text-sm font-medium">4.9</span>
-                          <span className="text-sm text-gray-500">(128 reviews)</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <h4 className="font-semibold text-[#8B7355] flex items-center gap-2">
-                          <Phone size={20} />
-                          Contact Information
-                        </h4>
-                        <div className="space-y-3">
-                          <div className="flex items-center gap-3">
-                            <Phone size={16} className="text-gray-500" />
-                            <span className="text-sm">{bookingData.tenant.phone}</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <Mail size={16} className="text-gray-500" />
-                            <span className="text-sm">{bookingData.tenant.email}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-4">
-                        <h4 className="font-semibold text-[#8B7355]">Quick Actions</h4>
-                        <div className="space-y-2">
-                          <Button variant="outline" className="w-full justify-start">
-                            <MessageCircle size={16} className="mr-2" />
-                            Send Message
-                          </Button>
-                          <Button variant="outline" className="w-full justify-start">
-                            <Phone size={16} className="mr-2" />
-                            Call Host
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
                   </motion.div>
                 )}
               </div>
@@ -489,9 +337,7 @@ export default function BookingDetails() {
                         <Button 
                           className="w-full bg-[#8B7355] hover:bg-[#7A6349] text-white"
                           onClick={() => {
-                            // In real implementation, this would call the Midtrans API
                             console.log('Redirecting to Midtrans payment gateway...');
-                            // window.location.href = '/bookings/1/payment-pending';
                           }}
                         >
                           Pay with Payment Gateway
@@ -517,38 +363,6 @@ export default function BookingDetails() {
                   )}
                 </div>
               </div>
-
-              {/* Booking Timeline */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="font-bold text-[#8B7355] mb-4">Booking Timeline</h3>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-3 h-3 bg-green-500 rounded-full mt-1"></div>
-                    <div>
-                      <p className="text-sm font-medium">Booking Created</p>
-                      <p className="text-xs text-gray-500">{formatDate(bookingData.createdAt)}</p>
-                    </div>
-                  </div>
-                  
-                  {bookingData.status === 'waiting_for_payment' && (
-                    <div className="flex items-start gap-3">
-                      <div className="w-3 h-3 bg-yellow-500 rounded-full mt-1"></div>
-                      <div>
-                        <p className="text-sm font-medium">Waiting for Payment</p>
-                        <p className="text-xs text-gray-500">Upload proof to continue</p>
-                      </div>
-                    </div>
-                  )}
-                  
-                  <div className="flex items-start gap-3">
-                    <div className="w-3 h-3 bg-gray-300 rounded-full mt-1"></div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">Check-in</p>
-                      <p className="text-xs text-gray-500">{formatDate(bookingData.checkIn)}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </motion.div>
           </div>
         </div>
@@ -563,13 +377,9 @@ export default function BookingDetails() {
         onSelectMethod={(method) => {
           console.log('Selected payment method:', method);
           setShowPaymentModal(false);
-          // In real implementation, this would update the booking's payment method
-          // and redirect accordingly
           if (method === 'payment_gateway') {
-            // Redirect to payment gateway
             window.location.href = '/bookings/1/payment-pending';
           } else {
-            // Redirect to upload payment proof
             window.location.href = '/bookings/1/upload-payment';
           }
         }}
