@@ -3,8 +3,8 @@ import type {
   LoginResponse,
   RegisterResponse,
   ResetPasswordResponse,
-} from "@/lib/types/users/auth-type";
-import type { User } from "@/lib/types/users/user-type";
+} from "@/lib/types/account/auth-type";
+import type { User } from "@/lib/types/account/user-type";
 
 // --- Register ---
 export async function registerUser(email: string): Promise<RegisterResponse> {

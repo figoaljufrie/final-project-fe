@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { registerUser } from "@/lib/services/auth/auth-service";
-import type { RegisterResponse } from "@/lib/types/users/auth-type";
+import { registerUser } from "@/lib/services/Account/auth/auth-service";
+import type { RegisterResponse } from "@/lib/types/account/auth-type";
 
 export function useRegister() {
   const [loading, setLoading] = useState(false);

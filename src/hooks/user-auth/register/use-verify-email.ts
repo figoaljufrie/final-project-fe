@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { verifyEmailAndSetPassword } from "@/lib/services/auth/auth-service";
-import type { User } from "@/lib/types/users/user-type";
+import { verifyEmailAndSetPassword } from "@/lib/services/Account/auth/auth-service";
+import type { User } from "@/lib/types/account/user-type";
 
 export function useVerifyEmail() {
   const [loading, setLoading] = useState(false);
