@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { socialLogin } from "@/lib/services/oAuth/oAuth-service";
-import type { SocialLoginPayload, SocialLoginResponse } from "@/lib/types/users/oauth-type";
+import { socialLogin } from "@/lib/services/Account/oAuth/oAuth-service";
+import type { SocialLoginPayload, SocialLoginResponse } from "@/lib/types/account/oauth-type";
 import { useAuthStore } from "@/stores/auth-store";
 
 export function useSocialLogin() {

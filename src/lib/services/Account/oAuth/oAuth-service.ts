@@ -2,7 +2,7 @@ import api, { setAuthToken } from "@/lib/api";
 import type {
   SocialLoginPayload,
   SocialLoginResponse,
-} from "@/lib/types/users/oauth-type";
+} from "@/lib/types/account/oauth-type";
 
 export async function socialLogin(
   idToken: string,

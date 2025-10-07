@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import type { User, UpdateUserPayload } from "@/lib/types/users/user-type";
+import type { User, UpdateUserPayload } from "@/lib/types/account/user-type";
 
 // --- Get Users ---
 export async function getAllUsers(): Promise<User[]> {
