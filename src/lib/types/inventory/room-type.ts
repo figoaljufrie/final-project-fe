@@ -25,7 +25,7 @@ export interface RoomListItem {
   capacity: number;
   basePrice: number;
   totalUnits: number;
-  image: string | null;
+  image?: string | null;
 }
 
 export interface RoomImagePayload {

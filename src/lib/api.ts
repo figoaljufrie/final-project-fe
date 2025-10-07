@@ -7,10 +7,19 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
+    const isPublicRoute =
+      config.url?.includes("/verify-email") ||
+      config.url?.includes("/reset-password");
+
+    if (isPublicRoute) {
+      return config;
+    }
+
     let token: string | null = null;
     try {
       token = useAuthStore.getState().token || localStorage.getItem("token");
     } catch {}
+
     if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
   },

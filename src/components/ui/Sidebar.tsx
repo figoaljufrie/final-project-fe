@@ -37,7 +37,7 @@ const navigation = [
   },
   {
     name: "Property Management", 
-    href: "/dashboard/properties",
+    href: "/dashboard/property",
     icon: Building2,
     description: "Manage Properties"
   },
