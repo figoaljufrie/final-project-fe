@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { 
+import {
   CheckIcon,
   XMarkIcon,
   ClockIcon,
@@ -10,7 +10,11 @@ import {
   BellIcon,
 } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
-import { TenantApprovalService, TenantBooking, BookingFilters } from "@/lib/services/tenant/tenant-approval-service";
+import {
+  TenantApprovalService,
+  TenantBooking,
+  BookingFilters,
+} from "@/lib/services/tenant/tenant-approval-service";
 import BookingSearchFilter from "@/components/ui/BookingSearchFilter";
 import BookingStatsCards from "@/components/ui/BookingStatsCards";
 import BookingTable from "@/components/ui/BookingTable";
@@ -77,7 +81,7 @@ export default function TenantApprovalPage() {
         limit: pagination.limit,
         ...filters,
       });
-      
+
       setBookings(result.bookings || []);
       setPagination(result.pagination || pagination);
     } catch (error: any) {
@@ -105,13 +109,19 @@ export default function TenantApprovalPage() {
 
   // Filter bookings based on search and status
   const filteredBookings = bookings.filter((booking) => {
-    const matchesSearch = 
+    // Only show bookings with valid property data
+    if (!booking.property || !booking.property.name) {
+      return false;
+    }
+
+    const matchesSearch =
       booking.bookingNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       booking.property.name.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = statusFilter === "all" || booking.status === statusFilter;
-    
+
+    const matchesStatus =
+      statusFilter === "all" || booking.status === statusFilter;
+
     return matchesSearch && matchesStatus;
   });
 
@@ -122,7 +132,7 @@ export default function TenantApprovalPage() {
       await TenantApprovalService.confirmPayment(bookingId, {
         confirmationNotes: "Payment confirmed by tenant",
       });
-      
+
       toast.success("Booking confirmed successfully");
       await loadBookings();
       await loadPendingCount();
@@ -144,7 +154,7 @@ export default function TenantApprovalPage() {
       await TenantApprovalService.rejectPayment(bookingId, {
         rejectionReason,
       });
-      
+
       toast.success("Booking rejected successfully");
       await loadBookings();
       await loadPendingCount();
@@ -157,7 +167,10 @@ export default function TenantApprovalPage() {
   };
 
   // Handle send reminder
-  const handleSendReminder = async (bookingId: number, reminderType: 'payment' | 'checkin' | 'checkout' = 'payment') => {
+  const handleSendReminder = async (
+    bookingId: number,
+    reminderType: "payment" | "checkin" | "checkout" = "payment"
+  ) => {
     try {
       await TenantApprovalService.sendReminder(bookingId, { reminderType });
       toast.success("Reminder sent successfully");
@@ -190,10 +203,14 @@ export default function TenantApprovalPage() {
           className="flex items-center justify-between"
         >
           <div>
-            <h1 className="text-3xl font-bold text-[#8B7355]">Tenant Approval System</h1>
-            <p className="text-gray-600 mt-2">Manage and approve booking requests from users</p>
+            <h1 className="text-3xl font-bold text-[#8B7355]">
+              Tenant Approval System
+            </h1>
+            <p className="text-gray-600 mt-2">
+              Manage and approve booking requests from users
+            </p>
           </div>
-          
+
           {pendingCount > 0 && (
             <motion.div
               initial={{ scale: 0 }}
@@ -203,9 +220,12 @@ export default function TenantApprovalPage() {
               <BellIcon className="h-6 w-6 text-yellow-600" />
               <div>
                 <p className="font-semibold text-yellow-800">
-                  {pendingCount} booking{pendingCount > 1 ? 's' : ''} pending approval
+                  {pendingCount} booking{pendingCount > 1 ? "s" : ""} pending
+                  approval
                 </p>
-                <p className="text-sm text-yellow-700">Please review and take action</p>
+                <p className="text-sm text-yellow-700">
+                  Please review and take action
+                </p>
               </div>
             </motion.div>
           )}
@@ -247,11 +267,11 @@ export default function TenantApprovalPage() {
             className="flex items-center justify-between bg-white rounded-lg p-4"
           >
             <div className="text-sm text-gray-700">
-              Showing {((pagination.page - 1) * pagination.limit) + 1} to{' '}
-              {Math.min(pagination.page * pagination.limit, pagination.total)} of{' '}
-              {pagination.total} results
+              Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
+              {Math.min(pagination.page * pagination.limit, pagination.total)}{" "}
+              of {pagination.total} results
             </div>
-            
+
             <div className="flex items-center gap-2">
               <button
                 onClick={() => loadBookings({ page: pagination.page - 1 })}
@@ -260,11 +280,11 @@ export default function TenantApprovalPage() {
               >
                 Previous
               </button>
-              
+
               <span className="px-3 py-2 text-sm">
                 Page {pagination.page} of {pagination.totalPages}
               </span>
-              
+
               <button
                 onClick={() => loadBookings({ page: pagination.page + 1 })}
                 disabled={pagination.page >= pagination.totalPages}
