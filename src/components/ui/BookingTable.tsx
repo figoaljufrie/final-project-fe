@@ -7,6 +7,7 @@ import {
   XMarkIcon,
   ClockIcon,
 } from "@heroicons/react/24/outline";
+import { BellIcon } from "lucide-react";
 import clsx from "clsx";
 import { Booking } from "@/lib/types/bookings/booking";
 
@@ -20,6 +21,8 @@ interface BookingTableProps {
   onConfirmBooking: (bookingId: number) => void;
   onRejectBooking: (bookingId: number) => void;
   isLoading: boolean;
+  showReminderButton?: boolean;
+  onSendReminder?: (bookingId: number) => void;
 }
 
 export default function BookingTable({ 
@@ -27,7 +30,9 @@ export default function BookingTable({
   statusConfig, 
   onConfirmBooking, 
   onRejectBooking, 
-  isLoading 
+  isLoading,
+  showReminderButton = false,
+  onSendReminder
 }: BookingTableProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -129,7 +134,7 @@ export default function BookingTable({
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
                         <div className="flex items-center space-x-2">
                           <Link
-                            href={`/dashboard/bookings/${booking.id}`}
+                            href={showReminderButton ? `/dashboard/tenant-approval/${booking.id}` : `/dashboard/bookings/${booking.id}`}
                             className="text-rose-600 hover:text-rose-900"
                             title="View booking details"
                           >
@@ -154,6 +159,15 @@ export default function BookingTable({
                                 <XMarkIcon className="h-4 w-4" />
                               </button>
                             </>
+                          )}
+                          {showReminderButton && onSendReminder && (
+                            <button
+                              onClick={() => onSendReminder(booking.id)}
+                              className="text-blue-600 hover:text-blue-900"
+                              title="Send reminder"
+                            >
+                              <BellIcon className="h-4 w-4" />
+                            </button>
                           )}
                         </div>
                       </td>

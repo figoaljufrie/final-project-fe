@@ -16,7 +16,9 @@ import {
   User,
   Settings,
   LogOut,
-  Home
+  Home,
+  CheckCircle,
+  Building2
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -28,10 +30,16 @@ const navigation = [
     description: "Overview & Analytics"
   },
   {
-    name: "Transaction Management", 
-    href: "/dashboard/bookings",
-    icon: CreditCard,
-    description: "Manage Bookings"
+    name: "Tenant Approval", 
+    href: "/dashboard/tenant-approval",
+    icon: CheckCircle,
+    description: "Approve Bookings"
+  },
+  {
+    name: "Property Management", 
+    href: "/dashboard/properties",
+    icon: Building2,
+    description: "Manage Properties"
   },
   {
     name: "Reports & Analytics",
