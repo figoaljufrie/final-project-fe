@@ -76,17 +76,60 @@ export default function TenantApprovalPage() {
   const loadBookings = async (filters: BookingFilters = {}) => {
     try {
       setIsLoading(true);
-      const result = await TenantApprovalService.getTenantBookings({
-        page: pagination.page,
+      const requestParams = {
+        page: filters.page || pagination.page,
         limit: pagination.limit,
+        status: statusFilter !== "all" ? statusFilter : undefined,
+        bookingNo: searchTerm || undefined,
         ...filters,
-      });
+      };
+      console.log("Request parameters:", requestParams);
+      const result = await TenantApprovalService.getTenantBookings(
+        requestParams
+      );
 
       setBookings(result.bookings || []);
-      setPagination(result.pagination || pagination);
+      // Update pagination state with the actual response
+      if (result.pagination) {
+        console.log("Backend pagination response:", result.pagination);
+        const backendPage = result.pagination.page || 1;
+        const totalPages = result.pagination.totalPages || 0;
+
+        // Fix invalid page number - if page > totalPages, reset to page 1
+        const validPage = backendPage > totalPages ? 1 : backendPage;
+
+        setPagination({
+          total: result.pagination.total || 0,
+          page: validPage,
+          limit: result.pagination.limit || 10,
+          totalPages: totalPages,
+        });
+
+        // If page was invalid, reload with correct page
+        if (backendPage > totalPages && totalPages > 0) {
+          console.log(`Invalid page ${backendPage}, reloading with page 1`);
+          loadBookings({ page: 1 });
+        }
+      } else {
+        // Reset to default if no pagination data
+        console.log("No pagination data, resetting to default");
+        setPagination({
+          total: 0,
+          page: 1,
+          limit: 10,
+          totalPages: 0,
+        });
+      }
     } catch (error: any) {
       console.error("Error loading bookings:", error);
       toast.error(error.response?.data?.message || "Failed to load bookings");
+      // Reset pagination on error
+      setPagination({
+        total: 0,
+        page: 1,
+        limit: 10,
+        totalPages: 0,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -103,27 +146,13 @@ export default function TenantApprovalPage() {
   };
 
   useEffect(() => {
+    console.log("Initial pagination state:", pagination);
     loadBookings();
     loadPendingCount();
   }, []);
 
-  // Filter bookings based on search and status
-  const filteredBookings = bookings.filter((booking) => {
-    // Only show bookings with valid property data
-    if (!booking.property || !booking.property.name) {
-      return false;
-    }
-
-    const matchesSearch =
-      booking.bookingNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.property.name.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesStatus =
-      statusFilter === "all" || booking.status === statusFilter;
-
-    return matchesSearch && matchesStatus;
-  });
+  // Use bookings directly since filtering is now done on backend
+  const filteredBookings = bookings;
 
   // Handle confirm booking
   const handleConfirmBooking = async (bookingId: number) => {
@@ -183,10 +212,22 @@ export default function TenantApprovalPage() {
   // Handle search and filter changes
   const handleSearchChange = (newSearchTerm: string) => {
     setSearchTerm(newSearchTerm);
+    // Reload data with new search term (page will be reset to 1 by backend)
+    loadBookings({
+      page: 1,
+      bookingNo: newSearchTerm || undefined,
+      status: statusFilter !== "all" ? statusFilter : undefined,
+    });
   };
 
   const handleStatusChange = (newStatus: string) => {
     setStatusFilter(newStatus);
+    // Reload data with new status filter (page will be reset to 1 by backend)
+    loadBookings({
+      page: 1,
+      bookingNo: searchTerm || undefined,
+      status: newStatus !== "all" ? newStatus : undefined,
+    });
   };
 
   if (isLoading && bookings.length === 0) {
@@ -260,21 +301,41 @@ export default function TenantApprovalPage() {
         </div>
 
         {/* Pagination */}
-        {pagination.totalPages > 1 && (
+        {pagination.totalPages > 1 && pagination.total > 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="flex items-center justify-between bg-white rounded-lg p-4"
           >
             <div className="text-sm text-gray-700">
-              Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
-              {Math.min(pagination.page * pagination.limit, pagination.total)}{" "}
-              of {pagination.total} results
+              {pagination.total > 0 ? (
+                <>
+                  Showing{" "}
+                  {Math.max(
+                    1,
+                    (Math.min(pagination.page, pagination.totalPages) - 1) *
+                      pagination.limit +
+                      1
+                  )}{" "}
+                  to{" "}
+                  {Math.min(
+                    Math.min(pagination.page, pagination.totalPages) *
+                      pagination.limit,
+                    pagination.total
+                  )}{" "}
+                  of {pagination.total} results
+                </>
+              ) : (
+                "No results found"
+              )}
             </div>
 
             <div className="flex items-center gap-2">
               <button
-                onClick={() => loadBookings({ page: pagination.page - 1 })}
+                onClick={() => {
+                  const newPage = Math.max(1, pagination.page - 1);
+                  loadBookings({ page: newPage });
+                }}
                 disabled={pagination.page <= 1}
                 className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -282,11 +343,18 @@ export default function TenantApprovalPage() {
               </button>
 
               <span className="px-3 py-2 text-sm">
-                Page {pagination.page} of {pagination.totalPages}
+                Page {Math.min(pagination.page, pagination.totalPages)} of{" "}
+                {pagination.totalPages}
               </span>
 
               <button
-                onClick={() => loadBookings({ page: pagination.page + 1 })}
+                onClick={() => {
+                  const newPage = Math.min(
+                    pagination.totalPages,
+                    pagination.page + 1
+                  );
+                  loadBookings({ page: newPage });
+                }}
                 disabled={pagination.page >= pagination.totalPages}
                 className="px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >

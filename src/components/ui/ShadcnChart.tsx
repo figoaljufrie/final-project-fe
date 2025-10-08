@@ -16,7 +16,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend
+  Legend,
 } from "recharts";
 import clsx from "clsx";
 
@@ -34,23 +34,29 @@ interface ChartKey {
 
 interface ShadcnChartProps {
   data: ChartDataItem[];
-  type: 'line' | 'area' | 'bar' | 'pie';
+  type: "line" | "area" | "bar" | "pie";
   keys: ChartKey[];
   height?: number;
   colors?: string[];
   animated?: boolean;
   className?: string;
+  isCount?: boolean;
 }
 
 const defaultColors = [
   "hsl(var(--chart-1))",
-  "hsl(var(--chart-2))", 
+  "hsl(var(--chart-2))",
   "hsl(var(--chart-3))",
   "hsl(var(--chart-4))",
-  "hsl(var(--chart-5))"
+  "hsl(var(--chart-5))",
 ];
 
-const CustomTooltip = ({ active, payload, label }: {
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+  isCount = false,
+}: {
   active?: boolean;
   payload?: Array<{
     name: string;
@@ -59,6 +65,7 @@ const CustomTooltip = ({ active, payload, label }: {
     dataKey: string;
   }>;
   label?: string;
+  isCount?: boolean;
 }) => {
   if (active && payload && payload.length) {
     return (
@@ -79,14 +86,15 @@ const CustomTooltip = ({ active, payload, label }: {
                     {entry.name}
                   </span>
                   <span className="text-sm font-bold">
-                    {typeof entry.value === 'number' 
-                      ? new Intl.NumberFormat("id-ID", { 
-                          style: "currency", 
-                          currency: "IDR", 
-                          minimumFractionDigits: 0 
-                        }).format(entry.value)
-                      : entry.value
-                    }
+                    {typeof entry.value === "number"
+                      ? isCount
+                        ? `${entry.value} bookings`
+                        : new Intl.NumberFormat("id-ID", {
+                            style: "currency",
+                            currency: "IDR",
+                            minimumFractionDigits: 0,
+                          }).format(entry.value)
+                      : entry.value}
                   </span>
                 </div>
               </div>
@@ -106,40 +114,40 @@ export default function ShadcnChart({
   height = 300,
   colors = defaultColors,
   animated = true,
-  className = ""
+  className = "",
+  isCount = false,
 }: ShadcnChartProps) {
-
   const renderChart = () => {
     const commonProps = {
       data,
-      margin: { top: 20, right: 30, left: 20, bottom: 5 }
+      margin: { top: 20, right: 30, left: 20, bottom: 5 },
     };
 
     switch (type) {
-      case 'line':
+      case "line":
         return (
           <LineChart {...commonProps}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
-            <XAxis 
-              dataKey="name" 
+            <XAxis
+              dataKey="name"
               className="text-xs fill-gray-500"
               tickLine={false}
               axisLine={false}
             />
-            <YAxis 
+            <YAxis
               className="text-xs fill-gray-500"
               tickLine={false}
               axisLine={false}
-              tickFormatter={(value) => 
-                typeof value === 'number' 
-                  ? new Intl.NumberFormat("id-ID", { 
-                      notation: "compact", 
-                      compactDisplay: "short" 
-                    }).format(value) 
+              tickFormatter={(value) =>
+                typeof value === "number"
+                  ? new Intl.NumberFormat("id-ID", {
+                      notation: "compact",
+                      compactDisplay: "short",
+                    }).format(value)
                   : String(value)
               }
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<CustomTooltip isCount={isCount} />} />
             <Legend />
             {keys.map((key, index) => (
               <Line
@@ -155,30 +163,30 @@ export default function ShadcnChart({
           </LineChart>
         );
 
-      case 'area':
+      case "area":
         return (
           <AreaChart {...commonProps}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
-            <XAxis 
-              dataKey="name" 
+            <XAxis
+              dataKey="name"
               className="text-xs fill-gray-500"
               tickLine={false}
               axisLine={false}
             />
-            <YAxis 
+            <YAxis
               className="text-xs fill-gray-500"
               tickLine={false}
               axisLine={false}
-              tickFormatter={(value) => 
-                typeof value === 'number' 
-                  ? new Intl.NumberFormat("id-ID", { 
-                      notation: "compact", 
-                      compactDisplay: "short" 
-                    }).format(value) 
+              tickFormatter={(value) =>
+                typeof value === "number"
+                  ? new Intl.NumberFormat("id-ID", {
+                      notation: "compact",
+                      compactDisplay: "short",
+                    }).format(value)
                   : String(value)
               }
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<CustomTooltip isCount={isCount} />} />
             <Legend />
             {keys.map((key, index) => (
               <Area
@@ -193,30 +201,30 @@ export default function ShadcnChart({
           </AreaChart>
         );
 
-      case 'bar':
+      case "bar":
         return (
           <BarChart {...commonProps}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.1)" />
-            <XAxis 
-              dataKey="name" 
+            <XAxis
+              dataKey="name"
               className="text-xs fill-gray-500"
               tickLine={false}
               axisLine={false}
             />
-            <YAxis 
+            <YAxis
               className="text-xs fill-gray-500"
               tickLine={false}
               axisLine={false}
-              tickFormatter={(value) => 
-                typeof value === 'number' 
-                  ? new Intl.NumberFormat("id-ID", { 
-                      notation: "compact", 
-                      compactDisplay: "short" 
-                    }).format(value) 
+              tickFormatter={(value) =>
+                typeof value === "number"
+                  ? new Intl.NumberFormat("id-ID", {
+                      notation: "compact",
+                      compactDisplay: "short",
+                    }).format(value)
                   : String(value)
               }
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<CustomTooltip isCount={isCount} />} />
             <Legend />
             {keys.map((key, index) => (
               <Bar
@@ -229,27 +237,32 @@ export default function ShadcnChart({
           </BarChart>
         );
 
-          case 'pie':
-            return (
-              <PieChart>
-                <Pie
-                  data={data}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  fill="#8884d8"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                >
-                  {data.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color || colors[index % colors.length]} />
-                  ))}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} />
-                <Legend />
-              </PieChart>
-            );
+      case "pie":
+        return (
+          <PieChart>
+            <Pie
+              data={data}
+              dataKey="value"
+              nameKey="name"
+              cx="50%"
+              cy="50%"
+              outerRadius={100}
+              fill="#8884d8"
+              label={({ name, percent }) =>
+                `${name} ${(percent * 100).toFixed(0)}%`
+              }
+            >
+              {data.map((entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={entry.color || colors[index % colors.length]}
+                />
+              ))}
+            </Pie>
+            <Tooltip content={<CustomTooltip isCount={isCount} />} />
+            <Legend />
+          </PieChart>
+        );
 
       default:
         return <div>Chart type not supported</div>;
@@ -275,9 +288,5 @@ export default function ShadcnChart({
     );
   }
 
-  return (
-    <div className={clsx("w-full", className)}>
-      {chartContent}
-    </div>
-  );
+  return <div className={clsx("w-full", className)}>{chartContent}</div>;
 }

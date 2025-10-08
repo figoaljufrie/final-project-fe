@@ -43,8 +43,7 @@ export interface TenantBooking {
     city?: string;
     province?: string;
     address?: string;
-    tenantId: number;
-  } | null;
+  };
   items: {
     id: number;
     roomId: number;
@@ -101,13 +100,14 @@ export class TenantApprovalService {
   // Get tenant bookings with filters
   static async getTenantBookings(filters: BookingFilters = {}) {
     const response = await api.get("/tenant/bookings", { params: filters });
-    return response.data.data || response.data;
+    console.log("Raw API response:", response.data);
+    return response.data.data;
   }
 
   // Get booking details for tenant
   static async getBookingDetails(bookingId: number) {
     const response = await api.get(`/tenant/bookings/${bookingId}`);
-    return response.data.data || response.data;
+    return response.data.data;
   }
 
   // Confirm payment
@@ -116,7 +116,7 @@ export class TenantApprovalService {
       `/tenant/bookings/${bookingId}/confirm`,
       data
     );
-    return response.data.data || response.data;
+    return response.data.data;
   }
 
   // Reject payment
@@ -125,7 +125,7 @@ export class TenantApprovalService {
       `/tenant/bookings/${bookingId}/reject`,
       data
     );
-    return response.data.data || response.data;
+    return response.data.data;
   }
 
   // Cancel user order
@@ -134,13 +134,13 @@ export class TenantApprovalService {
       `/tenant/bookings/${bookingId}/cancel`,
       data
     );
-    return response.data.data || response.data;
+    return response.data.data;
   }
 
   // Get pending confirmations count
   static async getPendingConfirmationsCount() {
     const response = await api.get("/tenant/bookings/pending/count");
-    return response.data.data || response.data;
+    return response.data.data;
   }
 
   // Send reminder
@@ -149,6 +149,6 @@ export class TenantApprovalService {
       `/tenant/bookings/${bookingId}/reminder`,
       data
     );
-    return response.data.data || response.data;
+    return response.data.data;
   }
 }
