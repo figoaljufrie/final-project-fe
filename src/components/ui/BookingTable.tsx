@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import {
+import { 
   EyeIcon,
   CheckIcon,
   XMarkIcon,
@@ -10,18 +10,14 @@ import {
 import { BellIcon } from "lucide-react";
 import clsx from "clsx";
 import { Booking } from "@/lib/types/bookings/booking";
-import { TenantBooking } from "@/lib/services/tenant/tenant-approval-service";
 
 interface BookingTableProps {
-  bookings: (Booking | TenantBooking)[];
-  statusConfig: Record<
-    string,
-    {
-      label: string;
-      color: string;
-      icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-    }
-  >;
+  bookings: Booking[];
+  statusConfig: Record<string, {
+    label: string;
+    color: string;
+    icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  }>;
   onConfirmBooking: (bookingId: number) => void;
   onRejectBooking: (bookingId: number) => void;
   isLoading: boolean;
@@ -29,14 +25,14 @@ interface BookingTableProps {
   onSendReminder?: (bookingId: number) => void;
 }
 
-export default function BookingTable({
-  bookings,
-  statusConfig,
-  onConfirmBooking,
-  onRejectBooking,
+export default function BookingTable({ 
+  bookings, 
+  statusConfig, 
+  onConfirmBooking, 
+  onRejectBooking, 
   isLoading,
   showReminderButton = false,
-  onSendReminder,
+  onSendReminder
 }: BookingTableProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -87,9 +83,8 @@ export default function BookingTable({
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {bookings.map((booking) => {
-                  const StatusIcon =
-                    statusConfig[booking.status]?.icon || ClockIcon;
-
+                  const StatusIcon = statusConfig[booking.status]?.icon || ClockIcon;
+                  
                   return (
                     <tr key={booking.id} className="hover:bg-gray-50">
                       <td className="whitespace-nowrap py-4 pl-4 pr-3 sm:pl-0">
@@ -104,40 +99,23 @@ export default function BookingTable({
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         <div>
-                          <div className="text-gray-900">
-                            {booking.user?.name || "N/A"}
-                          </div>
-                          <div className="text-gray-500">
-                            {booking.user?.email || "N/A"}
-                          </div>
+                          <div className="text-gray-900">{booking.user.name}</div>
+                          <div className="text-gray-500">{booking.user.email}</div>
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        <div>
+                          <div className="text-gray-900">{booking.property.name}</div>
+                          <div className="text-gray-500">{booking.property.city}, {booking.property.province}</div>
                         </div>
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         <div>
                           <div className="text-gray-900">
-                            {booking.property?.name || "N/A"}
+                            {formatDate(booking.checkIn)} - {formatDate(booking.checkOut)}
                           </div>
                           <div className="text-gray-500">
-                            {booking.property?.city &&
-                            booking.property?.province
-                              ? `${booking.property.city}, ${booking.property.province}`
-                              : booking.property?.address || "N/A"}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        <div>
-                          <div className="text-gray-900">
-                            {formatDate(booking.checkIn)} -{" "}
-                            {formatDate(booking.checkOut)}
-                          </div>
-                          <div className="text-gray-500">
-                            {Math.ceil(
-                              (new Date(booking.checkOut).getTime() -
-                                new Date(booking.checkIn).getTime()) /
-                                (1000 * 60 * 60 * 24)
-                            )}{" "}
-                            nights
+                            {Math.ceil((new Date(booking.checkOut).getTime() - new Date(booking.checkIn).getTime()) / (1000 * 60 * 60 * 24))} nights
                           </div>
                         </div>
                       </td>
@@ -145,26 +123,18 @@ export default function BookingTable({
                         {formatCurrency(booking.totalAmount)}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        <span
-                          className={clsx(
-                            "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
-                            statusConfig[booking.status]?.color ||
-                              "bg-gray-100 text-gray-800"
-                          )}
-                        >
+                        <span className={clsx(
+                          "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                          statusConfig[booking.status]?.color || "bg-gray-100 text-gray-800"
+                        )}>
                           <StatusIcon className="w-3 h-3 mr-1" />
-                          {statusConfig[booking.status]?.label ||
-                            booking.status}
+                          {statusConfig[booking.status]?.label || booking.status}
                         </span>
                       </td>
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
                         <div className="flex items-center space-x-2">
                           <Link
-                            href={
-                              showReminderButton
-                                ? `/dashboard/tenant-approval/${booking.id}`
-                                : `/dashboard/bookings/${booking.id}`
-                            }
+                            href={showReminderButton ? `/dashboard/tenant-approval/${booking.id}` : `/dashboard/bookings/${booking.id}`}
                             className="text-rose-600 hover:text-rose-900"
                             title="View booking details"
                           >
