@@ -4,7 +4,7 @@ import type {
   RoomDetail,
   RoomImagePayload,
   RoomListItem,
-  UpdateRoomPayload
+  UpdateRoomPayload,
 } from "@/lib/types/inventory/room-type";
 
 function forFormData(
@@ -23,12 +23,14 @@ function forFormData(
     formData.append("totalUnits", String(payload.totalUnits));
 
   if (images && images.length > 0) {
-    const imagesMetaData = images.map((img) => ({
+    const meta = images.map((img) => ({
       isPrimary: img.isPrimary,
       order: img.order,
       altText: img.altText,
     }));
-    formData.append("images", JSON.stringify(imagesMetaData));
+
+    // ✅ FIXED: renamed for consistency with backend
+    formData.append("imageMeta", JSON.stringify(meta));
 
     images.forEach((img) => {
       formData.append("images", img.file);
@@ -44,30 +46,46 @@ export async function createRoom(
 ): Promise<RoomDetail> {
   const formData = forFormData(payload, payload.images);
   const { data } = await api.post(`/properties/${propertyId}/rooms`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
+    headers: { "Content-Type": "multipart/form-data" },
   });
-
   return data.data;
 }
 
-export async function listsRoomsByProperty(
+export const listsRoomsByProperty = async (
   propertyId: number
-): Promise<RoomListItem[]> {
-  const { data } = await api.get(`/properties/${propertyId}/rooms`);
+): Promise<RoomListItem[]> => {
+  const res = await api.get(`/properties/${propertyId}/rooms`);
+  const data = res.data.data as RoomDetail[];
 
-  return data.data;
-}
+  return data.map((room) => ({
+    id: room.id,
+    propertyId: room.propertyId,
+    name: room.name,
+    capacity: room.capacity,
+    basePrice: room.basePrice,
+    totalUnits: room.totalUnits,
+    image:
+      room.images && room.images.length > 0
+        ? room.images.find((img) => img.isPrimary)?.url ||
+          room.images[0].url ||
+          null
+        : null,
+  }));
+};
 
 export async function updateRoom(
   propertyId: number,
   roomId: number,
-  payload: UpdateRoomPayload
+  payload: UpdateRoomPayload,
+  images?: RoomImagePayload[]
 ): Promise<RoomDetail> {
+  const formData = forFormData(payload, images);
   const { data } = await api.patch(
-    `properties/${propertyId}/rooms/${roomId}`,
-    payload
+    `/properties/${propertyId}/rooms/${roomId}`,
+    formData,
+    {
+      headers: { "Content-Type": "multipart/form-data" },
+    }
   );
   return data.data;
 }

@@ -13,6 +13,7 @@ import type {
   UpdatePropertyPayload,
 } from "@/lib/types/inventory/property-types";
 
+// ✅ CREATE
 export function useCreateProperty() {
   const queryClient = useQueryClient();
 
@@ -22,11 +23,12 @@ export function useCreateProperty() {
       toast.success("Property created successfully!");
       queryClient.invalidateQueries({ queryKey: ["tenantProperties"] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(`Failed to create property: ${error.message}`);
     },
   });
 }
+
 
 export function useUpdateProperty() {
   const queryClient = useQueryClient();
@@ -35,20 +37,26 @@ export function useUpdateProperty() {
     mutationFn: ({
       propertyId,
       payload,
+      files,
     }: {
       propertyId: number;
       payload: UpdatePropertyPayload;
-    }) => updateProperty(propertyId, payload),
-    onSuccess: () => {
+      files?: File[];
+    }) => updateProperty(propertyId, payload, files),
+    onSuccess: (data, variables) => {
       toast.success("Property updated successfully!");
       queryClient.invalidateQueries({ queryKey: ["tenantProperties"] });
+      queryClient.invalidateQueries({
+        queryKey: ["property", variables.propertyId],
+      });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(`Failed to update property: ${error.message}`);
     },
   });
 }
 
+// ✅ DELETE
 export function useDeleteProperty() {
   const queryClient = useQueryClient();
 
@@ -58,7 +66,7 @@ export function useDeleteProperty() {
       toast.success("Property deleted successfully!");
       queryClient.invalidateQueries({ queryKey: ["tenantProperties"] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(`Failed to delete property: ${error.message}`);
     },
   });

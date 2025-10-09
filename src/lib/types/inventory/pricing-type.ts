@@ -1,5 +1,81 @@
 import { PriceChangeType } from "../enums/enums-type";
 
+export interface SetAvailabilityBody {
+  date: string;
+  isAvailable?: boolean;
+  customPrice?: number;
+  priceModifier?: number;
+  reason?: string;
+}
+
+export interface SetAvailability {
+  roomId: number;
+  date: string; 
+  isAvailable?: boolean;
+  customPrice?: number;
+  priceModifier?: number;
+  reason?: string;
+}
+
+export interface AvailabilitySeedData {
+  roomId: number;
+  date: string; // ISO string
+  isAvailable: boolean;
+  bookedUnits: number;
+  customPrice: number | null;
+}
+
+export interface RoomForPricing {
+  id: number;
+  propertyId: number;
+  basePrice: number;
+}
+
+export interface PriceCalculationResult {
+  priceModifier: number | null;
+  customPrice: number | null;
+  reason: string | null;
+}
+
+
+export interface CreatePeakSeason {
+  name: string;
+  startDate: string;
+  endDate: string;
+  changeType: PriceChangeType;
+  changeValue: number;
+  applyToAllProperties: boolean;
+  propertyIds?: number[];
+}
+
+export interface PeakSeasonCreate {
+  tenantId: number;
+  name: string;
+  startDate: string;
+  endDate: string;
+  changeType: PriceChangeType;
+  changeValue: number;
+  applyToAllProperties: boolean;
+  propertyIds: number[];
+}
+
+export interface UpdatePeakSeason extends Partial<CreatePeakSeason> {}
+
+
+export interface RoomAvailability {
+  id: number;
+  roomId: number;
+  date: string; 
+  isAvailable: boolean;
+  bookedUnits: number;
+  customPrice: number | null;
+  priceModifier: number | null;
+  reason: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+
 export interface PeakSeason {
   id: number;
   tenantId: number;
@@ -10,47 +86,18 @@ export interface PeakSeason {
   changeValue: number;
   applyToAllProperties: boolean;
   propertyIds: number[];
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface CreatePeakSeasonPayload {
-  name: string;
-  startDate: string;
-  endDate: string;
-  changeType: PriceChangeType;
-  changeValue: number;
-  applyToAllProperties: boolean;
-  propertyIds?: number[];
-}
-
-export interface UpdatePeakSeasonPayload
-  extends Partial<CreatePeakSeasonPayload> {}
-
-export interface RoomAvailability {
-  id: number;
-  roomId: number;
-  date: string;
-  isAvailable: boolean;
-  customPrice: number | null;
-  priceModifier: number | null;
-  reason: string | null;
-  bookedUnits: number;
-}
-
-export interface SetAvailabilityPayload {
-  date: string;
-  isAvailable?: boolean;
-  customPrice?: number;
-  priceModifier?: number;
-  reason?: string;
-}
-
-export interface DailyCalculatedPrice {
+export interface CalculatedPrice {
   date: string;
   roomBasePrice: number;
   finalPrice: number;
   isAvailable: boolean;
-  activePeakSeasons: Pick<PeakSeason, "name" | "changeType" | "changeValue">[];
+  activePeakSeasons: Pick<
+    PeakSeason,
+    "name" | "changeType" | "changeValue"
+  >[];
   reason: string | null;
 }

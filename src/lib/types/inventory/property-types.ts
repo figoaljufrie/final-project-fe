@@ -24,6 +24,9 @@ export interface UpdatePropertyPayload {
   category?: PropertyCategory;
   city?: string;
   address?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  published?: boolean;
 }
 
 export interface PropertyImage {
@@ -61,8 +64,9 @@ export interface PropertyListItem {
   name: string;
   city: string | null;
   category: PropertyCategory;
-  minPrice: number | null;
-  image: string | null;
+  minBasePrice: number | null;
+  rooms: RoomForPropertyList[];
+  images?: PropertyImage[];
 }
 
 export interface PropertySearchQuery {

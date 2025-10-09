@@ -6,20 +6,51 @@ import type {
   PropertySearchQuery,
   PropertySearchResponse,
   UpdatePropertyPayload,
-} from "@/lib/types/inventory/property-types"; // Adjust path as necessary
+} from "@/lib/types/inventory/property-types";
 
 export async function createProperty(
-  payload: CreatePropertyPayload
+  payload: CreatePropertyPayload,
+  files?: File[]
 ): Promise<PropertyDetail> {
-  const { data } = await api.post("/tenant/properties", payload);
+  const formData = new FormData();
+
+  formData.append("name", payload.name);
+  formData.append("description", payload.description);
+  formData.append("category", payload.category);
+
+  if (files && files.length > 0) {
+    files.forEach((file) => formData.append("images", file));
+  }
+
+  const { data } = await api.post("/tenant/properties", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
   return data.data;
 }
 
 export async function updateProperty(
   propertyId: number,
-  payload: UpdatePropertyPayload
+  payload: UpdatePropertyPayload,
+  files?: File[]
 ): Promise<PropertyDetail> {
-  const { data } = await api.patch(`/tenant/properties/${propertyId}`, payload);
+  const formData = new FormData();
+
+  Object.entries(payload).forEach(([key, value]) => {
+    if (value !== undefined && value !== null)
+      formData.append(key, String(value));
+  });
+
+  if (files && files.length > 0) {
+    files.forEach((file) => formData.append("images", file));
+  }
+
+  const { data } = await api.patch(
+    `/tenant/properties/${propertyId}`,
+    formData,
+    {
+      headers: { "Content-Type": "multipart/form-data" },
+    }
+  );
   return data.data;
 }
 

@@ -4,7 +4,13 @@ import { motion } from "framer-motion";
 import { BedDouble, Pencil, Trash2 } from "lucide-react";
 import type { RoomListItem } from "@/lib/types/inventory/room-type";
 
-export default function RoomCard({ room }: { room: RoomListItem }) {
+interface RoomCardProps {
+  room: RoomListItem;
+  onEdit?: () => void;
+  onDelete?: () => void;
+}
+
+export default function RoomCard({ room, onEdit, onDelete }: RoomCardProps) {
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("id-ID", {
       style: "currency",
@@ -37,9 +43,7 @@ export default function RoomCard({ room }: { room: RoomListItem }) {
           <p className="text-sm text-gray-600">
             Capacity: {room.capacity} guests
           </p>
-          <p className="text-sm text-gray-600">
-            Units: {room.totalUnits || 1}
-          </p>
+          <p className="text-sm text-gray-600">Units: {room.totalUnits || 1}</p>
           <p className="text-lg font-bold text-gray-800 mt-2">
             {formatCurrency(room.basePrice)}{" "}
             <span className="text-sm text-gray-500 font-normal">/night</span>
@@ -47,10 +51,13 @@ export default function RoomCard({ room }: { room: RoomListItem }) {
         </div>
 
         <div className="flex justify-end mt-4 space-x-2">
-          <button className="p-2 rounded-lg hover:bg-gray-100">
+          <button className="p-2 rounded-lg hover:bg-gray-100" onClick={onEdit}>
             <Pencil className="w-5 h-5 text-gray-600" />
           </button>
-          <button className="p-2 rounded-lg hover:bg-gray-100">
+          <button
+            className="p-2 rounded-lg hover:bg-gray-100"
+            onClick={onDelete}
+          >
             <Trash2 className="w-5 h-5 text-red-500" />
           </button>
         </div>
