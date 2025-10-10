@@ -10,9 +10,14 @@ import {
   Clock,
   Shield,
   Smartphone,
-  Building2
+  Building2,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PaymentService } from "@/lib/services/payment/payment-service";
+import { useAuthStore } from "@/stores/auth-store";
+import { toast } from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 interface PaymentMethodModalProps {
   isOpen: boolean;
@@ -25,6 +30,8 @@ interface PaymentMethodModalProps {
     guests: number;
     nights: number;
   };
+  bookingId?: number;
+  bookingNo?: string;
 }
 
 export default function PaymentMethodModal({ 
@@ -32,9 +39,14 @@ export default function PaymentMethodModal({
   onClose, 
   onSelectMethod, 
   totalAmount,
-  bookingData 
+  bookingData,
+  bookingId,
+  bookingNo
 }: PaymentMethodModalProps) {
   const [selectedMethod, setSelectedMethod] = useState<'manual_transfer' | 'payment_gateway' | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { user } = useAuthStore();
+  const router = useRouter();
 
   const paymentMethods = [
     {
@@ -65,9 +77,41 @@ export default function PaymentMethodModal({
     setSelectedMethod(method);
   };
 
-  const handleConfirm = () => {
-    if (selectedMethod) {
-      onSelectMethod(selectedMethod);
+  const handleConfirm = async () => {
+    if (!selectedMethod) return;
+    
+    setIsProcessing(true);
+    
+    try {
+      if (selectedMethod === 'payment_gateway') {
+        // Create payment gateway payment
+        if (bookingId && bookingNo && user) {
+          const paymentData = await PaymentService.createPaymentGatewayPayment({
+            bookingId,
+            bookingNo,
+            totalAmount,
+            userEmail: user.email,
+            userName: user.name
+          });
+          
+          // Redirect to Midtrans payment page
+          if (paymentData.redirectUrl) {
+            window.location.href = paymentData.redirectUrl;
+            return;
+          }
+        }
+        
+        // Fallback to old method if no booking data
+        onSelectMethod(selectedMethod);
+      } else {
+        // Manual transfer - just redirect to upload page
+        onSelectMethod(selectedMethod);
+      }
+    } catch (error: any) {
+      console.error('Payment creation error:', error);
+      toast.error(error.response?.data?.message || 'Failed to create payment');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -193,7 +237,7 @@ export default function PaymentMethodModal({
                   <p className="text-sm text-gray-600">Including taxes and fees</p>
                 </div>
                 <div className="text-right">
-                  <span className="text-2xl font-bold text-[#8B7355]">${totalAmount}</span>
+                  <span className="text-2xl font-bold text-[#8B7355]">Rp {totalAmount.toLocaleString('id-ID')}</span>
                 </div>
               </div>
 
@@ -207,10 +251,17 @@ export default function PaymentMethodModal({
                 </Button>
                 <Button
                   onClick={handleConfirm}
-                  disabled={!selectedMethod}
+                  disabled={!selectedMethod || isProcessing}
                   className="flex-1 bg-[#8B7355] hover:bg-[#7A6349] text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Continue to Payment
+                  {isProcessing ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin mr-2" />
+                      Processing...
+                    </>
+                  ) : (
+                    'Continue to Payment'
+                  )}
                 </Button>
               </div>
             </div>
