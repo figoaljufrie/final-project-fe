@@ -7,6 +7,7 @@ import type {
   SetAvailabilityBody,
 } from "@/lib/types/inventory/pricing-type";
 
+// ✅ AVAILABILITY
 export async function setRoomAvailability(
   propertyId: number,
   roomId: number,
@@ -44,32 +45,41 @@ export async function getRoomAvailabilityByDate(
   return data.data as RoomAvailability | null;
 }
 
+//peak-season:
 export async function createPeakSeason(
-  propertyId: number,
   payload: CreatePeakSeason
 ): Promise<PeakSeason> {
-  const { data } = await api.post(
-    `/properties/${propertyId}/peakseasons`,
-    payload
-  );
+  const { data } = await api.post(`/tenant/peakseasons`, payload);
   return data.data as PeakSeason;
 }
 
+
+export async function getTenantPeakSeasons(): Promise<PeakSeason[]> {
+  const { data } = await api.get(`/tenant/peakseasons`);
+  return data.data as PeakSeason[];
+}
+
+
 export async function updatePeakSeason(
-  propertyId: number,
   id: number,
   payload: UpdatePeakSeason
 ): Promise<PeakSeason> {
-  const { data } = await api.patch(
-    `/properties/${propertyId}/peakseasons/${id}`,
-    payload
-  );
+  const { data } = await api.patch(`/tenant/peakseasons/${id}`, payload);
   return data.data as PeakSeason;
 }
 
-export async function deletePeakSeason(
+
+export async function deletePeakSeason(id: number): Promise<void> {
+  await api.delete(`/tenant/peakseasons/${id}`);
+}
+
+export async function getPeakSeasonsForPropertyRange(
   propertyId: number,
-  id: number
-): Promise<void> {
-  await api.delete(`/properties/${propertyId}/peakseasons/${id}`);
+  start: string,
+  end: string
+): Promise<PeakSeason[]> {
+  const { data } = await api.get(`/properties/${propertyId}/peakseasons`, {
+    params: { start, end },
+  });
+  return data.data as PeakSeason[];
 }

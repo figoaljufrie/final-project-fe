@@ -18,7 +18,8 @@ import {
   LogOut,
   Home,
   CheckCircle,
-  Building2
+  Building2,
+  CalendarDays
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -27,50 +28,57 @@ const navigation = [
     name: "Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
-    description: "Overview & Analytics"
+    description: "Overview & Analytics",
   },
   {
-    name: "Tenant Approval", 
+    name: "Tenant Approval",
     href: "/dashboard/tenant-approval",
     icon: CheckCircle,
-    description: "Approve Bookings"
+    description: "Approve Bookings",
   },
   {
-    name: "Property Management", 
+    name: "Property Management",
     href: "/dashboard/property",
     icon: Building2,
-    description: "Manage Properties"
+    description: "Manage Properties",
+  },
+
+  {
+    name: "Peak Season", 
+    href: "/dashboard/peak-seasons",
+    icon: CalendarDays,
+    description: "Set seasonal pricing",
   },
   {
     name: "Reports & Analytics",
-    href: "/dashboard/reports", 
+    href: "/dashboard/reports",
     icon: BarChart3,
-    description: "Business Insights"
+    description: "Business Insights",
   },
   {
     name: "Reviews",
     href: "/dashboard/reviews",
     icon: Star,
-    description: "Guest Reviews"
-  }
+    description: "Guest Reviews",
+  },
 ];
 
 const userMenu = [
   {
     name: "Profile",
     href: "/dashboard/profile",
-    icon: User
+    icon: User,
   },
   {
-    name: "Settings", 
+    name: "Settings",
     href: "/dashboard/settings",
-    icon: Settings
+    icon: Settings,
   },
   {
     name: "Logout",
     href: "/logout",
-    icon: LogOut
-  }
+    icon: LogOut,
+  },
 ];
 
 interface SidebarProps {
@@ -78,23 +86,27 @@ interface SidebarProps {
   isCollapsed?: boolean;
 }
 
-export default function Sidebar({ onToggle, isCollapsed: externalCollapsed }: SidebarProps) {
+export default function Sidebar({
+  onToggle,
+  isCollapsed: externalCollapsed,
+}: SidebarProps) {
   const pathname = usePathname();
   const [internalCollapsed, setInternalCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
-  
-  const isCollapsed = externalCollapsed !== undefined ? externalCollapsed : internalCollapsed;
+
+  const isCollapsed =
+    externalCollapsed !== undefined ? externalCollapsed : internalCollapsed;
 
   useEffect(() => {
     const checkScreenSize = () => {
       setIsDesktop(window.innerWidth >= 1024);
     };
-    
+
     checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    
-    return () => window.removeEventListener('resize', checkScreenSize);
+    window.addEventListener("resize", checkScreenSize);
+
+    return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
   const toggleSidebar = () => {
@@ -150,7 +162,7 @@ export default function Sidebar({ onToggle, isCollapsed: externalCollapsed }: Si
         initial={false}
         animate={{
           width: isCollapsed ? "4rem" : "16rem",
-          x: isDesktop ? 0 : (isMobileOpen ? 0 : "-100%")
+          x: isDesktop ? 0 : isMobileOpen ? 0 : "-100%",
         }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
         className={clsx(
@@ -176,13 +188,15 @@ export default function Sidebar({ onToggle, isCollapsed: externalCollapsed }: Si
                     <Home className="h-5 w-5 text-white" />
                   </div>
                   <div>
-                    <h1 className="text-lg font-bold text-gray-900">NGINEPIN</h1>
+                    <h1 className="text-lg font-bold text-gray-900">
+                      NGINEPIN
+                    </h1>
                     <p className="text-xs text-gray-500">Tenant Dashboard</p>
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
-            
+
             <button
               onClick={toggleSidebar}
               className="hidden lg:flex p-2 rounded-lg hover:bg-gray-100 transition-colors"
@@ -200,7 +214,7 @@ export default function Sidebar({ onToggle, isCollapsed: externalCollapsed }: Si
             {navigation.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
-              
+
               return (
                 <Link
                   key={item.name}
@@ -209,18 +223,24 @@ export default function Sidebar({ onToggle, isCollapsed: externalCollapsed }: Si
                   className={clsx(
                     "group flex items-center rounded-xl transition-all duration-200 relative",
                     "hover:bg-rose-50 hover:shadow-sm",
-                    active 
-                      ? "bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-lg" 
+                    active
+                      ? "bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-lg"
                       : "text-gray-700 hover:text-rose-600",
-                    isCollapsed ? "justify-center px-3 py-3" : "space-x-3 px-3 py-3"
+                    isCollapsed
+                      ? "justify-center px-3 py-3"
+                      : "space-x-3 px-3 py-3"
                   )}
                   title={isCollapsed ? item.name : undefined}
                 >
-                  <Icon className={clsx(
-                    "h-5 w-5 flex-shrink-0 transition-colors",
-                    active ? "text-white" : "text-gray-500 group-hover:text-rose-500"
-                  )} />
-                  
+                  <Icon
+                    className={clsx(
+                      "h-5 w-5 flex-shrink-0 transition-colors",
+                      active
+                        ? "text-white"
+                        : "text-gray-500 group-hover:text-rose-500"
+                    )}
+                  />
+
                   <AnimatePresence>
                     {!isCollapsed && (
                       <motion.div
@@ -231,22 +251,26 @@ export default function Sidebar({ onToggle, isCollapsed: externalCollapsed }: Si
                         transition={{ duration: 0.2 }}
                         className="flex-1 min-w-0"
                       >
-                        <p className={clsx(
-                          "text-sm font-medium truncate",
-                          active ? "text-white" : "text-gray-900"
-                        )}>
+                        <p
+                          className={clsx(
+                            "text-sm font-medium truncate",
+                            active ? "text-white" : "text-gray-900"
+                          )}
+                        >
                           {item.name}
                         </p>
-                        <p className={clsx(
-                          "text-xs truncate",
-                          active ? "text-rose-100" : "text-gray-500"
-                        )}>
+                        <p
+                          className={clsx(
+                            "text-xs truncate",
+                            active ? "text-rose-100" : "text-gray-500"
+                          )}
+                        >
                           {item.description}
                         </p>
                       </motion.div>
                     )}
                   </AnimatePresence>
-                  
+
                   {/* Tooltip for collapsed state */}
                   {isCollapsed && (
                     <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
@@ -260,10 +284,12 @@ export default function Sidebar({ onToggle, isCollapsed: externalCollapsed }: Si
 
           {/* User Menu */}
           <div className="p-4 border-t border-gray-200/50">
-            <div className={clsx(
-              "flex items-center mb-3",
-              isCollapsed ? "justify-center" : "space-x-3"
-            )}>
+            <div
+              className={clsx(
+                "flex items-center mb-3",
+                isCollapsed ? "justify-center" : "space-x-3"
+              )}
+            >
               <div className="w-8 h-8 bg-gradient-to-br from-gray-400 to-gray-600 rounded-full flex items-center justify-center">
                 <User className="h-4 w-4 text-white" />
               </div>
@@ -298,7 +324,9 @@ export default function Sidebar({ onToggle, isCollapsed: externalCollapsed }: Si
                     className={clsx(
                       "group flex items-center rounded-lg transition-all duration-200 relative",
                       "hover:bg-gray-100 text-gray-700 hover:text-gray-900",
-                      isCollapsed ? "justify-center px-3 py-2" : "space-x-3 px-3 py-2"
+                      isCollapsed
+                        ? "justify-center px-3 py-2"
+                        : "space-x-3 px-3 py-2"
                     )}
                     title={isCollapsed ? item.name : undefined}
                   >
@@ -317,7 +345,7 @@ export default function Sidebar({ onToggle, isCollapsed: externalCollapsed }: Si
                         </motion.span>
                       )}
                     </AnimatePresence>
-                    
+
                     {/* Tooltip for collapsed state */}
                     {isCollapsed && (
                       <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
