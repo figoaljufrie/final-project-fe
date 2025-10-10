@@ -45,7 +45,7 @@ function VerifyEmailForm() {
 
     if (user) {
       toast.success("Your account is verified!");
-      router.push("/login");
+      router.push("/auth/login");
     } else {
       toast.error("Verification failed.");
     }
@@ -60,7 +60,10 @@ function VerifyEmailForm() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label htmlFor="password" className="block text-sm font-medium mb-1">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium mb-1"
+            >
               New Password
             </label>
             <input
@@ -110,7 +113,9 @@ function VerifyEmailForm() {
         </form>
 
         {error && <p className="text-red-600 mt-4 text-center">{error}</p>}
-        {success && <p className="text-green-600 mt-4 text-center">{success}</p>}
+        {success && (
+          <p className="text-green-600 mt-4 text-center">{success}</p>
+        )}
       </div>
     </div>
   );

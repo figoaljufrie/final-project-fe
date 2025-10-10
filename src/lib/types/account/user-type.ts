@@ -1,5 +1,5 @@
 // app/types/users/user.ts
-export type UserRole = "user" | "tenant";
+import { UserRole } from "../enums/enums-type";
 
 export interface User {
   id: number;

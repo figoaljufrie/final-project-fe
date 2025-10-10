@@ -1,4 +1,4 @@
-import api, { setAuthToken } from "@/lib/api";
+import api from "@/lib/api";
 import type {
   LoginResponse,
   RegisterResponse,
@@ -23,15 +23,13 @@ export async function login(
   password: string
 ): Promise<LoginResponse> {
   const { data } = await api.post("/auth/login", { email, password });
-  setAuthToken(data.data.accessToken);
-  localStorage.setItem("token", data.data.accessToken);
   return data.data;
 }
 
 // Get current logged-in user
 export async function getMe(): Promise<User> {
   const { data } = await api.get("/users/me");
-  return data.data; // unwrap safe user
+  return data.data;
 }
 
 // --- Email Verification ---
@@ -80,13 +78,12 @@ export async function resetPassword(
 }
 
 // --- Session Validation ---
-export async function validateToken(token: string): Promise<User> {
-  const { data } = await api.post("/auth/validate-token", { token });
+export async function validateSession(): Promise<User> {
+  const { data } = await api.get("/users/me"); // cookie handles auth
   return data.data;
 }
 
 // --- Logout ---
-export function logout() {
-  setAuthToken(undefined);
-  localStorage.removeItem("token");
+export async function logout() {
+  await api.post("/auth/logout");
 }
