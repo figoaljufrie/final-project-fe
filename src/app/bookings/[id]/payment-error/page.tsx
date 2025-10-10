@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
   XCircle, 
@@ -17,42 +17,51 @@ import {
   ArrowRight,
   ExternalLink,
   Clock,
-  HelpCircle
+  HelpCircle,
+  Loader2,
+  AlertCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/landing-page/header";
 import Footer from "@/components/landing-page/footer";
 import Link from "next/link";
 import Image from "next/image";
+import { useParams, useRouter } from "next/navigation";
+import { PaymentService } from "@/lib/services/payment/payment-service";
+import { useBookingPaymentStatus } from "@/hooks/payment/use-payment-status";
+import { toast } from "react-hot-toast";
+import { 
+  calculateTimeRemaining, 
+  formatTimeRemaining, 
+  getDeadlineText 
+} from "@/lib/utils/payment-deadline";
 
 export default function PaymentError() {
   const [isRetrying, setIsRetrying] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState({ hours: 0, minutes: 0, seconds: 0, isExpired: false });
+  const params = useParams();
+  const router = useRouter();
+  const bookingId = params.id as string;
 
-  // Mock booking data - replace with actual data from props/API
-  const bookingData = {
-    id: 1,
-    bookingNo: "BK-2024-001234",
-    propertyName: "Ocean View Villa",
-    propertyImage: "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    address: "Jl. Pantai Kuta No. 88, Seminyak, Bali",
-    checkIn: "2024-03-15",
-    checkOut: "2024-03-18",
-    guests: 4,
-    nights: 3,
-    totalAmount: 960,
-    paymentMethod: "payment_gateway",
-    paymentType: "credit_card",
-    transactionId: "TXN-2024-001234",
-    errorCode: "PAYMENT_DECLINED",
-    errorMessage: "Your payment was declined by your bank. Please check your card details or try a different payment method.",
-    failedAt: "2024-03-08T14:30:00Z",
-    tenant: {
-      name: "Made Sutrisno",
-      email: "made@example.com",
-      phone: "+62 812-3456-7890",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80"
-    }
-  };
+  const { bookingData, isLoading, error, reloadBooking } = useBookingPaymentStatus(Number(bookingId));
+
+  // Update countdown timer every second
+  useEffect(() => {
+    if (!bookingData?.paymentDeadline) return;
+
+    const updateTimer = () => {
+      const result = calculateTimeRemaining(bookingData.paymentDeadline!);
+      setTimeRemaining(result);
+    };
+
+    // Update immediately
+    updateTimer();
+
+    // Update every second
+    const timer = setInterval(updateTimer, 1000);
+
+    return () => clearInterval(timer);
+  }, [bookingData?.paymentDeadline]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -71,275 +80,322 @@ export default function PaymentError() {
   };
 
   const handleRetryPayment = async () => {
+    if (!bookingData) return;
+    
     setIsRetrying(true);
-    // Simulate retry process
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    try {
+      // In real implementation, this would redirect to payment gateway
+      if (bookingData.midtransPayment?.redirectUrl) {
+        window.open(bookingData.midtransPayment.redirectUrl, '_blank');
+      } else {
+        toast.error('Payment URL not available');
+      }
+    } catch (error: any) {
+      console.error('Retry payment error:', error);
+      toast.error('Failed to retry payment');
+    } finally {
     setIsRetrying(false);
-    // In real implementation, this would redirect to payment gateway
-  };
-
-  const handleTryDifferentMethod = () => {
-    // In real implementation, this would redirect to payment method selection
-    console.log("Try different payment method");
-  };
-
-  const getErrorIcon = (errorCode: string) => {
-    switch (errorCode) {
-      case 'PAYMENT_DECLINED':
-        return <XCircle size={48} className="text-red-600" />;
-      case 'INSUFFICIENT_FUNDS':
-        return <AlertTriangle size={48} className="text-orange-600" />;
-      case 'CARD_EXPIRED':
-        return <Clock size={48} className="text-yellow-600" />;
-      default:
-        return <XCircle size={48} className="text-red-600" />;
     }
   };
 
-  const getErrorColor = (errorCode: string) => {
-    switch (errorCode) {
-      case 'PAYMENT_DECLINED':
-        return 'bg-red-100 text-red-600';
-      case 'INSUFFICIENT_FUNDS':
-        return 'bg-orange-100 text-orange-600';
-      case 'CARD_EXPIRED':
-        return 'bg-yellow-100 text-yellow-600';
-      default:
-        return 'bg-red-100 text-red-600';
-    }
+  const handleContactSupport = () => {
+    // In real implementation, this would open support chat or redirect to support page
+    toast('Support contact feature coming soon!');
   };
 
-  const getErrorSuggestions = (errorCode: string) => {
-    switch (errorCode) {
-      case 'PAYMENT_DECLINED':
-        return [
-          'Check your card details (number, expiry date, CVV)',
-          'Ensure your card is not blocked or restricted',
-          'Try a different payment method',
-          'Contact your bank if the issue persists'
-        ];
-      case 'INSUFFICIENT_FUNDS':
-        return [
-          'Check your account balance',
-          'Try a different payment method',
-          'Contact your bank to increase your limit',
-          'Consider using a different card'
-        ];
-      case 'CARD_EXPIRED':
-        return [
-          'Check your card expiry date',
-          'Use a different card with valid expiry date',
-          'Update your card information',
-          'Contact your bank for a new card'
-        ];
-      default:
-        return [
-          'Try again with the same payment method',
-          'Try a different payment method',
-          'Contact support for assistance',
-          'Check your internet connection'
-        ];
-    }
-  };
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 size={48} className="animate-spin mx-auto mb-4 text-[#8B7355]" />
+          <p className="text-gray-600">Loading booking data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !bookingData) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle size={48} className="mx-auto mb-4 text-red-500" />
+          <p className="text-gray-600 mb-4">{error || 'Booking not found'}</p>
+          <Button onClick={reloadBooking} variant="outline">
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const property = bookingData.items[0]?.room?.property;
+  const nights = bookingData.items[0]?.nights || 0;
 
   return (
     <main className="min-h-screen bg-[#F2EEE3]">
       <Header />
       
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Error Animation */}
+      <div className="container mx-auto px-4 py-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-4xl mx-auto"
+        >
+          {/* Error Header */}
+          <div className="text-center mb-8">
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ 
-            type: "spring", 
-            stiffness: 200, 
-            damping: 15,
-            delay: 0.2 
-          }}
-          className="text-center mb-8"
-        >
-          <div className={`w-24 h-24 ${getErrorColor(bookingData.errorCode)} rounded-full flex items-center justify-center mx-auto mb-6`}>
-            {getErrorIcon(bookingData.errorCode)}
-          </div>
-          <h1 className="text-4xl font-bold text-[#8B7355] mb-4">Payment Failed</h1>
-          <p className="text-xl text-gray-600 mb-2">We couldn't process your payment</p>
-          <p className="text-gray-500">Booking #{bookingData.bookingNo}</p>
-        </motion.div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Error Details Card */}
-            <motion.div
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6"
+            >
+              <XCircle className="w-12 h-12 text-red-600" />
+            </motion.div>
+            <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-white rounded-xl shadow-lg p-6"
+              className="text-4xl font-bold text-[#8B7355] mb-2"
             >
-              <div className="flex items-center gap-4 mb-6">
-                <Image
-                  src={bookingData.propertyImage}
-                  alt={bookingData.propertyName}
-                  width={80}
-                  height={80}
-                  className="w-20 h-20 rounded-lg object-cover"
-                />
+              Payment Failed
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="text-gray-600 text-lg"
+            >
+              We encountered an issue processing your payment
+            </motion.p>
+          </div>
+
+          {/* Error Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="bg-white rounded-xl shadow-lg p-6 mb-6"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                  <XCircle className="w-6 h-6 text-red-600" />
+                </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-[#8B7355]">{bookingData.propertyName}</h2>
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <MapPin size={16} />
-                    <span>{bookingData.address}</span>
+                  <h3 className="font-semibold text-gray-900">Payment Failed</h3>
+                  <p className="text-sm text-gray-600">Transaction could not be completed</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-gray-600">Booking No.</p>
+                <p className="font-semibold text-[#8B7355]">{bookingData.bookingNo}</p>
+              </div>
+            </div>
+
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle size={20} className="text-red-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-semibold text-red-800 mb-1">What went wrong?</h4>
+                  <p className="text-red-700 text-sm">
+                    Your payment was declined or failed to process. This could be due to insufficient funds, 
+                    incorrect card details, or network issues. Don't worry - your booking is still reserved.
+                  </p>
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-[#8B7355] flex items-center gap-2">
-                    <Calendar size={20} />
-                    Stay Details
-                  </h3>
-                  <div className="space-y-2">
-                    <div>
-                      <span className="text-sm text-gray-600">Check-in:</span>
-                      <p className="font-medium">{formatDate(bookingData.checkIn)}</p>
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <Button
+                onClick={handleRetryPayment}
+                disabled={isRetrying}
+                className="flex-1 bg-[#8B7355] hover:bg-[#7A6349] text-white"
+              >
+                {isRetrying ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin mr-2" />
+                    Retrying...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw size={16} className="mr-2" />
+                    Retry Payment
+                  </>
+                )}
+              </Button>
+              <Button
+                onClick={handleContactSupport}
+                variant="outline"
+                className="border-gray-300 text-gray-700 hover:bg-gray-50"
+              >
+                <MessageCircle size={16} className="mr-2" />
+                Contact Support
+              </Button>
+            </div>
+          </motion.div>
+
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Property Details */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.6 }}
+              className="lg:col-span-2 space-y-6"
+            >
+              {/* Property Card */}
+              <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div className="relative h-64">
+                  <Image
+                    src={property?.images[0]?.url || "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"}
+                    alt={property?.name || "Property"}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="p-6">
+                  <h3 className="text-2xl font-bold text-[#8B7355] mb-2">{property?.name}</h3>
+                  <div className="flex items-center gap-2 text-gray-600 mb-4">
+                    <MapPin size={16} />
+                    <span>{property?.address}</span>
                     </div>
+                  
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <Calendar size={16} className="text-gray-500" />
                     <div>
-                      <span className="text-sm text-gray-600">Check-out:</span>
-                      <p className="font-medium">{formatDate(bookingData.checkOut)}</p>
+                          <p className="text-sm font-medium">Check-in</p>
+                          <p className="text-sm text-gray-600">{formatDate(bookingData.checkIn)}</p>
                     </div>
-                    <div>
-                      <span className="text-sm text-gray-600">Duration:</span>
-                      <p className="font-medium">{bookingData.nights} nights</p>
                     </div>
+                      
+                      <div className="flex items-center gap-3">
+                        <Calendar size={16} className="text-gray-500" />
                     <div>
-                      <span className="text-sm text-gray-600">Guests:</span>
-                      <p className="font-medium">{bookingData.guests} guests</p>
+                          <p className="text-sm font-medium">Check-out</p>
+                          <p className="text-sm text-gray-600">{formatDate(bookingData.checkOut)}</p>
                     </div>
                   </div>
                 </div>
 
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <Users size={16} className="text-gray-500" />
+                    <div>
+                          <p className="text-sm font-medium">Guests</p>
+                          <p className="text-sm text-gray-600">{bookingData.totalGuests} guests</p>
+                        </div>
+                    </div>
+                      
+                      <div className="flex items-center gap-3">
+                        <Clock size={16} className="text-gray-500" />
+                    <div>
+                          <p className="text-sm font-medium">Duration</p>
+                          <p className="text-sm text-gray-600">{nights} nights</p>
+                    </div>
+                    </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Troubleshooting */}
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h3 className="text-xl font-bold text-[#8B7355] mb-4">Troubleshooting Tips</h3>
                 <div className="space-y-4">
-                  <h3 className="font-semibold text-[#8B7355] flex items-center gap-2">
-                    <CreditCard size={20} />
-                    Payment Details
-                  </h3>
-                  <div className="space-y-2">
-                    <div>
-                      <span className="text-sm text-gray-600">Payment Method:</span>
-                      <p className="font-medium capitalize">{bookingData.paymentMethod.replace('_', ' ')}</p>
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                      <CreditCard size={16} className="text-blue-600" />
                     </div>
                     <div>
-                      <span className="text-sm text-gray-600">Payment Type:</span>
-                      <p className="font-medium capitalize">{bookingData.paymentType.replace('_', ' ')}</p>
+                      <h4 className="font-semibold text-gray-900">Check Your Payment Method</h4>
+                      <p className="text-sm text-gray-600">
+                        Ensure your card has sufficient funds and the details are correct. 
+                        Try using a different payment method if available.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                      <RefreshCw size={16} className="text-yellow-600" />
                     </div>
                     <div>
-                      <span className="text-sm text-gray-600">Transaction ID:</span>
-                      <p className="font-medium font-mono text-sm">{bookingData.transactionId}</p>
+                      <h4 className="font-semibold text-gray-900">Try Again</h4>
+                      <p className="text-sm text-gray-600">
+                        Sometimes payment failures are temporary. Wait a few minutes and try again.
+                      </p>
+                </div>
+              </div>
+                  
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                      <MessageCircle size={16} className="text-green-600" />
                     </div>
-                    <div>
-                      <span className="text-sm text-gray-600">Failed At:</span>
-                      <p className="font-medium">
-                        {formatDate(bookingData.failedAt)} at {formatTime(bookingData.failedAt)}
+                <div>
+                      <h4 className="font-semibold text-gray-900">Contact Support</h4>
+                      <p className="text-sm text-gray-600">
+                        If the problem persists, our support team is here to help you complete your booking.
                       </p>
                     </div>
                   </div>
                 </div>
               </div>
-
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <div className="flex justify-between items-center">
-                  <span className="text-lg font-semibold">Amount to Pay:</span>
-                  <span className="text-2xl font-bold text-[#8B7355]">${bookingData.totalAmount}</span>
-                </div>
-              </div>
             </motion.div>
 
-            {/* Error Message */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="bg-red-50 border border-red-200 rounded-xl p-6"
-            >
-              <div className="flex items-start gap-4">
-                <AlertTriangle size={24} className="text-red-600 flex-shrink-0 mt-1" />
-                <div>
-                  <h3 className="font-semibold text-red-800 mb-2">Payment Error</h3>
-                  <p className="text-red-700 mb-4">{bookingData.errorMessage}</p>
-                  <div className="text-sm text-red-600">
-                    <span className="font-medium">Error Code:</span> {bookingData.errorCode}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Troubleshooting */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="bg-white rounded-xl shadow-lg p-6"
-            >
-              <h3 className="text-xl font-bold text-[#8B7355] mb-4">Troubleshooting Steps</h3>
-              <div className="space-y-4">
-                {getErrorSuggestions(bookingData.errorCode).map((suggestion, index) => (
-                  <div key={index} className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-xs font-bold text-gray-600">{index + 1}</span>
-                    </div>
-                    <p className="text-sm text-gray-700">{suggestion}</p>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Host Information */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="bg-white rounded-xl shadow-lg p-6"
-            >
-              <h3 className="text-xl font-bold text-[#8B7355] mb-4">Your Host</h3>
-              <div className="flex items-center gap-4">
-                <Image
-                  src={bookingData.tenant.avatar}
-                  alt={bookingData.tenant.name}
-                  width={60}
-                  height={60}
-                  className="w-15 h-15 rounded-full object-cover"
-                />
-                <div className="flex-1">
-                  <h4 className="font-semibold text-lg">{bookingData.tenant.name}</h4>
-                  <p className="text-gray-600">Property Host</p>
-                  <div className="flex items-center gap-1 mt-1">
-                    <CheckCircle size={14} className="text-green-500" />
-                    <span className="text-sm font-medium text-green-600">Verified Host</span>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
-                    <MessageCircle size={16} className="mr-2" />
-                    Message
-                  </Button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
+            {/* Sidebar */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
+              transition={{ delay: 0.7 }}
               className="space-y-6"
             >
-              {/* Quick Actions */}
+              {/* Payment Summary */}
               <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="font-bold text-[#8B7355] mb-4">Quick Actions</h3>
+                <h3 className="text-lg font-bold text-[#8B7355] mb-4">Payment Summary</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Subtotal</span>
+                    <span className="font-medium">Rp {bookingData.totalAmount.toLocaleString('id-ID')}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Taxes & Fees</span>
+                    <span className="font-medium">$0</span>
+                    </div>
+                  <div className="border-t pt-3">
+                    <div className="flex justify-between">
+                      <span className="font-semibold">Total Amount</span>
+                      <span className="font-bold text-[#8B7355]">Rp {bookingData.totalAmount.toLocaleString('id-ID')}</span>
+                  </div>
+              </div>
+                  </div>
+                </div>
+
+              {/* Payment Deadline */}
+              {bookingData.paymentDeadline && !timeRemaining.isExpired && (
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Clock size={16} className="text-orange-600" />
+                    <h3 className="font-bold text-orange-800">Payment Deadline</h3>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-orange-800">
+                      {formatTimeRemaining(timeRemaining.hours, timeRemaining.minutes, timeRemaining.seconds)}
+                    </div>
+                    <p className="text-sm text-orange-600">
+                      Time remaining to complete payment
+                    </p>
+                    <p className="text-xs text-orange-500 mt-1">
+                      Complete within {getDeadlineText(bookingData.paymentMethod)} from booking creation
+                    </p>
+                </div>
+              </div>
+              )}
+
+              {/* Actions */}
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h3 className="text-lg font-bold text-[#8B7355] mb-4">Quick Actions</h3>
                 <div className="space-y-3">
                   <Button 
                     onClick={handleRetryPayment}
@@ -348,7 +404,7 @@ export default function PaymentError() {
                   >
                     {isRetrying ? (
                       <>
-                        <RefreshCw size={16} className="mr-2 animate-spin" />
+                        <Loader2 size={16} className="animate-spin mr-2" />
                         Retrying...
                       </>
                     ) : (
@@ -359,99 +415,37 @@ export default function PaymentError() {
                     )}
                   </Button>
                   
+                  <Link href={`/bookings/${bookingId}?from=error`}>
                   <Button 
-                    onClick={handleTryDifferentMethod}
                     variant="outline" 
-                    className="w-full"
+                      className="w-full justify-start"
                   >
-                    <ExternalLink size={16} className="mr-2" />
-                    Try Different Method
-                  </Button>
-                  
-                  <Button variant="outline" className="w-full">
-                    <MessageCircle size={16} className="mr-2" />
-                    Contact Host
-                  </Button>
-                  
-                  <Link href="/dashboard/bookings" className="block">
-                    <Button variant="outline" className="w-full">
                       <Building2 size={16} className="mr-2" />
-                      My Bookings
+                      View Booking Details
+                  </Button>
+                  </Link>
+                  
+                  <Button
+                    onClick={handleContactSupport}
+                    variant="outline"
+                    className="w-full justify-start"
+                  >
+                    <HelpCircle size={16} className="mr-2" />
+                    Get Help
+                  </Button>
+                  
+                  <Link href="/">
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                    >
+                      <Home size={16} className="mr-2" />
+                      Back to Home
                     </Button>
                   </Link>
                 </div>
               </div>
-
-              {/* Payment Status */}
-              <div className="bg-red-50 border border-red-200 rounded-xl p-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <XCircle size={20} className="text-red-600" />
-                  <h3 className="font-semibold text-red-800">Payment Status</h3>
-                </div>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-red-700">Status:</span>
-                    <span className="font-medium text-red-800">Failed</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-red-700">Error Code:</span>
-                    <span className="font-medium text-red-800">{bookingData.errorCode}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-red-700">Failed At:</span>
-                    <span className="font-medium text-red-800">
-                      {formatTime(bookingData.failedAt)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Support */}
-              <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <HelpCircle size={20} className="text-gray-600" />
-                  <h3 className="font-semibold text-gray-800">Need Help?</h3>
-                </div>
-                <p className="text-sm text-gray-600 mb-4">
-                  Having trouble with your payment? Our support team is here to help you resolve this issue.
-                </p>
-                <Button variant="outline" size="sm" className="w-full">
-                  Contact Support
-                </Button>
-              </div>
             </motion.div>
-          </div>
-        </div>
-
-        {/* Bottom CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-          className="text-center mt-12"
-        >
-          <div className="bg-white rounded-xl shadow-lg p-8">
-            <h3 className="text-2xl font-bold text-[#8B7355] mb-4">Don't Give Up!</h3>
-            <p className="text-gray-600 mb-6">
-              Your booking is still available. Try again with a different payment method or contact support for assistance.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                onClick={handleRetryPayment}
-                disabled={isRetrying}
-                className="bg-[#8B7355] hover:bg-[#7A6349] text-white px-8"
-              >
-                {isRetrying ? 'Retrying...' : 'Retry Payment'}
-                <ArrowRight size={16} className="ml-2" />
-              </Button>
-              <Button 
-                onClick={handleTryDifferentMethod}
-                variant="outline" 
-                className="px-8"
-              >
-                Try Different Method
-              </Button>
-            </div>
           </div>
         </motion.div>
       </div>

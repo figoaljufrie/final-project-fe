@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
   ArrowLeft,
@@ -18,7 +18,8 @@ import {
   Star,
   Building2,
   Phone,
-  Mail
+  Mail,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/landing-page/header";
@@ -26,46 +27,166 @@ import Footer from "@/components/landing-page/footer";
 import PaymentMethodModal from "@/components/payment/PaymentMethodModal";
 import Link from "next/link";
 import Image from "next/image";
+import { useParams, useRouter } from "next/navigation";
+import { PaymentService } from "@/lib/services/payment/payment-service";
+import { toast } from "react-hot-toast";
+import { getDeadlineText, getDeadlineMessage } from "@/lib/utils/payment-deadline";
+
+interface BookingData {
+  id: number;
+  bookingNo: string;
+  status: string;
+  totalAmount: number;
+  paymentMethod: string;
+  paymentDeadline?: string;
+  checkIn: string;
+  checkOut: string;
+  totalGuests: number;
+  notes?: string;
+  createdAt: string;
+  paymentProofUrl?: string;
+  items: Array<{
+    id: number;
+    room: {
+      name: string;
+      property: {
+        name: string;
+        address: string;
+        images: Array<{ url: string }>;
+        tenant: {
+          name: string;
+          email: string;
+          phone?: string;
+          avatarUrl?: string;
+        };
+      };
+    };
+    unitCount: number;
+    unitPrice: number;
+    nights: number;
+    subTotal: number;
+  }>;
+  user: {
+    name: string;
+    email: string;
+  };
+}
 
 export default function BookingDetails() {
   const [activeTab, setActiveTab] = useState<'details' | 'payment' | 'contact'>('details');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [bookingData, setBookingData] = useState<BookingData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const params = useParams();
+  const router = useRouter();
+  const bookingId = params.id as string;
 
-  // Mock booking data - replace with actual data from props/API
-  const bookingData = {
-    id: 1,
-    bookingNo: "BK-2024-001234",
-    status: "waiting_for_payment" as const,
-    propertyName: "Ocean View Villa",
-    propertyImage: "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    address: "Jl. Pantai Kuta No. 88, Seminyak, Bali",
-    checkIn: "2024-03-15",
-    checkOut: "2024-03-18",
-    guests: 4,
-    nights: 3,
-    totalAmount: 960,
-    paymentMethod: "payment_gateway" as const, // Changed to payment_gateway for testing
-    paymentProofUrl: null,
-    paymentDeadline: "2024-03-10T14:30:00Z",
-    createdAt: "2024-03-08T10:30:00Z",
-    notes: "Please prepare early check-in if possible",
-    items: [
-      {
-        id: 1,
-        roomName: "Deluxe Ocean View Room",
-        unitCount: 1,
-        unitPrice: 320,
-        nights: 3,
-        subTotal: 960
+  // Handle redirects based on booking status
+  const handleStatusBasedRedirect = (bookingData: any) => {
+    if (!bookingData) return;
+
+    const { status, paymentMethod } = bookingData;
+
+    // If payment is confirmed, show success message and redirect
+    if (status === 'confirmed') {
+      toast.success('Payment confirmed! Your booking is now confirmed.');
+      // Redirect to booking details after 3 seconds
+      setTimeout(() => {
+        router.push(`/bookings/${bookingId}`);
+      }, 3000);
+      return;
+    }
+
+    // If payment is completed, show completion message
+    if (status === 'completed') {
+      toast.success('Booking completed! Thank you for your stay.');
+      return;
+    }
+
+    // If booking is cancelled, show cancellation message
+    if (status === 'cancelled') {
+      toast.error('This booking has been cancelled.');
+      // Redirect to bookings list after 3 seconds
+      setTimeout(() => {
+        router.push('/bookings');
+      }, 3000);
+      return;
+    }
+
+    // If payment is still pending, check if we should redirect to payment pages
+    if (status === 'waiting_for_payment') {
+      // Check if user came from payment success/error pages
+      const urlParams = new URLSearchParams(window.location.search);
+      const fromPayment = urlParams.get('from');
+      
+      if (fromPayment === 'success') {
+        toast.success('Payment successful! Your booking is being processed.');
+        // Remove the 'from' parameter to prevent infinite loop
+        setTimeout(() => {
+          router.replace(`/bookings/${bookingId}`);
+        }, 2000);
+      } else if (fromPayment === 'error') {
+        toast.error('Payment failed. Please try again.');
+        // Redirect to appropriate payment page based on payment method
+        setTimeout(() => {
+          if (paymentMethod === 'payment_gateway') {
+            router.push(`/bookings/${bookingId}/payment-pending`);
+          } else {
+            router.push(`/bookings/${bookingId}/upload-payment`);
+          }
+        }, 2000);
       }
-    ],
-    tenant: {
-      name: "Made Sutrisno",
-      email: "made@example.com",
-      phone: "+62 812-3456-7890",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80"
     }
   };
+
+  // Load booking data from API
+  useEffect(() => {
+    const loadBookingData = async () => {
+      try {
+        setIsLoading(true);
+        const data = await PaymentService.getBookingDetails(Number(bookingId));
+        console.log('Loaded booking data:', data);
+        setBookingData(data);
+        
+        // Handle redirects based on booking status
+        handleStatusBasedRedirect(data);
+      } catch (error: any) {
+        console.error('Error loading booking data:', error);
+        
+        // Handle different error types
+        if (error.response?.status === 403) {
+          toast.error('Access denied. You may not have permission to view this booking.');
+          // Redirect to bookings list after 2 seconds
+          setTimeout(() => {
+            router.push('/bookings');
+          }, 2000);
+        } else if (error.response?.status === 404) {
+          toast.error('Booking not found.');
+          // Redirect to bookings list after 2 seconds
+          setTimeout(() => {
+            router.push('/bookings');
+          }, 2000);
+        } else if (error.response?.status === 401) {
+          toast.error('Please login to view your bookings.');
+          // Redirect to login after 2 seconds
+          setTimeout(() => {
+            router.push('/login');
+          }, 2000);
+        } else {
+          toast.error('Failed to load booking data. Please try again.');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (bookingId) {
+      loadBookingData();
+    }
+  }, [bookingId, router]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -117,11 +238,62 @@ export default function BookingDetails() {
     });
   };
 
+  const handleCancelBooking = async () => {
+    if (!cancelReason.trim()) {
+      toast.error('Please provide a reason for cancellation');
+      return;
+    }
+
+    setIsCancelling(true);
+    try {
+      await PaymentService.cancelBooking(Number(bookingId), cancelReason);
+      toast.success('Booking cancelled successfully');
+      setShowCancelModal(false);
+      setCancelReason('');
+      // Reload booking data to reflect the cancellation
+      const data = await PaymentService.getBookingDetails(Number(bookingId));
+      setBookingData(data);
+    } catch (error: any) {
+      console.error('Error cancelling booking:', error);
+      toast.error(error.response?.data?.message || 'Failed to cancel booking');
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
   const tabs = [
     { id: 'details', label: 'Booking Details', icon: FileText },
     { id: 'payment', label: 'Payment Info', icon: CreditCard },
     { id: 'contact', label: 'Contact Host', icon: MessageCircle }
   ];
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#F2EEE3] flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 size={48} className="animate-spin mx-auto mb-4 text-[#8B7355]" />
+          <p className="text-gray-600">Loading booking details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!bookingData) {
+    return (
+      <div className="min-h-screen bg-[#F2EEE3] flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle size={48} className="mx-auto mb-4 text-red-500" />
+          <p className="text-gray-600">Booking not found</p>
+          <Link href="/dashboard/bookings" className="text-[#8B7355] hover:underline">
+            Back to My Bookings
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const property = bookingData.items[0]?.room?.property;
+  const tenant = property?.tenant;
 
   return (
     <main className="min-h-screen bg-[#F2EEE3]">
@@ -147,8 +319,8 @@ export default function BookingDetails() {
             <div className="flex items-center gap-4">
               <div className="relative">
                 <Image
-                  src={bookingData.propertyImage}
-                  alt={bookingData.propertyName}
+                  src={property?.images[0]?.url || "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"}
+                  alt={property?.name || "Property"}
                   width={80}
                   height={80}
                   className="w-20 h-20 rounded-lg object-cover"
@@ -161,14 +333,14 @@ export default function BookingDetails() {
                 </div>
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-[#8B7355]">{bookingData.propertyName}</h1>
-                <p className="text-gray-600">{bookingData.address}</p>
+                <h1 className="text-2xl font-bold text-[#8B7355]">{property?.name || "Property"}</h1>
+                <p className="text-gray-600">{property?.address || "Address not available"}</p>
                 <p className="text-sm text-gray-500">Booking #{bookingData.bookingNo}</p>
               </div>
             </div>
             
             <div className="text-right">
-              <div className="text-3xl font-bold text-[#8B7355]">${bookingData.totalAmount}</div>
+              <div className="text-3xl font-bold text-[#8B7355]">Rp {bookingData.totalAmount.toLocaleString('id-ID')}</div>
               <p className="text-sm text-gray-600">Total Amount</p>
             </div>
           </div>
@@ -226,7 +398,7 @@ export default function BookingDetails() {
                           </div>
                           <div>
                             <span className="text-sm text-gray-600">Duration:</span>
-                            <p className="font-medium">{bookingData.nights} nights</p>
+                            <p className="font-medium">{bookingData.items[0]?.nights || 0} nights</p>
                           </div>
                         </div>
                       </div>
@@ -239,7 +411,7 @@ export default function BookingDetails() {
                         <div className="space-y-2">
                           <div>
                             <span className="text-sm text-gray-600">Number of Guests:</span>
-                            <p className="font-medium">{bookingData.guests} guests</p>
+                            <p className="font-medium">{bookingData.totalGuests} guests</p>
                           </div>
                           {bookingData.notes && (
                             <div>
@@ -258,14 +430,14 @@ export default function BookingDetails() {
                           <div key={item.id} className="border border-gray-200 rounded-lg p-4">
                             <div className="flex justify-between items-start">
                               <div>
-                                <h4 className="font-medium">{item.roomName}</h4>
+                                <h4 className="font-medium">{item.room.name}</h4>
                                 <p className="text-sm text-gray-600">
                                   {item.unitCount} unit{item.unitCount > 1 ? 's' : ''} × {item.nights} night{item.nights > 1 ? 's' : ''}
                                 </p>
                               </div>
                               <div className="text-right">
-                                <p className="font-medium">${item.unitPrice}/night</p>
-                                <p className="text-sm text-gray-600">Subtotal: ${item.subTotal}</p>
+                                <p className="font-medium">Rp {item.unitPrice.toLocaleString('id-ID')}/night</p>
+                                <p className="text-sm text-gray-600">Subtotal: Rp {item.subTotal.toLocaleString('id-ID')}</p>
                               </div>
                             </div>
                           </div>
@@ -295,7 +467,7 @@ export default function BookingDetails() {
                           </div>
                           <div>
                             <span className="text-sm text-gray-600">Total Amount:</span>
-                            <p className="font-medium text-lg">${bookingData.totalAmount}</p>
+                            <p className="font-medium text-lg">Rp {bookingData.totalAmount.toLocaleString('id-ID')}</p>
                           </div>
                         </div>
                       </div>
@@ -316,6 +488,9 @@ export default function BookingDetails() {
                               <p className="font-medium">
                                 {formatDate(bookingData.paymentDeadline)} at {formatTime(bookingData.paymentDeadline)}
                               </p>
+                              <p className="text-xs text-gray-500 mt-1">
+                                ({getDeadlineText(bookingData.paymentMethod)} from booking creation)
+                              </p>
                             </div>
                           )}
                         </div>
@@ -333,6 +508,9 @@ export default function BookingDetails() {
                               width={100}
                               height={100}
                               className="w-24 h-24 object-cover rounded-lg"
+                              onError={(e) => {
+                                console.error('Failed to load payment proof image:', e);
+                              }}
                             />
                             <div className="flex-1">
                               <p className="font-medium">Payment proof uploaded</p>
@@ -356,25 +534,24 @@ export default function BookingDetails() {
                           {bookingData.paymentMethod === 'manual_transfer' ? (
                             <div className="space-y-3">
                               <p className="text-sm text-gray-600">
-                                Upload your bank transfer receipt to complete the payment.
+                                {getDeadlineMessage(bookingData.paymentMethod)}
                               </p>
-                              <Link href={`/bookings/${bookingData.id}/upload-payment`}>
-                                <Button className="bg-[#8B7355] hover:bg-[#7A6349] text-white">
-                                  Upload Payment Proof
-                                </Button>
-                              </Link>
+                              <Link href={`/bookings/${bookingId}/upload-payment`}>
+                          <Button className="bg-[#8B7355] hover:bg-[#7A6349] text-white">
+                            Upload Payment Proof
+                          </Button>
+                        </Link>
                             </div>
                           ) : (
                             <div className="space-y-3">
                               <p className="text-sm text-gray-600">
-                                Complete your payment securely through our payment gateway.
+                                {getDeadlineMessage(bookingData.paymentMethod)}
                               </p>
                               <Button 
                                 className="bg-[#8B7355] hover:bg-[#7A6349] text-white"
                                 onClick={() => {
-                                  // In real implementation, this would call the Midtrans API
-                                  console.log('Redirecting to Midtrans payment gateway...');
-                                  // window.location.href = '/bookings/1/payment-pending';
+                                  // Redirect to payment pending page
+                                  window.location.href = `/bookings/${bookingId}/payment-pending`;
                                 }}
                               >
                                 Pay with Payment Gateway
@@ -410,14 +587,14 @@ export default function BookingDetails() {
                   >
                     <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
                       <Image
-                        src={bookingData.tenant.avatar}
-                        alt={bookingData.tenant.name}
+                        src={tenant?.avatarUrl || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80"}
+                        alt={tenant?.name || "Host"}
                         width={60}
                         height={60}
                         className="w-15 h-15 rounded-full object-cover"
                       />
                       <div className="flex-1">
-                        <h3 className="font-semibold text-[#8B7355]">{bookingData.tenant.name}</h3>
+                        <h3 className="font-semibold text-[#8B7355]">{tenant?.name || "Host"}</h3>
                         <p className="text-sm text-gray-600">Property Host</p>
                         <div className="flex items-center gap-1 mt-1">
                           <Star size={14} className="fill-yellow-400 text-yellow-400" />
@@ -436,11 +613,11 @@ export default function BookingDetails() {
                         <div className="space-y-3">
                           <div className="flex items-center gap-3">
                             <Phone size={16} className="text-gray-500" />
-                            <span className="text-sm">{bookingData.tenant.phone}</span>
+                            <span className="text-sm">{tenant?.phone || "Phone not available"}</span>
                           </div>
                           <div className="flex items-center gap-3">
                             <Mail size={16} className="text-gray-500" />
-                            <span className="text-sm">{bookingData.tenant.email}</span>
+                            <span className="text-sm">{tenant?.email || "Email not available"}</span>
                           </div>
                         </div>
                       </div>
@@ -480,18 +657,17 @@ export default function BookingDetails() {
                   {bookingData.status === 'waiting_for_payment' && !bookingData.paymentProofUrl && (
                     <>
                       {bookingData.paymentMethod === 'manual_transfer' ? (
-                        <Link href={`/bookings/${bookingData.id}/upload-payment`} className="block">
-                          <Button className="w-full bg-[#8B7355] hover:bg-[#7A6349] text-white">
-                            Upload Payment Proof
-                          </Button>
-                        </Link>
+                        <Link href={`/bookings/${bookingId}/upload-payment`} className="block">
+                      <Button className="w-full bg-[#8B7355] hover:bg-[#7A6349] text-white">
+                        Upload Payment Proof
+                      </Button>
+                    </Link>
                       ) : (
                         <Button 
                           className="w-full bg-[#8B7355] hover:bg-[#7A6349] text-white"
                           onClick={() => {
-                            // In real implementation, this would call the Midtrans API
-                            console.log('Redirecting to Midtrans payment gateway...');
-                            // window.location.href = '/bookings/1/payment-pending';
+                            // Redirect to payment pending page
+                            window.location.href = `/bookings/${bookingId}/payment-pending`;
                           }}
                         >
                           Pay with Payment Gateway
@@ -511,7 +687,11 @@ export default function BookingDetails() {
                   </Button>
                   
                   {bookingData.status === 'waiting_for_payment' && (
-                    <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                    <Button 
+                      variant="outline" 
+                      className="w-full text-red-600 border-red-200 hover:bg-red-50"
+                      onClick={() => setShowCancelModal(true)}
+                    >
                       Cancel Booking
                     </Button>
                   )}
@@ -563,24 +743,76 @@ export default function BookingDetails() {
         onSelectMethod={(method) => {
           console.log('Selected payment method:', method);
           setShowPaymentModal(false);
-          // In real implementation, this would update the booking's payment method
-          // and redirect accordingly
+          // Redirect based on selected method
           if (method === 'payment_gateway') {
             // Redirect to payment gateway
-            window.location.href = '/bookings/1/payment-pending';
+            window.location.href = `/bookings/${bookingId}/payment-pending`;
           } else {
             // Redirect to upload payment proof
-            window.location.href = '/bookings/1/upload-payment';
+            window.location.href = `/bookings/${bookingId}/upload-payment`;
           }
         }}
         totalAmount={bookingData.totalAmount}
+        bookingId={bookingData.id}
+        bookingNo={bookingData.bookingNo}
         bookingData={{
           checkIn: bookingData.checkIn,
           checkOut: bookingData.checkOut,
-          guests: bookingData.guests,
-          nights: bookingData.nights
+          guests: bookingData.totalGuests,
+          nights: bookingData.items[0]?.nights || 0
         }}
       />
+
+      {/* Cancel Booking Modal */}
+      {showCancelModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+            <h3 className="text-lg font-semibold text-[#8B7355] mb-4">Cancel Booking</h3>
+            <p className="text-gray-600 mb-4">
+              Are you sure you want to cancel this booking? This action cannot be undone.
+            </p>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Reason for cancellation
+              </label>
+              <textarea
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="Please provide a reason for cancelling this booking..."
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B7355] focus:border-transparent resize-none"
+                rows={3}
+              />
+            </div>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowCancelModal(false);
+                  setCancelReason('');
+                }}
+                className="flex-1"
+                disabled={isCancelling}
+              >
+                Keep Booking
+              </Button>
+              <Button
+                onClick={handleCancelBooking}
+                disabled={isCancelling || !cancelReason.trim()}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white disabled:opacity-50"
+              >
+                {isCancelling ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin mr-2" />
+                    Cancelling...
+                  </>
+                ) : (
+                  'Cancel Booking'
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

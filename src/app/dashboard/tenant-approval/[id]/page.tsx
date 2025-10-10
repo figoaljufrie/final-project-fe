@@ -29,6 +29,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { TenantApprovalService, TenantBooking } from "@/lib/services/tenant/tenant-approval-service";
 import { toast } from "react-hot-toast";
+import { getDeadlineText } from "@/lib/utils/payment-deadline";
 
 export default function TenantBookingDetailPage({ params }: { params: { id: string } }) {
   const [activeTab, setActiveTab] = useState<'details' | 'payment' | 'contact'>('details');
@@ -392,6 +393,9 @@ export default function TenantBookingDetailPage({ params }: { params: { id: stri
                               <span className="text-sm text-gray-600">Payment Deadline:</span>
                               <p className="font-medium">
                                 {formatDate(booking.paymentDeadline)} at {formatTime(booking.paymentDeadline)}
+                              </p>
+                              <p className="text-xs text-gray-500 mt-1">
+                                ({getDeadlineText(booking.paymentMethod)} from booking creation)
                               </p>
                             </div>
                           )}

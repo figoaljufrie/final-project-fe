@@ -1,5 +1,5 @@
 import api from '../../api';
-import { Booking, CreateBookingRequest } from '../../types/bookings/booking';
+import { Booking } from '../../types/bookings/booking';
 
 export interface CreateBookingPayload {
   roomId: number;
@@ -15,6 +15,17 @@ export interface MidtransPaymentResponse {
   token: string;
   redirectUrl: string;
   orderId: string;
+}
+
+export interface PaymentStatusResponse {
+  transaction_status: string;
+  order_id: string;
+  gross_amount: string;
+  payment_type: string;
+  transaction_time: string;
+  settlement_time?: string;
+  fraud_status: string;
+  status_message: string;
 }
 
 export interface BookingListResponse {
@@ -37,6 +48,18 @@ export class PaymentService {
   // Create Midtrans payment
   static async createMidtransPayment(bookingId: number) {
     const response = await api.post(`/bookings/${bookingId}/midtrans-payment`);
+    return response.data.data || response.data;
+  }
+
+  // Create payment gateway payment (direct to Midtrans)
+  static async createPaymentGatewayPayment(bookingData: {
+    bookingId: number;
+    bookingNo: string;
+    totalAmount: number;
+    userEmail: string;
+    userName: string;
+  }) {
+    const response = await api.post('/payment/create-payment', bookingData);
     return response.data.data || response.data;
   }
 
@@ -73,9 +96,44 @@ export class PaymentService {
     return response.data.data || response.data;
   }
 
-  // Check payment status
-  static async checkPaymentStatus(orderId: string) {
+  // Check payment status from Midtrans
+  static async checkPaymentStatus(orderId: string): Promise<PaymentStatusResponse> {
     const response = await api.get(`/payment/payment-status/${orderId}`);
     return response.data.data || response.data;
+  }
+
+  // Poll payment status (for real-time updates)
+  static async pollPaymentStatus(orderId: string, maxAttempts: number = 30, intervalMs: number = 2000): Promise<PaymentStatusResponse> {
+    return new Promise((resolve, reject) => {
+      let attempts = 0;
+      
+      const poll = async () => {
+        try {
+          attempts++;
+          const status = await this.checkPaymentStatus(orderId);
+          
+          // Check if payment is completed or failed
+          if (['settlement', 'capture', 'cancel', 'deny', 'expire', 'failure'].includes(status.transaction_status)) {
+            resolve(status);
+            return;
+          }
+          
+          // Continue polling if not final status
+          if (attempts < maxAttempts) {
+            setTimeout(poll, intervalMs);
+          } else {
+            reject(new Error('Payment status polling timeout'));
+          }
+        } catch (error) {
+          if (attempts < maxAttempts) {
+            setTimeout(poll, intervalMs);
+          } else {
+            reject(error);
+          }
+        }
+      };
+      
+      poll();
+    });
   }
 }
