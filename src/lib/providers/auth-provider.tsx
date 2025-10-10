@@ -2,33 +2,19 @@
 import { QueryProvider } from "./query-provider";
 import { ReactNode, useEffect, useState } from "react";
 import { useAuthStore } from "@/stores/auth-store";
-import { setAuthToken } from "@/lib/api";
-import * as authService from "@/lib/services/Account/auth/auth-service";
+import { ProtectedRoute } from "@/components/auth/protected-route/protected-route";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const { hydrate, token, hydrated, user } = useAuthStore();
+  const { hydrate, hydrated } = useAuthStore();
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    hydrate();
-  }, [hydrate]);
-
-  useEffect(() => {
     const init = async () => {
-      if (token && !user) {
-        setAuthToken(token);
-        try {
-          const me = await authService.getMe();
-          useAuthStore.setState({ user: me });
-        } catch {
-          localStorage.removeItem("token");
-          useAuthStore.setState({ token: null, user: null });
-        }
-      }
+      await hydrate();
       setReady(true);
     };
-    if (hydrated) init();
-  }, [hydrated, token, user]);
+    init();
+  }, [hydrate]);
 
   if (!ready || !hydrated)
     return (
@@ -37,5 +23,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       </div>
     );
 
-  return <QueryProvider>{children}</QueryProvider>;
+  return (
+    <QueryProvider>
+      <ProtectedRoute>{children}</ProtectedRoute>
+    </QueryProvider>
+  );
 }

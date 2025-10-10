@@ -1,4 +1,3 @@
-// app/login/page.tsx
 "use client";
 
 import { useLogin } from "@/hooks/user-auth/login/use-login";
@@ -8,7 +7,7 @@ import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-// make sure this runs and initializes Firebase
+import { useAuthStore } from "@/stores/auth-store";
 
 type FormData = {
   email: string;
@@ -31,11 +30,19 @@ export default function LoginPage() {
   const router = useRouter();
 
   const onSubmit = async (data: FormData) => {
-    const res = await handleLogin(data.email, data.password);
-    if (res) {
+    try {
+      await handleLogin(data.email, data.password);
+
       toast.success("Login successful!");
-      router.push("/");
-    } else {
+
+      const user = useAuthStore.getState().user;
+
+      if (user?.role === "tenant") {
+        router.push("/dashboard");
+      } else {
+        router.push("/");
+      }
+    } catch (err) {
       toast.error(emailError || "Login failed");
     }
   };
@@ -47,15 +54,18 @@ export default function LoginPage() {
       const result = await signInWithPopup(auth, provider);
       const idToken = await result.user.getIdToken();
 
-      const res = await handleSocialLogin(idToken, "google");
-      if (res) {
-        toast.success("Google login successful!");
-        router.push("/");
+      await handleSocialLogin(idToken, "google");
+
+      toast.success("Google login successful!");
+
+      const user = useAuthStore.getState().user;
+
+      if (user?.role === "tenant") {
+        router.push("/dashboard");
       } else {
-        toast.error("Social login failed");
+        router.push("/");
       }
     } catch (err: unknown) {
-      console.error("Google login error", err);
       toast.error("Google login failed: " + (err as Error).message);
     }
   };
@@ -116,7 +126,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={emailLoading || socialLoading}
-            className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition"
+            className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
           >
             {emailLoading ? "Logging in..." : "Login"}
           </button>
@@ -139,10 +149,31 @@ export default function LoginPage() {
           <button
             onClick={handleGoogleLogin}
             disabled={emailLoading || socialLoading}
-            className="w-full flex items-center justify-center bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition"
+            className="w-full flex items-center justify-center bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition disabled:opacity-50"
           >
             Continue with Google
           </button>
+        </div>
+
+        <div className="mt-8 text-center space-y-2">
+          <p className="text-sm text-gray-600">
+            Don't have an account?{" "}
+            <button
+              onClick={() => router.push("/auth/register/user")}
+              className="text-indigo-600 hover:underline font-medium"
+            >
+              Register as User
+            </button>
+          </p>
+          <p className="text-sm text-gray-600">
+            Want to list your properties?{" "}
+            <button
+              onClick={() => router.push("/auth/register/tenant")}
+              className="text-indigo-600 hover:underline font-medium"
+            >
+              Be a Tenant and Share Your Properties!
+            </button>
+          </p>
         </div>
       </div>
     </div>
