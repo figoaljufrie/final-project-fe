@@ -25,6 +25,34 @@ export type {
 } from "./types";
 
 export class ReportService {
+  // Calculate average occupancy from reports data
+  private static calculateAverageOccupancyFromReports(reports: any[]): number {
+    if (reports.length === 0) return 0;
+
+    let totalOccupiedDays = 0;
+    let totalAvailableDays = 0;
+
+    reports.forEach((report) => {
+      if (report.type === "transaction" && report.details) {
+        const { totalGuests, nights } = report.details;
+        if (totalGuests && nights) {
+          // Calculate occupied days for this booking
+          const occupiedDays = nights * totalGuests;
+          totalOccupiedDays += occupiedDays;
+
+          // Assume average room capacity of 2 guests per room
+          const roomCapacity = 2;
+          const availableDays = nights * roomCapacity;
+          totalAvailableDays += availableDays;
+        }
+      }
+    });
+
+    return totalAvailableDays > 0
+      ? Math.min((totalOccupiedDays / totalAvailableDays) * 100, 100)
+      : 0;
+  }
+
   // Get sales report data (matching backend endpoint)
   static async getSalesReport(
     filters: SalesReportRequest = {}
@@ -54,6 +82,11 @@ export class ReportService {
         sortOrder: "desc",
       });
 
+      // Calculate average occupancy based on reports data
+      const averageOccupancy = this.calculateAverageOccupancyFromReports(
+        salesReport.reports
+      );
+
       const kpiData: SalesReportData = {
         totalRevenue: salesReport.totalSales || 0,
         totalBookings: salesReport.totalBookings || 0,
@@ -61,7 +94,7 @@ export class ReportService {
           (sum, item) => sum + (item.details?.totalGuests || 0),
           0
         ),
-        averageOccupancy: 0,
+        averageOccupancy: averageOccupancy,
         revenueGrowth: 0,
         bookingGrowth: 0,
         guestGrowth: 0,
