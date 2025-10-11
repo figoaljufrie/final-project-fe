@@ -19,7 +19,7 @@ import {
   Home,
   CheckCircle,
   Building2,
-  CalendarDays
+  CalendarDays,
 } from "lucide-react";
 import clsx from "clsx";
 
@@ -44,7 +44,7 @@ const navigation = [
   },
 
   {
-    name: "Peak Season", 
+    name: "Peak Season",
     href: "/dashboard/peak-seasons",
     icon: CalendarDays,
     description: "Set seasonal pricing",
@@ -167,7 +167,7 @@ export default function Sidebar({
         transition={{ duration: 0.3, ease: "easeInOut" }}
         className={clsx(
           "fixed left-0 top-0 z-50 h-full bg-white/95 backdrop-blur-xl border-r border-gray-200/50 shadow-xl",
-          "lg:translate-x-0 lg:relative lg:z-auto",
+          "lg:translate-x-0 lg:relative lg:z-auto lg:shadow-none lg:flex-shrink-0",
           isCollapsed ? "lg:w-16" : "lg:w-64"
         )}
       >

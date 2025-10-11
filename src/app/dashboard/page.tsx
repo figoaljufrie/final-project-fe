@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import DashboardOverview from "@/components/ui/DashboardOverview";
+import DashboardOverview from "@/components/dashboard/overview/DashboardOverview";
 
 export default function DashboardPage() {
   const [isLoaded, setIsLoaded] = useState(false);

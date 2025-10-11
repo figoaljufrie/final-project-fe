@@ -75,7 +75,7 @@ export default function ReportsPage() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-rose-50 p-6"
+      className="min-h-screen bg-gradient-to-br p-6"
     >
       <div id="reports-content" className="max-w-7xl mx-auto">
         <motion.div variants={itemVariants} className="mb-8">

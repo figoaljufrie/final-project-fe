@@ -1,5 +1,5 @@
-import api from '../../api';
-import { Booking } from '../../types/bookings/booking';
+import api from "../../api";
+import { Booking } from "../../types/bookings/booking";
 
 export interface CreateBookingPayload {
   roomId: number;
@@ -7,7 +7,7 @@ export interface CreateBookingPayload {
   checkOut: string;
   totalGuests: number;
   unitCount: number;
-  paymentMethod: 'manual_transfer' | 'payment_gateway';
+  paymentMethod: "manual_transfer" | "payment_gateway";
   notes?: string;
 }
 
@@ -41,7 +41,7 @@ export interface BookingListResponse {
 export class PaymentService {
   // Create new booking
   static async createBooking(bookingData: CreateBookingPayload) {
-    const response = await api.post('/bookings', bookingData);
+    const response = await api.post("/bookings", bookingData);
     return response.data.data || response.data;
   }
 
@@ -59,15 +59,19 @@ export class PaymentService {
     userEmail: string;
     userName: string;
   }) {
-    const response = await api.post('/payment/create-payment', bookingData);
+    const response = await api.post("/payment/create-payment", bookingData);
     return response.data.data || response.data;
   }
 
   // Upload payment proof
   static async uploadPaymentProof(bookingId: number, formData: FormData) {
-    const response = await api.post(`/bookings/${bookingId}/upload-payment`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
+    const response = await api.post(
+      `/bookings/${bookingId}/upload-payment`,
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
     return response.data.data || response.data;
   }
 
@@ -86,43 +90,60 @@ export class PaymentService {
     page?: number;
     limit?: number;
   }) {
-    const response = await api.get('/bookings', { params });
+    const response = await api.get("/bookings", { params });
     return response.data.data || response.data;
   }
 
   // Cancel booking
   static async cancelBooking(bookingId: number, reason: string) {
-    const response = await api.put(`/bookings/${bookingId}/cancel`, { cancelReason: reason });
+    const response = await api.put(`/bookings/${bookingId}/cancel`, {
+      cancelReason: reason,
+    });
     return response.data.data || response.data;
   }
 
   // Check payment status from Midtrans
-  static async checkPaymentStatus(orderId: string): Promise<PaymentStatusResponse> {
+  static async checkPaymentStatus(
+    orderId: string
+  ): Promise<PaymentStatusResponse> {
     const response = await api.get(`/payment/payment-status/${orderId}`);
     return response.data.data || response.data;
   }
 
   // Poll payment status (for real-time updates)
-  static async pollPaymentStatus(orderId: string, maxAttempts: number = 30, intervalMs: number = 2000): Promise<PaymentStatusResponse> {
+  static async pollPaymentStatus(
+    orderId: string,
+    maxAttempts: number = 30,
+    intervalMs: number = 2000
+  ): Promise<PaymentStatusResponse> {
     return new Promise((resolve, reject) => {
       let attempts = 0;
-      
+
       const poll = async () => {
         try {
           attempts++;
           const status = await this.checkPaymentStatus(orderId);
-          
+
           // Check if payment is completed or failed
-          if (['settlement', 'capture', 'cancel', 'deny', 'expire', 'failure'].includes(status.transaction_status)) {
+          if (
+            [
+              "settlement",
+              "capture",
+              "cancel",
+              "deny",
+              "expire",
+              "failure",
+            ].includes(status.transaction_status)
+          ) {
             resolve(status);
             return;
           }
-          
+
           // Continue polling if not final status
           if (attempts < maxAttempts) {
             setTimeout(poll, intervalMs);
           } else {
-            reject(new Error('Payment status polling timeout'));
+            reject(new Error("Payment status polling timeout"));
           }
         } catch (error) {
           if (attempts < maxAttempts) {
@@ -132,8 +153,16 @@ export class PaymentService {
           }
         }
       };
-      
+
       poll();
     });
+  }
+
+  // Poll booking status (for status changes after payment)
+  static async pollBookingStatus(
+    bookingId: number
+  ): Promise<{ status: string }> {
+    const booking = await this.getBookingDetails(bookingId);
+    return { status: booking.status };
   }
 }

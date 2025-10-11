@@ -1,0 +1,119 @@
+"use client";
+
+import { motion } from "framer-motion";
+import { FileText, CreditCard, MessageCircle } from "lucide-react";
+import BookingDetailsTab from "./BookingDetailsTab";
+import BookingPaymentTab from "./BookingPaymentTab";
+import BookingContactTab from "./BookingContactTab";
+
+interface BookingDetailTabsProps {
+  activeTab: "details" | "payment" | "contact";
+  setActiveTab: (tab: "details" | "payment" | "contact") => void;
+  bookingData: {
+    checkIn: string;
+    checkOut: string;
+    totalGuests: number;
+    notes?: string;
+    items: Array<{
+      id: number;
+      room: {
+        name: string;
+        property: {
+          tenant: {
+            name: string;
+            email: string;
+            phone?: string;
+            avatarUrl?: string;
+          };
+        };
+      };
+      unitCount: number;
+      unitPrice: number;
+      nights: number;
+      subTotal: number;
+    }>;
+    paymentMethod: string;
+    totalAmount: number;
+    status: string;
+    paymentDeadline?: string;
+    paymentProofUrl?: string;
+  };
+  showPaymentModal: boolean;
+  setShowPaymentModal: (show: boolean) => void;
+  bookingId: string;
+  getDeadlineText: (method: string) => string;
+  getDeadlineMessage: (method: string) => string;
+  formatDate: (dateString: string) => string;
+  formatTime: (dateString: string) => string;
+}
+
+export default function BookingDetailTabs({
+  activeTab,
+  setActiveTab,
+  bookingData,
+  showPaymentModal,
+  setShowPaymentModal,
+  bookingId,
+  getDeadlineText,
+  getDeadlineMessage,
+  formatDate,
+  formatTime,
+}: BookingDetailTabsProps) {
+  const tabs = [
+    { id: "details", label: "Booking Details", icon: FileText },
+    { id: "payment", label: "Payment Info", icon: CreditCard },
+    { id: "contact", label: "Contact Host", icon: MessageCircle },
+  ];
+
+  return (
+    <div className="bg-white rounded-xl shadow-lg mb-6">
+      <div className="border-b border-gray-200">
+        <nav className="flex">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+                  activeTab === tab.id
+                    ? "border-[#8B7355] text-[#8B7355]"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                <Icon size={16} />
+                {tab.label}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+
+      <div className="p-6">
+        {activeTab === "details" && (
+          <BookingDetailsTab
+            bookingData={bookingData}
+            formatDate={formatDate}
+          />
+        )}
+
+        {activeTab === "payment" && (
+          <BookingPaymentTab
+            bookingData={bookingData}
+            bookingId={bookingId}
+            showPaymentModal={showPaymentModal}
+            setShowPaymentModal={setShowPaymentModal}
+            getDeadlineText={getDeadlineText}
+            getDeadlineMessage={getDeadlineMessage}
+            formatDate={formatDate}
+            formatTime={formatTime}
+          />
+        )}
+
+        {activeTab === "contact" && (
+          <BookingContactTab bookingData={bookingData} />
+        )}
+      </div>
+    </div>
+  );
+}
