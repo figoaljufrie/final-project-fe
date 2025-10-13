@@ -3,7 +3,15 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { CalendarDays, Users, Plus, Minus, Star, CreditCard, Upload } from "lucide-react";
+import {
+  CalendarDays,
+  Users,
+  Plus,
+  Minus,
+  Star,
+  CreditCard,
+  Upload,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PaymentMethodModal from "@/components/payment/PaymentMethodModal";
 
@@ -20,61 +28,70 @@ export default function BookingCard() {
     guests: 2,
   });
 
-  const [showCalendar, setShowCalendar] = useState<'checkIn' | 'checkOut' | null>(null);
+  const [showCalendar, setShowCalendar] = useState<
+    "checkIn" | "checkOut" | null
+  >(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isBooking, setIsBooking] = useState(false);
 
   const pricePerNight = 320;
-  const nights = bookingData.checkIn && bookingData.checkOut 
-    ? Math.ceil((new Date(bookingData.checkOut).getTime() - new Date(bookingData.checkIn).getTime()) / (1000 * 60 * 60 * 24))
-    : 0;
+  const nights =
+    bookingData.checkIn && bookingData.checkOut
+      ? Math.ceil(
+          (new Date(bookingData.checkOut).getTime() -
+            new Date(bookingData.checkIn).getTime()) /
+            (1000 * 60 * 60 * 24)
+        )
+      : 0;
   const serviceFee = 50;
   const taxes = 25;
-  const totalPrice = (pricePerNight * nights) + serviceFee + taxes;
+  const totalPrice = pricePerNight * nights + serviceFee + taxes;
 
   const handleGuestChange = (increment: boolean) => {
-    setBookingData(prev => ({
+    setBookingData((prev) => ({
       ...prev,
-      guests: increment 
-        ? Math.min(prev.guests + 1, 8) 
-        : Math.max(prev.guests - 1, 1)
+      guests: increment
+        ? Math.min(prev.guests + 1, 8)
+        : Math.max(prev.guests - 1, 1),
     }));
   };
 
-  const handleDateSelect = (date: string, type: 'checkIn' | 'checkOut') => {
-    setBookingData(prev => ({
+  const handleDateSelect = (date: string, type: "checkIn" | "checkOut") => {
+    setBookingData((prev) => ({
       ...prev,
-      [type]: date
+      [type]: date,
     }));
     setShowCalendar(null);
   };
 
   const handleReserve = () => {
     if (!bookingData.checkIn || !bookingData.checkOut) {
-      alert('Please select check-in and check-out dates');
+      alert("Please select check-in and check-out dates");
       return;
     }
     setShowPaymentModal(true);
   };
 
-  const handlePaymentMethodSelect = async (paymentMethod: 'manual_transfer' | 'payment_gateway') => {
+  const handlePaymentMethodSelect = async (
+    paymentMethod: "manual_transfer" | "payment_gateway"
+  ) => {
     setIsBooking(true);
     setShowPaymentModal(false);
-    
+
     // Simulate booking process
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      if (paymentMethod === 'payment_gateway') {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      if (paymentMethod === "payment_gateway") {
         // In real implementation, redirect to Midtrans payment
-        alert('Redirecting to payment gateway...');
+        alert("Redirecting to payment gateway...");
       } else {
         // In real implementation, redirect to payment proof upload
-        alert('Redirecting to payment proof upload...');
+        alert("Redirecting to payment proof upload...");
       }
     } catch (error) {
-      console.error('Booking failed:', error);
-      alert('Booking failed. Please try again.');
+      console.error("Booking failed:", error);
+      alert("Booking failed. Please try again.");
     } finally {
       setIsBooking(false);
     }
@@ -85,29 +102,39 @@ export default function BookingCard() {
     const today = new Date();
     const currentMonth = today.getMonth();
     const currentYear = today.getFullYear();
-    
+
     // Get first day of month and number of days
     const firstDay = new Date(currentYear, currentMonth, 1);
     const lastDay = new Date(currentYear, currentMonth + 1, 0);
     const startDate = firstDay.getDay(); // Day of week for first day
     const daysInMonth = lastDay.getDate();
-    
+
     // Add empty cells for days before month starts
     for (let i = 0; i < startDate; i++) {
       days.push(null);
     }
-    
+
     // Add actual days
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(day);
     }
-    
+
     return days;
   };
 
   const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
 
   const currentDate = new Date();
@@ -124,7 +151,9 @@ export default function BookingCard() {
       {/* Price Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <span className="text-2xl font-bold text-[#8B7355]">${pricePerNight}</span>
+          <span className="text-2xl font-bold text-[#8B7355]">
+            ${pricePerNight}
+          </span>
           <span className="text-gray-500"> / night</span>
         </div>
         <div className="flex items-center gap-1">
@@ -139,23 +168,31 @@ export default function BookingCard() {
         <div className="grid grid-cols-2">
           {/* Check-in */}
           <button
-            onClick={() => setShowCalendar(showCalendar === 'checkIn' ? null : 'checkIn')}
+            onClick={() =>
+              setShowCalendar(showCalendar === "checkIn" ? null : "checkIn")
+            }
             className="p-3 text-left border-r border-[#D6D5C9] hover:bg-gray-50 transition-colors"
           >
-            <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Check-in</div>
+            <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+              Check-in
+            </div>
             <div className="text-sm text-gray-800 mt-1">
-              {bookingData.checkIn || 'Add date'}
+              {bookingData.checkIn || "Add date"}
             </div>
           </button>
 
           {/* Check-out */}
           <button
-            onClick={() => setShowCalendar(showCalendar === 'checkOut' ? null : 'checkOut')}
+            onClick={() =>
+              setShowCalendar(showCalendar === "checkOut" ? null : "checkOut")
+            }
             className="p-3 text-left hover:bg-gray-50 transition-colors"
           >
-            <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Check-out</div>
+            <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+              Check-out
+            </div>
             <div className="text-sm text-gray-800 mt-1">
-              {bookingData.checkOut || 'Add date'}
+              {bookingData.checkOut || "Add date"}
             </div>
           </button>
         </div>
@@ -170,10 +207,15 @@ export default function BookingCard() {
             <div className="grid grid-cols-2 gap-4">
               {/* Current Month */}
               <div>
-                <h4 className="font-medium text-center mb-3">{currentMonth} 2025</h4>
+                <h4 className="font-medium text-center mb-3">
+                  {currentMonth} 2025
+                </h4>
                 <div className="grid grid-cols-7 gap-1 text-xs">
-                  {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(day => (
-                    <div key={day} className="text-center p-1 font-medium text-gray-500">
+                  {["S", "M", "T", "W", "T", "F", "S"].map((day) => (
+                    <div
+                      key={day}
+                      className="text-center p-1 font-medium text-gray-500"
+                    >
                       {day}
                     </div>
                   ))}
@@ -181,9 +223,18 @@ export default function BookingCard() {
                     <button
                       key={index}
                       disabled={!day}
-                      onClick={() => day && handleDateSelect(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`, 'checkIn')}
+                      onClick={() =>
+                        day &&
+                        handleDateSelect(
+                          `${currentYear}-${String(currentMonth + 1).padStart(
+                            2,
+                            "0"
+                          )}-${String(day).padStart(2, "0")}`,
+                          "checkIn"
+                        )
+                      }
                       className={`text-center p-1 text-sm rounded hover:bg-[#8B7355] hover:text-white transition-colors ${
-                        !day ? 'invisible' : ''
+                        !day ? "invisible" : ""
                       }`}
                     >
                       {day}
@@ -194,10 +245,15 @@ export default function BookingCard() {
 
               {/* Next Month */}
               <div>
-                <h4 className="font-medium text-center mb-3">{nextMonth} 2025</h4>
+                <h4 className="font-medium text-center mb-3">
+                  {nextMonth} 2025
+                </h4>
                 <div className="grid grid-cols-7 gap-1 text-xs">
-                  {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(day => (
-                    <div key={day} className="text-center p-1 font-medium text-gray-500">
+                  {["S", "M", "T", "W", "T", "F", "S"].map((day) => (
+                    <div
+                      key={day}
+                      className="text-center p-1 font-medium text-gray-500"
+                    >
                       {day}
                     </div>
                   ))}
@@ -205,9 +261,18 @@ export default function BookingCard() {
                     <button
                       key={index}
                       disabled={!day}
-                      onClick={() => day && handleDateSelect(`${currentYear}-${String(currentMonth + 2).padStart(2, '0')}-${String(day).padStart(2, '0')}`, 'checkOut')}
+                      onClick={() =>
+                        day &&
+                        handleDateSelect(
+                          `${currentYear}-${String(currentMonth + 2).padStart(
+                            2,
+                            "0"
+                          )}-${String(day).padStart(2, "0")}`,
+                          "checkOut"
+                        )
+                      }
                       className={`text-center p-1 text-sm rounded hover:bg-[#8B7355] hover:text-white transition-colors ${
-                        !day ? 'invisible' : ''
+                        !day ? "invisible" : ""
                       }`}
                     >
                       {day}
@@ -225,8 +290,12 @@ export default function BookingCard() {
         <div className="p-3">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">Guests</div>
-              <div className="text-sm text-gray-800 mt-1">{bookingData.guests} guests</div>
+              <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+                Guests
+              </div>
+              <div className="text-sm text-gray-800 mt-1">
+                {bookingData.guests} guests
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <button
@@ -236,7 +305,9 @@ export default function BookingCard() {
               >
                 <Minus size={14} />
               </button>
-              <span className="w-8 text-center font-medium">{bookingData.guests}</span>
+              <span className="w-8 text-center font-medium">
+                {bookingData.guests}
+              </span>
               <button
                 onClick={() => handleGuestChange(true)}
                 disabled={bookingData.guests >= 8}
@@ -250,7 +321,7 @@ export default function BookingCard() {
       </div>
 
       {/* Reserve Button */}
-      <Button 
+      <Button
         size="lg"
         onClick={handleReserve}
         disabled={isBooking || !bookingData.checkIn || !bookingData.checkOut}
@@ -262,29 +333,35 @@ export default function BookingCard() {
             Processing...
           </div>
         ) : (
-          'Reserve'
+          "Reserve"
         )}
       </Button>
 
-      <p className="text-center text-sm text-gray-500 mb-6">You wont be charged yet</p>
+      <p className="text-center text-sm text-gray-500 mb-6">
+        You wont be charged yet
+      </p>
 
       {/* Price Breakdown */}
       <div className="space-y-3 pt-6 border-t border-[#D6D5C9]">
         <div className="flex justify-between text-sm">
-          <span className="text-gray-700">${pricePerNight} × {nights} nights</span>
+          <span className="text-gray-700">
+            ${pricePerNight} × {nights} nights
+          </span>
           <span className="text-gray-700">${pricePerNight * nights}</span>
         </div>
-        
+
         <div className="flex justify-between text-sm">
-          <span className="text-gray-700 underline cursor-pointer">Service fee</span>
+          <span className="text-gray-700 underline cursor-pointer">
+            Service fee
+          </span>
           <span className="text-gray-700">${serviceFee}</span>
         </div>
-        
+
         <div className="flex justify-between text-sm">
           <span className="text-gray-700 underline cursor-pointer">Taxes</span>
           <span className="text-gray-700">${taxes}</span>
         </div>
-        
+
         <div className="flex justify-between font-semibold text-lg pt-3 border-t border-[#D6D5C9]">
           <span>Total</span>
           <span className="text-[#8B7355]">${totalPrice}</span>
@@ -297,7 +374,7 @@ export default function BookingCard() {
           <CalendarDays size={16} className="mt-0.5 flex-shrink-0" />
           <span>Free cancellation before 48 hours of check-in</span>
         </div>
-        
+
         <div className="flex items-start gap-3 text-sm text-gray-600 mt-3">
           <Users size={16} className="mt-0.5 flex-shrink-0" />
           <span>This is a rare find - this property is highly rated</span>
@@ -314,7 +391,7 @@ export default function BookingCard() {
           checkIn: bookingData.checkIn,
           checkOut: bookingData.checkOut,
           guests: bookingData.guests,
-          nights: nights
+          nights: nights,
         }}
       />
     </motion.div>

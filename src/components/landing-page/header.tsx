@@ -1,12 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { CalendarDays, User } from "lucide-react";
+import { useState, useEffect } from "react";
+import { CalendarDays, User, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { useAuthStore } from "@/stores/auth-store";
 
 export default function Header() {
   const [openProfile, setOpenProfile] = useState(false);
   const [openCalendar, setOpenCalendar] = useState(false);
+  const { user, hydrated } = useAuthStore();
+
+  // Hydrate auth state on mount
+  useEffect(() => {
+    if (!hydrated) {
+      useAuthStore.getState().hydrate();
+    }
+  }, [hydrated]);
 
   return (
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-md">
@@ -25,6 +35,15 @@ export default function Header() {
 
         {/* Profile & Calendar */}
         <div className="flex items-center gap-4 relative">
+          {/* Bookings Link - Only show for authenticated users */}
+          {user && (
+            <Link href="/bookings">
+              <Button size="icon" variant="ghost" title="My Bookings">
+                <BookOpen className="h-5 w-5" />
+              </Button>
+            </Link>
+          )}
+
           <Button
             size="icon"
             variant="ghost"

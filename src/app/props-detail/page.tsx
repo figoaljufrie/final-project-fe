@@ -9,11 +9,13 @@ export default function RoomDetailsPage() {
   return (
     <main className="flex flex-col min-h-screen bg-[#F2EEE3]">
       <Header />
-      
+
       <div className="flex-1 max-w-7xl mx-auto w-full px-4 py-6">
         {/* Room Title */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-[#8B7355] mb-2">Ocean View Villa</h1>
+          <h1 className="text-3xl font-bold text-[#8B7355] mb-2">
+            Ocean View Villa
+          </h1>
           <div className="flex items-center gap-4 text-sm text-gray-600">
             <span>Seminyak, Bali</span>
             <span>•</span>
@@ -34,14 +36,14 @@ export default function RoomDetailsPage() {
           <div className="lg:col-span-2">
             <RoomInfo />
           </div>
-          
+
           {/* Booking Card */}
           <div className="lg:col-span-1">
             <BookingCard />
           </div>
         </div>
       </div>
-      
+
       <Footer />
     </main>
   );

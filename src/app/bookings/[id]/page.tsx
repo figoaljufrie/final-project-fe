@@ -25,9 +25,7 @@ import {
 } from "@/lib/utils/payment-deadline";
 
 export default function BookingDetails() {
-  const [activeTab, setActiveTab] = useState<"details" | "payment" | "contact">(
-    "details"
-  );
+  const [activeTab, setActiveTab] = useState<"details" | "payment">("details");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const params = useParams();
   const bookingId = params.id as string;

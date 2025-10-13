@@ -34,7 +34,7 @@ export default function BookingDetailHeader({
   const getStatusLabel = (status: string) => {
     switch (status) {
       case "confirmed":
-        return "DIPROSES";
+        return "CONFIRMED";
       case "waiting_for_payment":
         return "WAITING FOR PAYMENT";
       case "waiting_for_confirmation":

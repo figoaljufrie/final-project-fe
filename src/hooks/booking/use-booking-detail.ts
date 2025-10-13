@@ -141,7 +141,7 @@ export function useBookingDetail(bookingId?: string) {
         } else if (error.response?.status === 404) {
           toast.error("Booking not found.");
           setTimeout(() => {
-            router.push("/bookings");
+            router.push("/bookings/not-found");
           }, 2000);
         } else if (error.response?.status === 401) {
           toast.error("Please login to view your bookings.");
@@ -174,11 +174,26 @@ export function useBookingDetail(bookingId?: string) {
         return { status: data.status };
       },
       {
-        interval: 5000, // Poll every 5 seconds
-        maxAttempts: 24, // Poll for 2 minutes (24 * 5s)
+        interval: 3000, // Poll every 3 seconds for faster updates
+        maxAttempts: 40, // Poll for 2 minutes (40 * 3s)
         onStatusChange: (newStatus) => {
           if (newStatus === "confirmed") {
             toast.success("Payment confirmed! Your booking is now confirmed.");
+            // Immediately reload booking data
+            const reloadData = async () => {
+              try {
+                const data = await PaymentService.getBookingDetails(
+                  Number(finalBookingId)
+                );
+                setBookingData(data);
+              } catch (error) {
+                console.error("Error reloading booking data:", error);
+              }
+            };
+            reloadData();
+          } else if (newStatus === "cancelled" || newStatus === "expired") {
+            // Stop polling if booking is cancelled or expired
+            polling.stop();
             const reloadData = async () => {
               try {
                 const data = await PaymentService.getBookingDetails(
@@ -197,6 +212,7 @@ export function useBookingDetail(bookingId?: string) {
         },
         onMaxAttemptsReached: () => {
           // Stop polling after 2 minutes, user can manually refresh
+          console.log("Polling stopped after max attempts reached");
         },
       }
     );

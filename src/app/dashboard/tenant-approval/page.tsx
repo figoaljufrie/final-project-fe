@@ -43,7 +43,7 @@ export default function TenantApprovalPage() {
   };
 
   return (
-    <motion.div
+        <motion.div
       variants={containerVariants}
       initial="hidden"
       animate="visible"
@@ -57,11 +57,11 @@ export default function TenantApprovalPage() {
         </motion.div>
 
         <motion.div variants={itemVariants} className="mb-6">
-          <BookingSearchFilter
-            searchTerm={searchTerm}
-            onSearchChange={handleSearchChange}
-            statusFilter={statusFilter}
-            onStatusChange={handleStatusChange}
+            <BookingSearchFilter
+              searchTerm={searchTerm}
+              onSearchChange={handleSearchChange}
+              statusFilter={statusFilter}
+              onStatusChange={handleStatusChange}
             statusConfig={statusConfig}
           />
         </motion.div>
@@ -82,17 +82,17 @@ export default function TenantApprovalPage() {
                   ? "Try adjusting your search or filter criteria"
                   : "No bookings have been made yet"}
               </div>
-            </div>
+          </div>
           ) : (
             <>
-              <BookingTable
+          <BookingTable
                 bookings={bookings}
-                statusConfig={statusConfig}
+            statusConfig={statusConfig}
                 onConfirmPayment={handleConfirmPayment}
                 onRejectPayment={handleRejectPayment}
                 onCancelOrder={handleCancelOrder}
-                onSendReminder={handleSendReminder}
-              />
+            onSendReminder={handleSendReminder}
+          />
               <TenantApprovalPagination
                 pagination={pagination}
                 onPageChange={handlePageChange}
@@ -100,7 +100,7 @@ export default function TenantApprovalPage() {
             </>
           )}
         </motion.div>
-      </div>
-    </motion.div>
+            </div>
+          </motion.div>
   );
 }
