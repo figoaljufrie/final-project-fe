@@ -10,7 +10,7 @@ export interface SetAvailabilityBody {
 
 export interface SetAvailability {
   roomId: number;
-  date: string; 
+  date: string;
   isAvailable?: boolean;
   customPrice?: number;
   priceModifier?: number;
@@ -37,7 +37,6 @@ export interface PriceCalculationResult {
   reason: string | null;
 }
 
-
 export interface CreatePeakSeason {
   name: string;
   startDate: string;
@@ -47,6 +46,9 @@ export interface CreatePeakSeason {
   applyToAllProperties: boolean;
   propertyIds?: number[];
 }
+
+// Explicitly type as Partial<CreatePeakSeason> to avoid empty interface warning
+export type UpdatePeakSeason = Partial<CreatePeakSeason>;
 
 export interface PeakSeasonCreate {
   tenantId: number;
@@ -59,13 +61,10 @@ export interface PeakSeasonCreate {
   propertyIds: number[];
 }
 
-export interface UpdatePeakSeason extends Partial<CreatePeakSeason> {}
-
-
 export interface RoomAvailability {
   id: number;
   roomId: number;
-  date: string; 
+  date: string;
   isAvailable: boolean;
   bookedUnits: number;
   customPrice: number | null;
@@ -74,7 +73,6 @@ export interface RoomAvailability {
   createdAt?: string;
   updatedAt?: string;
 }
-
 
 export interface PeakSeason {
   id: number;
@@ -95,9 +93,6 @@ export interface CalculatedPrice {
   roomBasePrice: number;
   finalPrice: number;
   isAvailable: boolean;
-  activePeakSeasons: Pick<
-    PeakSeason,
-    "name" | "changeType" | "changeValue"
-  >[];
+  activePeakSeasons: Pick<PeakSeason, "name" | "changeType" | "changeValue">[];
   reason: string | null;
 }

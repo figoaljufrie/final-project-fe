@@ -23,12 +23,13 @@ export function useCreateProperty() {
       toast.success("Property created successfully!");
       queryClient.invalidateQueries({ queryKey: ["tenantProperties"] });
     },
-    onError: (error: any) => {
-      toast.error(`Failed to create property: ${error.message}`);
+    onError: (error: unknown) => {
+      const message =
+        error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(`Failed to create property: ${message}`);
     },
   });
 }
-
 
 export function useUpdateProperty() {
   const queryClient = useQueryClient();
@@ -50,8 +51,10 @@ export function useUpdateProperty() {
         queryKey: ["property", variables.propertyId],
       });
     },
-    onError: (error: any) => {
-      toast.error(`Failed to update property: ${error.message}`);
+    onError: (error: unknown) => {
+      const message =
+        error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(`Failed to update property: ${message}`);
     },
   });
 }
@@ -66,8 +69,10 @@ export function useDeleteProperty() {
       toast.success("Property deleted successfully!");
       queryClient.invalidateQueries({ queryKey: ["tenantProperties"] });
     },
-    onError: (error: any) => {
-      toast.error(`Failed to delete property: ${error.message}`);
+    onError: (error: unknown) => {
+      const message =
+        error instanceof Error ? error.message : "An unknown error occurred";
+      toast.error(`Failed to delete property: ${message}`);
     },
   });
 }

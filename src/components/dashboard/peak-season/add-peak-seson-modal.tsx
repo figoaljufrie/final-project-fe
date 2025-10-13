@@ -1,15 +1,36 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { Dialog } from "@headlessui/react";
 import { X } from "lucide-react";
 import { toast } from "react-hot-toast";
+
+// Form data type
+interface PeakSeasonFormData {
+  name: string;
+  startDate: string;
+  endDate: string;
+  changeType: "nominal" | "percentage";
+  changeValue: number;
+  applyToAllProperties: boolean;
+}
+
+// Create mutation type (React Query)
+interface CreateMutation {
+  mutate: (
+    variables: PeakSeasonFormData & { propertyIds: number[] },
+    options?: {
+      onSuccess?: () => void;
+      onError?: () => void;
+    }
+  ) => void;
+}
 
 interface AddPeakSeasonModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCreated: () => void;
-  create: any;
+  create: CreateMutation;
 }
 
 export default function AddPeakSeasonModal({
@@ -18,7 +39,7 @@ export default function AddPeakSeasonModal({
   onCreated,
   create,
 }: AddPeakSeasonModalProps) {
-  const { register, handleSubmit, reset } = useForm({
+  const { register, handleSubmit, reset } = useForm<PeakSeasonFormData>({
     defaultValues: {
       name: "",
       startDate: "",
@@ -29,7 +50,7 @@ export default function AddPeakSeasonModal({
     },
   });
 
-  const onSubmit = (data: any) => {
+  const onSubmit: SubmitHandler<PeakSeasonFormData> = (data) => {
     create.mutate(
       { ...data, propertyIds: [] },
       {

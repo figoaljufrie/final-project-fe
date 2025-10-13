@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { BedDouble, Pencil, Trash2 } from "lucide-react";
+import Image from "next/image";
 import type { RoomListItem } from "@/lib/types/inventory/room-type";
 
 interface RoomCardProps {
@@ -23,12 +24,14 @@ export default function RoomCard({ room, onEdit, onDelete }: RoomCardProps) {
       className="glass-card rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 flex flex-col"
       whileHover={{ scale: 1.01 }}
     >
-      <div className="h-40 bg-gray-200 flex items-center justify-center">
+      <div className="h-40 bg-gray-200 flex items-center justify-center relative">
         {room.image ? (
-          <img
+          <Image
             src={room.image}
             alt={room.name}
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover w-full h-full"
+            sizes="(max-width: 768px) 100vw, 33vw"
           />
         ) : (
           <BedDouble className="w-10 h-10 text-gray-400" />
