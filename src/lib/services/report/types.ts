@@ -30,7 +30,7 @@ export interface SalesReportItem {
   totalBookings: number;
   averageValue: number;
   date: string;
-  details?: any;
+  details?: Record<string, unknown>;
 }
 
 export interface PropertyReportRequest {
@@ -94,7 +94,7 @@ export interface PropertyPerformance {
 export interface BookingStatusData {
   name: string;
   value: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface MonthlyData {
@@ -103,7 +103,7 @@ export interface MonthlyData {
   bookings: number;
   guests: number;
   growth: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface ReportFilters {

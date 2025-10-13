@@ -7,17 +7,13 @@ import {
   Upload, 
   X, 
   CheckCircle, 
-  Clock,
   Shield,
-  Smartphone,
-  Building2,
   Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PaymentService } from "@/lib/services/payment/payment-service";
 import { useAuthStore } from "@/stores/auth-store";
 import { toast } from "react-hot-toast";
-import { useRouter } from "next/navigation";
 
 interface PaymentMethodModalProps {
   isOpen: boolean;
@@ -46,7 +42,6 @@ export default function PaymentMethodModal({
   const [selectedMethod, setSelectedMethod] = useState<'manual_transfer' | 'payment_gateway' | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const { user } = useAuthStore();
-  const router = useRouter();
 
   const paymentMethods = [
     {
@@ -107,9 +102,9 @@ export default function PaymentMethodModal({
         // Manual transfer - just redirect to upload page
         onSelectMethod(selectedMethod);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Payment creation error:', error);
-      toast.error(error.response?.data?.message || 'Failed to create payment');
+      toast.error((error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to create payment');
     } finally {
       setIsProcessing(false);
     }

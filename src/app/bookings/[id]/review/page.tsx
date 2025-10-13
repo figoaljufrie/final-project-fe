@@ -72,7 +72,7 @@ export default function ReviewPage() {
         // So if status is completed, it's already past checkout + 1 day
 
         setBookingData(data);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Error loading booking data:", error);
         toast.error("Failed to load booking data");
         router.push(`/bookings/${bookingId}`);
@@ -107,17 +107,18 @@ export default function ReviewPage() {
       }
 
       // Submit review using ReviewService
-      await ReviewService.submitReview(propertyId, Number(bookingId), {
+      await ReviewService.submitReview(
+        Number(bookingId),
         rating,
-        comment,
-      });
+        comment
+      );
 
       toast.success("Review submitted successfully!");
       router.push(`/bookings/${bookingId}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error submitting review:", error);
       toast.error(
-        error.response?.data?.message ||
+        (error as { response?: { data?: { message?: string } } }).response?.data?.message ||
           "Failed to submit review. Please try again."
       );
     } finally {

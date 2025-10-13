@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
-import {
+import { useState, useEffect } from "react";
+import { 
   CheckCircle,
   XCircle,
   AlertCircle,
@@ -23,10 +22,13 @@ import {
   getDeadlineText,
   getDeadlineMessage,
 } from "@/lib/utils/payment-deadline";
+import { ReviewService } from "@/lib/services/review/review-service";
 
 export default function BookingDetails() {
   const [activeTab, setActiveTab] = useState<"details" | "payment">("details");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [canReview, setCanReview] = useState(false);
+  const [isCheckingReview, setIsCheckingReview] = useState(false);
   const params = useParams();
   const bookingId = params.id as string;
 
@@ -40,6 +42,29 @@ export default function BookingDetails() {
     setCancelReason,
     handleCancelBooking,
   } = useBookingDetail(bookingId);
+
+  // Check review eligibility when booking data is loaded
+  useEffect(() => {
+    const checkReviewEligibility = async () => {
+      if (!bookingData || bookingData.status !== "completed") {
+        setCanReview(false);
+        return;
+      }
+
+      setIsCheckingReview(true);
+      try {
+        const canReviewBooking = await ReviewService.canReviewBooking(bookingData.id);
+        setCanReview(canReviewBooking);
+      } catch (error) {
+        console.error("Error checking review eligibility:", error);
+        setCanReview(false);
+      } finally {
+        setIsCheckingReview(false);
+      }
+    };
+
+    checkReviewEligibility();
+  }, [bookingData]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -129,10 +154,10 @@ export default function BookingDetails() {
   return (
     <main className="min-h-screen bg-[#F2EEE3]">
       <Header />
-
+      
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Back Button */}
-        <Link
+        <Link 
           href="/dashboard/bookings"
           className="inline-flex items-center gap-2 text-[#8B7355] hover:text-[#7A6349] transition-colors mb-6"
         >
@@ -161,7 +186,7 @@ export default function BookingDetails() {
               formatDate={formatDate}
               formatTime={formatTime}
             />
-          </div>
+              </div>
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
@@ -171,10 +196,12 @@ export default function BookingDetails() {
               showCancelModal={showCancelModal}
               setShowCancelModal={setShowCancelModal}
               formatDate={formatDate}
+              canReview={canReview}
+              isCheckingReview={isCheckingReview}
             />
-          </div>
-        </div>
-      </div>
+                          </div>
+                        </div>
+                      </div>
 
       <Footer />
 
@@ -208,7 +235,7 @@ export default function BookingDetails() {
           <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
             <h3 className="text-lg font-semibold text-[#8B7355] mb-4">
               Cancel Booking
-            </h3>
+                        </h3>
             <p className="text-gray-600 mb-4">
               Are you sure you want to cancel this booking? This action cannot
               be undone.
@@ -224,7 +251,7 @@ export default function BookingDetails() {
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B7355] focus:border-transparent resize-none"
                 rows={3}
               />
-            </div>
+                            </div>
             <div className="flex gap-3">
               <Button
                 variant="outline"
@@ -250,11 +277,11 @@ export default function BookingDetails() {
                 ) : (
                   "Cancel Booking"
                 )}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
     </main>
   );
 }

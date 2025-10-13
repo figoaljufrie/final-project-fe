@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { PaymentService } from "@/lib/services/payment/payment-service";
 import { toast } from "react-hot-toast";
@@ -57,7 +57,7 @@ export function useBookingDetail(bookingId?: string) {
   const finalBookingId = bookingId || (params.id as string);
 
   // Handle redirects based on booking status
-  const handleStatusBasedRedirect = (bookingData: any) => {
+  const handleStatusBasedRedirect = useCallback((bookingData: Record<string, unknown>) => {
     if (!bookingData) return;
 
     const { status, paymentMethod } = bookingData;
@@ -116,7 +116,7 @@ export function useBookingDetail(bookingId?: string) {
         }, 2000);
       }
     }
-  };
+  }, [finalBookingId, router]);
 
   // Load booking data from API
   useEffect(() => {
@@ -128,7 +128,7 @@ export function useBookingDetail(bookingId?: string) {
         );
         setBookingData(data);
         handleStatusBasedRedirect(data);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Error loading booking data:", error);
 
         if (error.response?.status === 403) {
@@ -159,7 +159,7 @@ export function useBookingDetail(bookingId?: string) {
     if (finalBookingId) {
       loadBookingData();
     }
-  }, [finalBookingId, router]);
+  }, [finalBookingId, router, handleStatusBasedRedirect]);
 
   // Auto-reload for manual transfer confirmations
   useEffect(() => {
@@ -240,7 +240,7 @@ export function useBookingDetail(bookingId?: string) {
         Number(finalBookingId)
       );
       setBookingData(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error cancelling booking:", error);
       toast.error(error.response?.data?.message || "Failed to cancel booking");
     } finally {

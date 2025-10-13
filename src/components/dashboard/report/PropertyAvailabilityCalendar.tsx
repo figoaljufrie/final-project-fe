@@ -54,7 +54,7 @@ export default function PropertyAvailabilityCalendar({
             .toISOString()
             .split("T")[0]
       );
-      setPropertyData(data);
+      setPropertyData(data as PropertyReportResponse);
     } catch (err: unknown) {
       console.error("Error loading property data:", err);
       if (err instanceof Error) {

@@ -1,7 +1,4 @@
 import {
-  Calendar,
-  MapPin,
-  Users,
   Clock,
   CheckCircle,
   XCircle,

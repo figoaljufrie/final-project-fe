@@ -1,8 +1,10 @@
+import React from "react";
+
 export interface PollingOptions {
   interval?: number; // milliseconds between polls
   maxAttempts?: number; // maximum number of polling attempts
   onStatusChange?: (newStatus: string) => void;
-  onError?: (error: any) => void;
+  onError?: (error: unknown) => void;
   onMaxAttemptsReached?: () => void;
 }
 
@@ -96,17 +98,15 @@ export function useStatusPolling(
   fetchStatus: () => Promise<{ status: string }>,
   options: PollingOptions = {}
 ) {
-  const polling = new StatusPolling(fetchStatus, options);
+  const polling = React.useMemo(() => new StatusPolling(fetchStatus, options), [fetchStatus, options]);
 
   // Cleanup on unmount
   React.useEffect(() => {
     return () => {
       polling.stop();
     };
-  }, []);
+  }, [polling]);
 
   return polling;
 }
 
-// Import React for the hook
-import React from "react";

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -18,8 +18,6 @@ import clsx from "clsx";
 import { useDashboardData } from "@/hooks/dashboard/use-dashboard-data";
 import {
   DashboardKPIData,
-  MonthlyRevenueData,
-  RecentTransaction,
 } from "@/lib/services/dashboard/dashboard-service";
 
 // Quick actions data (static)

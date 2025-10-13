@@ -46,7 +46,7 @@ export class ReviewService {
       });
 
       return response.data.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error submitting review:", error);
       throw new Error(
         error.response?.data?.message || "Failed to submit review"
@@ -66,7 +66,7 @@ export class ReviewService {
       );
 
       return response.data.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching property reviews:", error);
       throw new Error(
         error.response?.data?.message || "Failed to fetch reviews"
@@ -78,14 +78,14 @@ export class ReviewService {
   static async getUserReviews(
     page: number = 1,
     limit: number = 10
-  ): Promise<{ reviews: ReviewData[]; pagination: any }> {
+  ): Promise<{ reviews: ReviewData[]; pagination: Record<string, unknown> }> {
     try {
       const response = await api.get(
         `/reviews/user/my-reviews?page=${page}&limit=${limit}`
       );
 
       return response.data.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching user reviews:", error);
       throw new Error(
         error.response?.data?.message || "Failed to fetch user reviews"
@@ -100,7 +100,7 @@ export class ReviewService {
         `/reviews/eligibility/booking/${bookingId}`
       );
       return response.data.data.canReview;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error checking review eligibility:", error);
       return false;
     }
@@ -110,14 +110,14 @@ export class ReviewService {
   static async getTenantReviews(
     page: number = 1,
     limit: number = 10
-  ): Promise<{ reviews: ReviewData[]; pagination: any }> {
+  ): Promise<{ reviews: ReviewData[]; pagination: Record<string, unknown> }> {
     try {
       const response = await api.get(
         `/reviews/tenant/my-reviews?page=${page}&limit=${limit}`
       );
 
       return response.data.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching tenant reviews:", error);
       throw new Error(
         error.response?.data?.message || "Failed to fetch tenant reviews"
@@ -134,7 +134,7 @@ export class ReviewService {
     try {
       const response = await api.get(`/reviews/property/${propertyId}/stats`);
       return response.data.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching review stats:", error);
       throw new Error(
         error.response?.data?.message || "Failed to fetch review statistics"

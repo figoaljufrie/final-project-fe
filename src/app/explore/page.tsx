@@ -5,7 +5,7 @@ import Header from "@/components/landing-page/header";
 import Footer from "@/components/landing-page/footer";
 import FilterSidebar from "@/components/explore-page/filter-sidebar";
 import PropertyList from "@/components/explore-page/property-list";
-import MapSection from "@/components/explore-page/map-section";
+// import MapSection from "@/components/explore-page/map-section";
 
 export default function ExplorePage() {
   const { query } = useExploreQuery();
@@ -30,7 +30,7 @@ export default function ExplorePage() {
             </div>
 
             <div className="h-96">
-              <MapSection />
+              {/* <MapSection /> */}
             </div>
           </div>
         </div>

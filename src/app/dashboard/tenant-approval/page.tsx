@@ -9,6 +9,31 @@ import BookingSkeleton from "@/components/dashboard/booking/BookingSkeleton";
 import TenantApprovalHeader from "@/components/dashboard/tenant-approval/TenantApprovalHeader";
 import TenantApprovalPagination from "@/components/dashboard/tenant-approval/TenantApprovalPagination";
 
+// Interface for BookingTable compatibility
+interface BookingTableBooking {
+  id: number;
+  bookingNo: string;
+  status: string;
+  totalAmount: number;
+  paymentMethod: "manual_transfer" | "payment_gateway";
+  createdAt: string;
+  checkIn: string;
+  checkOut: string;
+  totalGuests: number;
+  user?: {
+    name: string;
+    email: string;
+    phoneNumber?: string;
+  };
+  property?: {
+    id: number;
+    name: string;
+    address: string;
+    city: string;
+    province: string;
+  };
+}
+
 export default function TenantApprovalPage() {
   const {
     bookings,
@@ -86,7 +111,7 @@ export default function TenantApprovalPage() {
           ) : (
             <>
           <BookingTable
-                bookings={bookings}
+                bookings={bookings as BookingTableBooking[]}
             statusConfig={statusConfig}
                 onConfirmPayment={handleConfirmPayment}
                 onRejectPayment={handleRejectPayment}

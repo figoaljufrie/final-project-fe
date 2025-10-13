@@ -18,7 +18,7 @@ export function useBookingList() {
         const data = await PaymentService.getUserBookings();
         setBookings(data);
         setFilteredBookings(data);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Error loading bookings:", error);
         toast.error("Failed to load bookings");
       } finally {
@@ -31,9 +31,10 @@ export function useBookingList() {
 
   // Filter and search bookings
   useEffect(() => {
-    const { filterBookings } = require("@/lib/utils/booking-utils");
-    const filtered = filterBookings(bookings, activeFilter, searchTerm);
-    setFilteredBookings(filtered);
+    import("@/lib/utils/booking-utils").then(({ filterBookings }) => {
+      const filtered = filterBookings(bookings, activeFilter, searchTerm);
+      setFilteredBookings(filtered);
+    });
   }, [bookings, activeFilter, searchTerm]);
 
   const handleFilterChange = (filter: FilterStatus) => {

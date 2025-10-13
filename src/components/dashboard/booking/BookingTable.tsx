@@ -52,7 +52,6 @@ export default function BookingTable({
   statusConfig,
   onConfirmPayment,
   onRejectPayment,
-  onCancelOrder,
   onSendReminder,
 }: BookingTableProps) {
   const [rejectModalOpen, setRejectModalOpen] = useState(false);

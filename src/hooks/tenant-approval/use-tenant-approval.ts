@@ -1,41 +1,54 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   TenantApprovalService,
   TenantBooking,
   BookingFilters,
 } from "@/lib/services/tenant/tenant-approval-service";
 import { toast } from "react-hot-toast";
+import {
+  ClockIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  ExclamationTriangleIcon,
+} from "@heroicons/react/24/outline";
 
 const statusConfig = {
   waiting_for_payment: {
     label: "Waiting Payment",
     color: "bg-red-100 text-red-800",
+    icon: ClockIcon,
   },
   waiting_for_confirmation: {
     label: "Waiting Confirmation",
     color: "bg-yellow-100 text-yellow-800",
+    icon: ExclamationTriangleIcon,
   },
   confirmed: {
     label: "Diproses",
     color: "bg-green-100 text-green-800",
+    icon: CheckCircleIcon,
   },
   cancelled: {
     label: "Cancelled",
     color: "bg-gray-100 text-gray-800",
+    icon: XCircleIcon,
   },
   expired: {
     label: "Expired",
     color: "bg-gray-100 text-gray-800",
+    icon: XCircleIcon,
   },
   completed: {
     label: "Completed",
     color: "bg-blue-100 text-blue-800",
+    icon: CheckCircleIcon,
   },
   rejected: {
     label: "Rejected",
     color: "bg-red-100 text-red-800",
+    icon: XCircleIcon,
   },
 };
 
@@ -53,7 +66,7 @@ export function useTenantApproval() {
   const [pendingCount, setPendingCount] = useState(0);
 
   // Load bookings data
-  const loadBookings = async (filters: BookingFilters = {}) => {
+  const loadBookings = useCallback(async (filters: BookingFilters = {}) => {
     try {
       setIsLoading(true);
       const requestParams = {
@@ -95,7 +108,7 @@ export function useTenantApproval() {
           totalPages: 0,
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error loading bookings:", error);
       toast.error("Failed to load bookings");
       setBookings([]);
@@ -108,17 +121,17 @@ export function useTenantApproval() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [pagination.page, pagination.limit, statusFilter, searchTerm]);
 
   // Load pending count
-  const loadPendingCount = async () => {
+  const loadPendingCount = useCallback(async () => {
     try {
       const count = await TenantApprovalService.getPendingConfirmationsCount();
       setPendingCount(count);
     } catch (error) {
       console.error("Error loading pending count:", error);
     }
-  };
+  }, []);
 
   // Handle search
   const handleSearchChange = (value: string) => {
@@ -154,7 +167,7 @@ export function useTenantApproval() {
       toast.success("Payment confirmed successfully");
       loadBookings();
       loadPendingCount();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error confirming payment:", error);
       toast.error(error.response?.data?.message || "Failed to confirm payment");
     }
@@ -171,7 +184,7 @@ export function useTenantApproval() {
       toast.success("Payment rejected successfully");
       loadBookings();
       loadPendingCount();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error rejecting payment:", error);
       toast.error(error.response?.data?.message || "Failed to reject payment");
     }
@@ -185,7 +198,7 @@ export function useTenantApproval() {
       toast.success("Order cancelled successfully");
       loadBookings();
       loadPendingCount();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error cancelling order:", error);
       toast.error(error.response?.data?.message || "Failed to cancel order");
     }
@@ -197,7 +210,7 @@ export function useTenantApproval() {
         reminderType: "payment",
       });
       toast.success("Reminder sent successfully");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error sending reminder:", error);
       toast.error(error.response?.data?.message || "Failed to send reminder");
     }
@@ -207,7 +220,7 @@ export function useTenantApproval() {
   useEffect(() => {
     loadBookings();
     loadPendingCount();
-  }, []);
+  }, [loadBookings, loadPendingCount]);
 
   return {
     bookings,

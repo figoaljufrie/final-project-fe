@@ -12,10 +12,7 @@ import {
   MessageCircle,
   Home,
   AlertTriangle,
-  CheckCircle,
   Building2,
-  ArrowRight,
-  ExternalLink,
   Clock,
   HelpCircle,
   Loader2,
@@ -26,8 +23,7 @@ import Header from "@/components/landing-page/header";
 import Footer from "@/components/landing-page/footer";
 import Link from "next/link";
 import Image from "next/image";
-import { useParams, useRouter } from "next/navigation";
-import { PaymentService } from "@/lib/services/payment/payment-service";
+import { useParams } from "next/navigation";
 import { useBookingPaymentStatus } from "@/hooks/payment/use-payment-status";
 import { toast } from "react-hot-toast";
 import { 
@@ -40,18 +36,19 @@ export default function PaymentError() {
   const [isRetrying, setIsRetrying] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState({ hours: 0, minutes: 0, seconds: 0, isExpired: false });
   const params = useParams();
-  const router = useRouter();
   const bookingId = params.id as string;
 
   const { bookingData, isLoading, error, reloadBooking } = useBookingPaymentStatus(Number(bookingId));
 
-  // Update countdown timer every second
+  // Update countdown timer every second - moved to top to avoid conditional hook
   useEffect(() => {
     if (!bookingData?.paymentDeadline) return;
 
     const updateTimer = () => {
-      const result = calculateTimeRemaining(bookingData.paymentDeadline!);
-      setTimeRemaining(result);
+      if (bookingData.paymentDeadline && typeof bookingData.paymentDeadline === 'string') {
+        const result = calculateTimeRemaining(bookingData.paymentDeadline);
+        setTimeRemaining(result);
+      }
     };
 
     // Update immediately
@@ -72,12 +69,6 @@ export default function PaymentError() {
     });
   };
 
-  const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
 
   const handleRetryPayment = async () => {
     if (!bookingData) return;
@@ -85,12 +76,13 @@ export default function PaymentError() {
     setIsRetrying(true);
     try {
       // In real implementation, this would redirect to payment gateway
-      if (bookingData.midtransPayment?.redirectUrl) {
-        window.open(bookingData.midtransPayment.redirectUrl, '_blank');
+      const midtransPayment = bookingData.midtransPayment as { redirectUrl?: string } | undefined;
+      if (midtransPayment?.redirectUrl) {
+        window.open(midtransPayment.redirectUrl, '_blank');
       } else {
         toast.error('Payment URL not available');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Retry payment error:', error);
       toast.error('Failed to retry payment');
     } finally {
@@ -128,8 +120,36 @@ export default function PaymentError() {
     );
   }
 
-  const property = bookingData.items[0]?.room?.property;
-  const nights = bookingData.items[0]?.nights || 0;
+  if (!bookingData) {
+    return (
+      <div className="min-h-screen bg-[#F2EEE3] flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle size={48} className="mx-auto mb-4 text-red-500" />
+          <p className="text-gray-600">Booking not found</p>
+        </div>
+      </div>
+    );
+  }
+
+  // At this point, bookingData is guaranteed to be non-null due to the check above
+  // Use type assertion with proper typing
+  const safeBookingData = bookingData as {
+    id: number;
+    bookingNo: string;
+    checkIn: string;
+    checkOut: string;
+    totalGuests: number;
+    totalAmount: number;
+    paymentMethod: string;
+    paymentDeadline?: string;
+    items: Array<{ room?: { property?: Record<string, unknown> }; nights?: number }>;
+    midtransPayment?: { redirectUrl?: string };
+  };
+  
+  const items = safeBookingData.items;
+  const property = items?.[0]?.room?.property;
+  const nights = items?.[0]?.nights || 0;
+
 
   return (
     <main className="min-h-screen bg-[#F2EEE3]">
@@ -188,7 +208,7 @@ export default function PaymentError() {
               </div>
               <div className="text-right">
                 <p className="text-sm text-gray-600">Booking No.</p>
-                <p className="font-semibold text-[#8B7355]">{bookingData.bookingNo}</p>
+                <p className="font-semibold text-[#8B7355]">{safeBookingData.bookingNo}</p>
               </div>
             </div>
 
@@ -199,7 +219,7 @@ export default function PaymentError() {
                   <h4 className="font-semibold text-red-800 mb-1">What went wrong?</h4>
                   <p className="text-red-700 text-sm">
                     Your payment was declined or failed to process. This could be due to insufficient funds, 
-                    incorrect card details, or network issues. Don't worry - your booking is still reserved.
+                    incorrect card details, or network issues. Don&apos;t worry - your booking is still reserved.
                   </p>
                   </div>
                 </div>
@@ -247,17 +267,17 @@ export default function PaymentError() {
               <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                 <div className="relative h-64">
                   <Image
-                    src={property?.images[0]?.url || "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"}
-                    alt={property?.name || "Property"}
+                    src={(property?.images as Array<{ url?: string }> | undefined)?.[0]?.url || "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"}
+                    alt={(property?.name as string) || "Property"}
                     fill
                     className="object-cover"
                   />
                 </div>
                 <div className="p-6">
-                  <h3 className="text-2xl font-bold text-[#8B7355] mb-2">{property?.name}</h3>
+                  <h3 className="text-2xl font-bold text-[#8B7355] mb-2">{(property?.name as string) || "Property"}</h3>
                   <div className="flex items-center gap-2 text-gray-600 mb-4">
                     <MapPin size={16} />
-                    <span>{property?.address}</span>
+                    <span>{(property?.address as string) || "Address not available"}</span>
                     </div>
                   
                   <div className="grid md:grid-cols-2 gap-4">
@@ -266,7 +286,7 @@ export default function PaymentError() {
                         <Calendar size={16} className="text-gray-500" />
                     <div>
                           <p className="text-sm font-medium">Check-in</p>
-                          <p className="text-sm text-gray-600">{formatDate(bookingData.checkIn)}</p>
+                          <p className="text-sm text-gray-600">{formatDate(safeBookingData.checkIn)}</p>
                     </div>
                     </div>
                       
@@ -274,7 +294,7 @@ export default function PaymentError() {
                         <Calendar size={16} className="text-gray-500" />
                     <div>
                           <p className="text-sm font-medium">Check-out</p>
-                          <p className="text-sm text-gray-600">{formatDate(bookingData.checkOut)}</p>
+                          <p className="text-sm text-gray-600">{formatDate(safeBookingData.checkOut)}</p>
                     </div>
                   </div>
                 </div>
@@ -284,7 +304,7 @@ export default function PaymentError() {
                         <Users size={16} className="text-gray-500" />
                     <div>
                           <p className="text-sm font-medium">Guests</p>
-                          <p className="text-sm text-gray-600">{bookingData.totalGuests} guests</p>
+                          <p className="text-sm text-gray-600">{safeBookingData.totalGuests} guests</p>
                         </div>
                     </div>
                       
@@ -357,7 +377,7 @@ export default function PaymentError() {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Subtotal</span>
-                    <span className="font-medium">Rp {bookingData.totalAmount.toLocaleString('id-ID')}</span>
+                    <span className="font-medium">Rp {safeBookingData.totalAmount.toLocaleString('id-ID')}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Taxes & Fees</span>
@@ -366,14 +386,14 @@ export default function PaymentError() {
                   <div className="border-t pt-3">
                     <div className="flex justify-between">
                       <span className="font-semibold">Total Amount</span>
-                      <span className="font-bold text-[#8B7355]">Rp {bookingData.totalAmount.toLocaleString('id-ID')}</span>
+                      <span className="font-bold text-[#8B7355]">Rp {safeBookingData.totalAmount.toLocaleString('id-ID')}</span>
                   </div>
               </div>
                   </div>
                 </div>
 
               {/* Payment Deadline */}
-              {bookingData.paymentDeadline && !timeRemaining.isExpired && (
+              {safeBookingData.paymentDeadline && !timeRemaining.isExpired && (
                 <div className="bg-white rounded-xl shadow-lg p-6">
                   <div className="flex items-center gap-2 mb-3">
                     <Clock size={16} className="text-orange-600" />
@@ -387,7 +407,7 @@ export default function PaymentError() {
                       Time remaining to complete payment
                     </p>
                     <p className="text-xs text-orange-500 mt-1">
-                      Complete within {getDeadlineText(bookingData.paymentMethod)} from booking creation
+                      Complete within {getDeadlineText(safeBookingData.paymentMethod)} from booking creation
                     </p>
                 </div>
               </div>

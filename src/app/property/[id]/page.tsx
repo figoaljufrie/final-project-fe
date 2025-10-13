@@ -146,7 +146,11 @@ export default function PropertyDetailsPage() {
           </div>
 
           <div className="lg:col-span-1">
-            <BookingCard selectedRooms={selectedRooms} rooms={bookingRooms} />
+            <BookingCard 
+              selectedRooms={selectedRooms} 
+              rooms={bookingRooms} 
+              propertyId={propertyId}
+            />
           </div>
         </div>
 

@@ -9,7 +9,6 @@ import ReportCharts from "@/components/dashboard/report/ReportCharts";
 import PropertyPerformanceTable from "@/components/dashboard/report/PropertyPerformanceTable";
 import PropertyAvailabilityCalendar from "@/components/dashboard/report/PropertyAvailabilityCalendar";
 import {
-  ReportService,
   ReportFilters as ReportFiltersType,
 } from "@/lib/services/report/report-service";
 import { toast } from "react-hot-toast";
@@ -49,7 +48,7 @@ export default function ReportsPage() {
         );
         toast.success("Excel report exported successfully");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Export error:", error);
       toast.error(`Failed to export ${format.toUpperCase()} report`);
     }

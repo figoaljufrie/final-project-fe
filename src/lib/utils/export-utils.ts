@@ -75,7 +75,7 @@ export class ExportUtils {
   }
 
   // Simple Excel export
-  static exportToExcel(data: any[], filename: string = "report.xlsx") {
+  static exportToExcel(data: Record<string, unknown>[], filename: string = "report.xlsx") {
     try {
       const worksheet = XLSX.utils.json_to_sheet(data);
       const workbook = XLSX.utils.book_new();
@@ -89,7 +89,7 @@ export class ExportUtils {
   }
 
   // Simple data preparation for Excel
-  static prepareReportDataForExcel(reportData: any) {
+  static prepareReportDataForExcel(reportData: Record<string, unknown>) {
     const excelData = [];
 
     // KPI Data
@@ -120,7 +120,7 @@ export class ExportUtils {
 
     // Monthly Data
     if (reportData.monthlyData && reportData.monthlyData.length > 0) {
-      reportData.monthlyData.forEach((item: any) => {
+      reportData.monthlyData.forEach((item: Record<string, unknown>) => {
         excelData.push({
           Metric: item.name,
           Value: item.value,
@@ -135,7 +135,7 @@ export class ExportUtils {
       reportData.propertyPerformance &&
       reportData.propertyPerformance.length > 0
     ) {
-      reportData.propertyPerformance.forEach((item: any) => {
+      reportData.propertyPerformance.forEach((item: Record<string, unknown>) => {
         excelData.push({
           Metric: item.name,
           Value: item.revenue,
@@ -150,7 +150,7 @@ export class ExportUtils {
       reportData.bookingStatusData &&
       reportData.bookingStatusData.length > 0
     ) {
-      reportData.bookingStatusData.forEach((item: any) => {
+      reportData.bookingStatusData.forEach((item: Record<string, unknown>) => {
         excelData.push({
           Metric: item.name,
           Value: item.value,

@@ -24,39 +24,39 @@ export default function DashboardOverview() {
     visible: { opacity: 1, y: 0 },
   };
 
-  const createKPICards = (kpiData: any) => {
+  const createKPICards = (kpiData: Record<string, unknown>) => {
     if (!kpiData) return [];
 
     return [
       {
         title: "Total Revenue",
-        value: `Rp ${(kpiData.totalRevenue || 0).toLocaleString("id-ID")}`,
-        change: kpiData.revenueGrowth || 0,
-        trend: (kpiData.revenueGrowth || 0) >= 0 ? "up" : "down",
+        value: `Rp ${(kpiData.totalRevenue || 0).toLocaleString()}`,
+        change: (kpiData.revenueGrowth as number) || 0,
+        trend: ((kpiData.revenueGrowth as number) || 0) >= 0 ? "up" : "down",
         icon: "💰",
         color: "bg-green-500",
       },
       {
         title: "Total Bookings",
         value: (kpiData.totalBookings || 0).toString(),
-        change: kpiData.bookingGrowth || 0,
-        trend: (kpiData.bookingGrowth || 0) >= 0 ? "up" : "down",
+        change: (kpiData.bookingGrowth as number) || 0,
+        trend: ((kpiData.bookingGrowth as number) || 0) >= 0 ? "up" : "down",
         icon: "📅",
         color: "bg-blue-500",
       },
       {
         title: "Total Guests",
         value: (kpiData.totalGuests || 0).toString(),
-        change: kpiData.guestGrowth || 0,
-        trend: (kpiData.guestGrowth || 0) >= 0 ? "up" : "down",
+        change: (kpiData.guestGrowth as number) || 0,
+        trend: ((kpiData.guestGrowth as number) || 0) >= 0 ? "up" : "down",
         icon: "👥",
         color: "bg-purple-500",
       },
       {
         title: "Avg. Occupancy",
-        value: `${(kpiData.averageOccupancy || 0).toFixed(1)}%`,
-        change: kpiData.occupancyGrowth || 0,
-        trend: (kpiData.occupancyGrowth || 0) >= 0 ? "up" : "down",
+        value: `${((kpiData.averageOccupancy as number) || 0).toFixed(1)}%`,
+        change: (kpiData.occupancyGrowth as number) || 0,
+        trend: ((kpiData.occupancyGrowth as number) || 0) >= 0 ? "up" : "down",
         icon: "🏠",
         color: "bg-orange-500",
       },
@@ -109,7 +109,7 @@ export default function DashboardOverview() {
           Dashboard Overview
         </h1>
         <p className="text-gray-600">
-          Welcome back! Here's what's happening with your properties.
+          Welcome back! Here&apos;s what&apos;s happening with your properties.
         </p>
       </motion.div>
 
@@ -120,7 +120,7 @@ export default function DashboardOverview() {
       >
         {dashboardData &&
           dashboardData.kpiData &&
-          createKPICards(dashboardData.kpiData)
+          createKPICards(dashboardData.kpiData as unknown as Record<string, unknown>)
             .filter((kpi) => kpi != null)
             .map((kpi, index) => (
               <motion.div
@@ -234,7 +234,7 @@ export default function DashboardOverview() {
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-semibold text-gray-900">
-                        Rp {(transaction.amount || 0).toLocaleString("id-ID")}
+                        Rp {(transaction.amount || 0).toLocaleString()}
                       </p>
                       <span
                         className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
