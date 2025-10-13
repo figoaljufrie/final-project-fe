@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Download, MessageCircle, Loader2, Calendar } from "lucide-react";
+import { Download, MessageCircle, Loader2, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -17,14 +17,17 @@ interface BookingDetailSidebarProps {
   showCancelModal: boolean;
   setShowCancelModal: (show: boolean) => void;
   formatDate: (dateString: string) => string;
+  canReview?: boolean;
+  isCheckingReview?: boolean;
 }
 
 export default function BookingDetailSidebar({
   bookingData,
   bookingId,
-  showCancelModal,
   setShowCancelModal,
   formatDate,
+  canReview = false,
+  isCheckingReview = false,
 }: BookingDetailSidebarProps) {
   return (
     <motion.div
@@ -71,6 +74,30 @@ export default function BookingDetailSidebar({
             <MessageCircle size={16} className="mr-2" />
             Contact Host
           </Button>
+
+          {/* Review Button - Only show for completed bookings that can be reviewed */}
+          {bookingData.status === "completed" && (
+            <>
+              {isCheckingReview ? (
+                <Button disabled className="w-full bg-gray-400 text-white">
+                  <Loader2 size={16} className="animate-spin mr-2" />
+                  Checking...
+                </Button>
+              ) : canReview ? (
+                <Link href={`/bookings/${bookingId}/review`} className="block">
+                  <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
+                    <Star size={16} className="mr-2" />
+                    Write a Review
+                  </Button>
+                </Link>
+              ) : (
+                <Button disabled className="w-full bg-gray-400 text-white">
+                  <Star size={16} className="mr-2" />
+                  Review Already Submitted
+                </Button>
+              )}
+            </>
+          )}
 
           {bookingData.status === "waiting_for_payment" && (
             <Button
@@ -119,6 +146,19 @@ export default function BookingDetailSidebar({
               </p>
             </div>
           </div>
+
+          {/* Show completed status and review option */}
+          {bookingData.status === "completed" && (
+            <div className="flex items-start gap-3">
+              <div className="w-3 h-3 bg-green-500 rounded-full mt-1"></div>
+              <div>
+                <p className="text-sm font-medium text-green-600">Stay Completed</p>
+                <p className="text-xs text-gray-500">
+                  {canReview ? "You can now write a review" : "Review already submitted"}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </motion.div>

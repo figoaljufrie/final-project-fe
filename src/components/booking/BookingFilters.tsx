@@ -1,4 +1,4 @@
-import { Search, Filter } from "lucide-react";
+import { Search } from "lucide-react";
 import { FilterStatus, FilterOption } from "@/types/booking";
 
 interface BookingFiltersProps {

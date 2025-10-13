@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { FileText, CreditCard } from "lucide-react";
 import BookingDetailsTab from "./BookingDetailsTab";
 import BookingPaymentTab from "./BookingPaymentTab";
@@ -72,7 +71,7 @@ export default function BookingDetailTabs({
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={() => setActiveTab(tab.id as 'details' | 'payment')}
                 className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === tab.id
                     ? "border-[#8B7355] text-[#8B7355]"

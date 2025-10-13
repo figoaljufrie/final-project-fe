@@ -4,7 +4,7 @@ import { ClockIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { Booking } from "@/lib/types/bookings/booking";
 
 interface BookingStatsCardsProps {
-  bookings: Booking[] | any[];
+  bookings: Booking[] | Record<string, unknown>[];
 }
 
 export default function BookingStatsCards({

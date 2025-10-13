@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   ReportService,
   ReportFilters,
@@ -34,23 +34,23 @@ export function useReportData(filters: ReportFilters = {}) {
     bookingStatusData: [],
   });
 
-  const loadReportData = async () => {
+  const loadReportData = useCallback(async () => {
     try {
       setIsLoading(true);
       const data = await ReportService.getSalesReportForUI(filters);
       setReportData(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(
-        error.response?.data?.message || "Failed to load report data"
+        (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to load report data"
       );
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [filters]);
 
   useEffect(() => {
     loadReportData();
-  }, [filters.startDate, filters.endDate, filters.propertyId]);
+  }, [filters.startDate, filters.endDate, filters.propertyId, loadReportData]);
 
   return {
     reportData,

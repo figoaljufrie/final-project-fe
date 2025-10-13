@@ -4,8 +4,6 @@ import { motion } from "framer-motion";
 import {
   CheckIcon,
   ClockIcon,
-  ExclamationTriangleIcon,
-  XMarkIcon,
 } from "@heroicons/react/24/outline";
 
 interface BookingStatsCardsProps {

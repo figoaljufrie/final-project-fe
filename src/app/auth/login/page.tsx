@@ -42,7 +42,7 @@ export default function LoginPage() {
       } else {
         router.push("/");
       }
-    } catch (error: unknown) {
+    } catch {
       toast.error(emailError || "Login failed");
     }
   };

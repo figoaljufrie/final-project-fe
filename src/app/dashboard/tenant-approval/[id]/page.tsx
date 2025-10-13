@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { 
   ArrowLeft,
   Calendar,
   Users,
-  MapPin,
   CreditCard,
   Clock,
   CheckCircle,
@@ -20,9 +19,8 @@ import {
   Phone,
   Mail,
   BellIcon,
-  EyeIcon,
   CheckIcon,
-  XMarkIcon,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -31,30 +29,36 @@ import { TenantApprovalService, TenantBooking } from "@/lib/services/tenant/tena
 import { toast } from "react-hot-toast";
 import { getDeadlineText } from "@/lib/utils/payment-deadline";
 
-export default function TenantBookingDetailPage({ params }: { params: { id: string } }) {
+export default function TenantBookingDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const [activeTab, setActiveTab] = useState<'details' | 'payment' | 'contact'>('details');
   const [booking, setBooking] = useState<TenantBooking | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [bookingId, setBookingId] = useState<number | null>(null);
 
-  const bookingId = parseInt(params.id);
-
-  useEffect(() => {
-    loadBookingDetails();
-  }, [bookingId]);
-
-  const loadBookingDetails = async () => {
+  const loadBookingDetails = useCallback(async () => {
+    if (!bookingId) return;
     try {
       setIsLoading(true);
       const result = await TenantApprovalService.getBookingDetails(bookingId);
       setBooking(result);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error loading booking details:", error);
-      toast.error(error.response?.data?.message || "Failed to load booking details");
+      toast.error((error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to load booking details");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [bookingId]);
+
+  useEffect(() => {
+    params.then((resolvedParams) => {
+      setBookingId(parseInt(resolvedParams.id));
+    });
+  }, [params]);
+
+  useEffect(() => {
+    loadBookingDetails();
+  }, [bookingId, loadBookingDetails]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -123,7 +127,7 @@ export default function TenantBookingDetailPage({ params }: { params: { id: stri
   };
 
   const handleConfirmBooking = async () => {
-    if (!booking) return;
+    if (!booking || !bookingId) return;
 
     try {
       setIsProcessing(true);
@@ -133,16 +137,16 @@ export default function TenantBookingDetailPage({ params }: { params: { id: stri
       
       toast.success("Booking confirmed successfully");
       await loadBookingDetails();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error confirming booking:", error);
-      toast.error(error.response?.data?.message || "Failed to confirm booking");
+      toast.error((error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to confirm booking");
     } finally {
       setIsProcessing(false);
     }
   };
 
   const handleRejectBooking = async () => {
-    if (!booking) return;
+    if (!booking || !bookingId) return;
 
     const rejectionReason = prompt("Please provide a reason for rejection:");
     if (!rejectionReason) return;
@@ -155,23 +159,23 @@ export default function TenantBookingDetailPage({ params }: { params: { id: stri
       
       toast.success("Booking rejected successfully");
       await loadBookingDetails();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error rejecting booking:", error);
-      toast.error(error.response?.data?.message || "Failed to reject booking");
+      toast.error((error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to reject booking");
     } finally {
       setIsProcessing(false);
     }
   };
 
   const handleSendReminder = async (reminderType: 'payment' | 'checkin' | 'checkout' = 'payment') => {
-    if (!booking) return;
+    if (!booking || !bookingId) return;
 
     try {
       await TenantApprovalService.sendReminder(booking.id, { reminderType });
       toast.success("Reminder sent successfully");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error sending reminder:", error);
-      toast.error(error.response?.data?.message || "Failed to send reminder");
+      toast.error((error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to send reminder");
     }
   };
 
@@ -198,7 +202,7 @@ export default function TenantBookingDetailPage({ params }: { params: { id: stri
       <div className="w-full text-center py-12">
         <AlertCircle size={48} className="mx-auto text-gray-400 mb-4" />
         <h3 className="text-lg font-semibold text-gray-900 mb-2">Booking Not Found</h3>
-        <p className="text-gray-600 mb-4">The booking you're looking for doesn't exist or you don't have access to it.</p>
+        <p className="text-gray-600 mb-4">The booking you&apos;re looking for doesn&apos;t exist or you don&apos;t have access to it.</p>
         <Link href="/dashboard/tenant-approval">
           <Button>Back to Bookings</Button>
         </Link>
@@ -263,7 +267,7 @@ export default function TenantBookingDetailPage({ params }: { params: { id: stri
                     return (
                       <button
                         key={tab.id}
-                        onClick={() => setActiveTab(tab.id as any)}
+                        onClick={() => setActiveTab(tab.id as 'details' | 'payment' | 'contact')}
                         className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
                           activeTab === tab.id
                             ? 'border-[#8B7355] text-[#8B7355]'
@@ -461,7 +465,7 @@ export default function TenantBookingDetailPage({ params }: { params: { id: stri
                               variant="outline"
                               className="border-red-300 text-red-600 hover:bg-red-50"
                             >
-                              <XMarkIcon size={16} className="mr-2" />
+                              <X size={16} className="mr-2" />
                               {isProcessing ? 'Rejecting...' : 'Reject Payment'}
                             </Button>
                           </div>
@@ -572,7 +576,7 @@ export default function TenantBookingDetailPage({ params }: { params: { id: stri
                         variant="outline"
                         className="w-full border-red-300 text-red-600 hover:bg-red-50"
                       >
-                        <XMarkIcon size={16} className="mr-2" />
+                        <X size={16} className="mr-2" />
                         Reject Payment
                       </Button>
                     </>

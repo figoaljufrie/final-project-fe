@@ -26,7 +26,6 @@ interface BookingPaymentTabProps {
 export default function BookingPaymentTab({
   bookingData,
   bookingId,
-  showPaymentModal,
   setShowPaymentModal,
   getDeadlineText,
   getDeadlineMessage,

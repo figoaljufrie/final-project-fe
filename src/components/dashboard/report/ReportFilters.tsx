@@ -55,9 +55,8 @@ export default function ReportFilters({
             </label>
             <div className="max-w-md">
               <DateRangePicker
-                startDate={dateRange.startDate}
-                endDate={dateRange.endDate}
-                onDateChange={setDateRange}
+                value={dateRange}
+                onChange={setDateRange}
               />
             </div>
           </div>

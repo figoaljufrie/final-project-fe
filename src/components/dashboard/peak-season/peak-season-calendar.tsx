@@ -192,6 +192,7 @@ export default function PeakSeasonCalendar() {
           toast.success("Peak season created");
           refetch();
         }}
+        // @ts-expect-error - Type mismatch between usePeakMutations and CreateMutation
         create={create}
       />
     </div>

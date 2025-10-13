@@ -41,6 +41,16 @@ export function usePaymentStatus({
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const attemptsRef = useRef(0);
   const isPollingRef = useRef(false);
+  
+  const stopPolling = useCallback(() => {
+    setIsPolling(false);
+    isPollingRef.current = false;
+    
+    if (intervalRef.current) {
+      clearTimeout(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }, []);
 
   const checkStatus = useCallback(async () => {
     if (!orderId) return;
@@ -69,14 +79,14 @@ export function usePaymentStatus({
         return;
       }
       
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'Failed to check payment status';
+      } catch (err: unknown) {
+      const errorMessage = (err as { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to check payment status';
       setError(errorMessage);
       console.error('Payment status check error:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [orderId, onStatusChange, onSuccess, onError]);
+  }, [orderId, onStatusChange, onSuccess, onError, stopPolling]);
 
   const startPolling = useCallback(() => {
     if (!orderId || isPollingRef.current) return;
@@ -113,17 +123,8 @@ export function usePaymentStatus({
     
     // Start polling immediately
     poll();
-  }, [orderId, maxAttempts, intervalMs, checkStatus, onTimeout]);
+  }, [orderId, maxAttempts, intervalMs, checkStatus, onTimeout, stopPolling]);
 
-  const stopPolling = useCallback(() => {
-    setIsPolling(false);
-    isPollingRef.current = false;
-    
-    if (intervalRef.current) {
-      clearTimeout(intervalRef.current);
-      intervalRef.current = null;
-    }
-  }, []);
 
   // Auto-start polling when enabled and orderId is available
   useEffect(() => {
@@ -135,13 +136,6 @@ export function usePaymentStatus({
       stopPolling();
     };
   }, [enabled, orderId, startPolling, stopPolling]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      stopPolling();
-    };
-  }, [stopPolling]);
 
   return {
     status,
@@ -156,7 +150,7 @@ export function usePaymentStatus({
 
 // Hook for booking payment status
 export function useBookingPaymentStatus(bookingId: number) {
-  const [bookingData, setBookingData] = useState<any>(null);
+  const [bookingData, setBookingData] = useState<Record<string, unknown> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -166,8 +160,8 @@ export function useBookingPaymentStatus(bookingId: number) {
       setError(null);
       const data = await PaymentService.getBookingDetails(bookingId);
       setBookingData(data);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to load booking data');
+      } catch (err: unknown) {
+      setError((err as { response?: { data?: { message?: string } } }).response?.data?.message || 'Failed to load booking data');
       console.error('Error loading booking data:', err);
     } finally {
       setIsLoading(false);
@@ -179,14 +173,14 @@ export function useBookingPaymentStatus(bookingId: number) {
   }, [loadBookingData]);
 
   const paymentStatus = usePaymentStatus({
-    orderId: bookingData?.midtransPayment?.orderId,
-    enabled: !!bookingData?.midtransPayment?.orderId && bookingData?.status === 'waiting_for_payment',
-    onSuccess: (status) => {
+    orderId: (bookingData?.midtransPayment as { orderId?: string } | undefined)?.orderId,
+    enabled: !!(bookingData?.midtransPayment as { orderId?: string } | undefined)?.orderId && bookingData?.status === 'waiting_for_payment',
+    onSuccess: () => {
       toast.success('Payment completed successfully!');
       // Reload booking data to get updated status
       loadBookingData();
     },
-    onError: (status) => {
+    onError: () => {
       toast.error('Payment failed or was cancelled');
       // Reload booking data to get updated status
       loadBookingData();

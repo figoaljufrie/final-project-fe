@@ -96,7 +96,7 @@ export class DashboardService {
 
       // Transform backend data to dashboard format
       return this.transformBookingsToDashboardData(bookingsData.bookings);
-    } catch (error: any) {
+    } catch (error: unknown) {
       // If authentication error, return empty dashboard data
       if (error.response?.status === 401 || error.response?.status === 403) {
         return this.getEmptyDashboardData();

@@ -5,8 +5,6 @@ import {
   PropertyReportRequest,
   PropertyReportResponse,
   SalesReportData,
-  MonthlyData,
-  PropertyPerformance,
   BookingStatusData,
   ReportFilters,
 } from "./types";
@@ -26,7 +24,7 @@ export type {
 
 export class ReportService {
   // Calculate average occupancy from reports data
-  private static calculateAverageOccupancyFromReports(reports: any[]): number {
+  private static calculateAverageOccupancyFromReports(reports: Record<string, unknown>[]): number {
     if (reports.length === 0) return 0;
 
     let totalOccupiedDays = 0;

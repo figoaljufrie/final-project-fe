@@ -2,7 +2,6 @@ import {
   SalesReportItem,
   MonthlyData,
   PropertyPerformance,
-  BookingStatusData,
 } from "./types";
 
 export class ReportTransformers {
@@ -43,7 +42,7 @@ export class ReportTransformers {
       .filter((report) => report.type === "property")
       .forEach((report) => {
         const propertyId = report.details?.propertyId;
-        if (propertyId) {
+        if (propertyId && typeof propertyId === 'number') {
           if (!propertyMap.has(propertyId)) {
             propertyMap.set(propertyId, {
               id: propertyId,
@@ -66,19 +65,21 @@ export class ReportTransformers {
 
   // Transform property calendar data to match our interface
   static transformPropertyCalendarData(
-    calendarData: any,
+    calendarData: Record<string, unknown>,
     startDate: string,
     endDate: string
   ) {
-    const { property, calendar } = calendarData;
+    const property = calendarData.property as Record<string, unknown>;
+    const calendar = calendarData.calendar as Record<string, unknown>[];
 
     // Filter dates within the requested range
     const start = new Date(startDate);
     const end = new Date(endDate);
 
-    const filteredCalendar = calendar.map((room: any) => {
-      const filteredDailyPrices = room.dailyPrices.filter((day: any) => {
-        const dayDate = new Date(day.date);
+    const filteredCalendar = calendar.map((room: Record<string, unknown>) => {
+      const dailyPrices = room.dailyPrices as Record<string, unknown>[];
+      const filteredDailyPrices = dailyPrices.filter((day: Record<string, unknown>) => {
+        const dayDate = new Date(day.date as string);
         return dayDate >= start && dayDate <= end;
       });
 
@@ -92,9 +93,10 @@ export class ReportTransformers {
     // Group by date for our calendar format
     const dateMap = new Map();
 
-    filteredCalendar.forEach((room: any) => {
-      room.dailyPrices.forEach((day: any) => {
-        const dateStr = day.date;
+    filteredCalendar.forEach((room: Record<string, unknown>) => {
+      const dailyPrices = room.dailyPrices as Record<string, unknown>[];
+      dailyPrices.forEach((day: Record<string, unknown>) => {
+        const dateStr = day.date as string;
         if (!dateMap.has(dateStr)) {
           dateMap.set(dateStr, {
             date: dateStr,

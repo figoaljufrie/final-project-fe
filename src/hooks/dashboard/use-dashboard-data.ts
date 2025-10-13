@@ -22,7 +22,7 @@ export function useDashboardData() {
 
         const data = await DashboardService.getDashboardData();
         setDashboardData(data);
-      } catch (err: any) {
+      } catch (err: unknown) {
         setError(err.message || "Failed to load dashboard data");
       } finally {
         setIsLoading(false);
@@ -62,7 +62,7 @@ export function useKPIData() {
 
         const data = await DashboardService.getKPIData();
         setKpiData(data);
-      } catch (err: any) {
+      } catch (err: unknown) {
         setError(err.message || "Failed to load KPI data");
       } finally {
         setIsLoading(false);
@@ -88,7 +88,7 @@ export function useMonthlyRevenueData() {
 
         const data = await DashboardService.getMonthlyRevenueData();
         setMonthlyData(data);
-      } catch (err: any) {
+      } catch (err: unknown) {
         setError(err.message || "Failed to load monthly revenue data");
       } finally {
         setIsLoading(false);
@@ -114,7 +114,7 @@ export function useRecentTransactions() {
 
         const data = await DashboardService.getRecentTransactions();
         setTransactions(data);
-      } catch (err: any) {
+      } catch (err: unknown) {
         setError(err.message || "Failed to load recent transactions");
       } finally {
         setIsLoading(false);

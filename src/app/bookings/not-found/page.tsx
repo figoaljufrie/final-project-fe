@@ -35,7 +35,7 @@ export default function BookingNotFound() {
               Booking Not Found
             </h1>
             <p className="text-xl text-gray-600 mb-2">
-              The booking you're looking for doesn't exist
+              The booking you&apos;re looking for doesn&apos;t exist
             </p>
             <p className="text-gray-500">
               The booking may have been removed, cancelled, or you may not have
@@ -92,7 +92,7 @@ export default function BookingNotFound() {
             <ul className="text-left text-gray-600 space-y-2">
               <li className="flex items-start gap-2">
                 <span className="text-[#8B7355] font-bold">•</span>
-                <span>Make sure you're logged in with the correct account</span>
+                <span>Make sure you&apos;re logged in with the correct account</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-[#8B7355] font-bold">•</span>
@@ -100,7 +100,7 @@ export default function BookingNotFound() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-[#8B7355] font-bold">•</span>
-                <span>Verify the booking hasn't been cancelled or expired</span>
+                <span>Verify the booking hasn&apos;t been cancelled or expired</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-[#8B7355] font-bold">•</span>

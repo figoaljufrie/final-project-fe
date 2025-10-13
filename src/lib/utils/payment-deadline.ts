@@ -1,7 +1,7 @@
-// Payment deadline configurations (Feature 2: 2 hours for all payment methods)
+// Payment deadline configurations (Feature 2: 1 hour for all payment methods)
 const PAYMENT_DEADLINES = {
-  manual_transfer: 2, // hours
-  payment_gateway: 2, // hours
+  manual_transfer: 1, // hours
+  payment_gateway: 1, // hours
 } as const;
 
 // Get deadline hours for payment method

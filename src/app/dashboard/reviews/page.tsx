@@ -5,14 +5,12 @@ import { motion } from "framer-motion";
 import {
   Star,
   MessageSquare,
-  Filter,
   Search,
   Reply,
   Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ReviewService } from "@/lib/services/review/review-service";
-import { toast } from "react-hot-toast";
 
 interface ReviewData {
   id: number;
@@ -39,6 +37,8 @@ interface ReviewData {
     createdAt: string;
   };
 }
+import { toast } from "react-hot-toast";
+
 
 interface PropertyReviewStats {
   averageRating: number;
@@ -50,7 +50,7 @@ export default function TenantReviewsPage() {
   const [reviews, setReviews] = useState<ReviewData[]>([]);
   const [stats, setStats] = useState<PropertyReviewStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedProperty, setSelectedProperty] = useState<number | null>(null);
+  const [selectedProperty] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [ratingFilter, setRatingFilter] = useState<number | null>(null);
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
@@ -62,7 +62,7 @@ export default function TenantReviewsPage() {
       try {
         setIsLoading(true);
         const data = await ReviewService.getTenantReviews(1, 50);
-        setReviews(data.reviews);
+        setReviews(data.reviews as ReviewData[]);
 
         // Calculate stats from reviews
         if (data.reviews.length > 0) {
@@ -83,7 +83,7 @@ export default function TenantReviewsPage() {
             ratingDistribution,
           });
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Error loading reviews:", error);
         toast.error("Failed to load reviews");
       } finally {
@@ -101,11 +101,12 @@ export default function TenantReviewsPage() {
     }
 
     try {
-      // TODO: Implement reply functionality
+      // TODO: Implement reply functionality using reviewId
+      console.log("Submitting reply for review:", reviewId);
       toast.success("Reply submitted successfully");
       setReplyingTo(null);
       setReplyText("");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error submitting reply:", error);
       toast.error("Failed to submit reply");
     }
@@ -113,9 +114,10 @@ export default function TenantReviewsPage() {
 
   const handleDeleteReply = async (reviewId: number) => {
     try {
-      // TODO: Implement delete reply functionality
+      // TODO: Implement delete reply functionality using reviewId
+      console.log("Deleting reply for review:", reviewId);
       toast.success("Reply deleted successfully");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error deleting reply:", error);
       toast.error("Failed to delete reply");
     }

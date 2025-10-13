@@ -73,7 +73,7 @@ export default function PaymentSuccess() {
           setPollingStatus("success");
           toast.success("Payment confirmed! Your booking is now confirmed.");
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Error loading booking data:", error);
         setPollingStatus("error");
         toast.error("Failed to load booking data");

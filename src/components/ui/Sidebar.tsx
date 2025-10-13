@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
-  CreditCard,
   BarChart3,
   Star,
   Menu,

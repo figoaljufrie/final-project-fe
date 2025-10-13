@@ -4,13 +4,10 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Upload,
-  FileImage,
   CheckCircle,
   AlertCircle,
   ArrowLeft,
   Clock,
-  CreditCard,
-  Building2,
   Calendar,
   Users,
   Loader2,
@@ -83,7 +80,7 @@ export default function UploadPaymentProof() {
         setIsLoading(true);
         const data = await PaymentService.getBookingDetails(Number(bookingId));
         setBookingData(data);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Error loading booking data:", error);
         toast.error("Failed to load booking data");
       } finally {
@@ -184,7 +181,7 @@ export default function UploadPaymentProof() {
       formData.append("file", file);
       formData.append("paymentMethod", "manual_transfer");
 
-      const result = await PaymentService.uploadPaymentProof(
+      await PaymentService.uploadPaymentProof(
         bookingData.id,
         formData
       );
@@ -196,11 +193,11 @@ export default function UploadPaymentProof() {
       setTimeout(() => {
         router.push(`/bookings/${bookingId}`);
       }, 2000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Upload error:", error);
       setUploadStatus("error");
       toast.error(
-        error.response?.data?.message || "Failed to upload payment proof"
+        (error as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to upload payment proof"
       );
     } finally {
       setIsUploading(false);
@@ -216,12 +213,6 @@ export default function UploadPaymentProof() {
     });
   };
 
-  const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
 
   if (isLoading) {
     return (
@@ -428,7 +419,7 @@ export default function UploadPaymentProof() {
                     </p>
                     <p className="text-green-600 text-xs mt-2">
                       The property owner will review and confirm your payment.
-                      You'll receive an email notification once confirmed.
+                      You&apos;ll receive an email notification once confirmed.
                     </p>
                   </motion.div>
                 )}
