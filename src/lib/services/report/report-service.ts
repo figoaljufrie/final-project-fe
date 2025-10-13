@@ -24,7 +24,9 @@ export type {
 
 export class ReportService {
   // Calculate average occupancy from reports data
-  private static calculateAverageOccupancyFromReports(reports: Record<string, unknown>[]): number {
+  private static calculateAverageOccupancyFromReports(
+    reports: Record<string, unknown>[]
+  ): number {
     if (reports.length === 0) return 0;
 
     let totalOccupiedDays = 0;
@@ -32,7 +34,11 @@ export class ReportService {
 
     reports.forEach((report) => {
       if (report.type === "transaction" && report.details) {
-        const { totalGuests, nights } = report.details;
+        const details = report.details as {
+          totalGuests?: number;
+          nights?: number;
+        };
+        const { totalGuests, nights } = details;
         if (totalGuests && nights) {
           // Calculate occupied days for this booking
           const occupiedDays = nights * totalGuests;
@@ -82,14 +88,16 @@ export class ReportService {
 
       // Calculate average occupancy based on reports data
       const averageOccupancy = this.calculateAverageOccupancyFromReports(
-        salesReport.reports
+        salesReport.reports as unknown as Record<string, unknown>[]
       );
 
       const kpiData: SalesReportData = {
         totalRevenue: salesReport.totalSales || 0,
         totalBookings: salesReport.totalBookings || 0,
         totalGuests: salesReport.reports.reduce(
-          (sum, item) => sum + (item.details?.totalGuests || 0),
+          (sum, item) =>
+            sum +
+            ((item.details as { totalGuests?: number })?.totalGuests || 0),
           0
         ),
         averageOccupancy: averageOccupancy,
