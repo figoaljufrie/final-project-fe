@@ -75,7 +75,10 @@ export class ExportUtils {
   }
 
   // Simple Excel export
-  static exportToExcel(data: Record<string, unknown>[], filename: string = "report.xlsx") {
+  static exportToExcel(
+    data: Record<string, unknown>[],
+    filename: string = "report.xlsx"
+  ) {
     try {
       const worksheet = XLSX.utils.json_to_sheet(data);
       const workbook = XLSX.utils.book_new();
@@ -93,34 +96,50 @@ export class ExportUtils {
     const excelData = [];
 
     // KPI Data
+    const kpiData = reportData.kpiData as
+      | {
+          totalRevenue?: number;
+          revenueGrowth?: number;
+          totalBookings?: number;
+          bookingGrowth?: number;
+          totalGuests?: number;
+          guestGrowth?: number;
+          averageOccupancy?: number;
+          occupancyGrowth?: number;
+        }
+      | undefined;
+
     excelData.push({
       Metric: "Total Revenue",
-      Value: reportData.kpiData?.totalRevenue || 0,
-      Growth: `${reportData.kpiData?.revenueGrowth || 0}%`,
+      Value: kpiData?.totalRevenue || 0,
+      Growth: `${kpiData?.revenueGrowth || 0}%`,
       Category: "KPI",
     });
     excelData.push({
       Metric: "Total Bookings",
-      Value: reportData.kpiData?.totalBookings || 0,
-      Growth: `${reportData.kpiData?.bookingGrowth || 0}%`,
+      Value: kpiData?.totalBookings || 0,
+      Growth: `${kpiData?.bookingGrowth || 0}%`,
       Category: "KPI",
     });
     excelData.push({
       Metric: "Total Guests",
-      Value: reportData.kpiData?.totalGuests || 0,
-      Growth: `${reportData.kpiData?.guestGrowth || 0}%`,
+      Value: kpiData?.totalGuests || 0,
+      Growth: `${kpiData?.guestGrowth || 0}%`,
       Category: "KPI",
     });
     excelData.push({
       Metric: "Average Occupancy",
-      Value: `${reportData.kpiData?.averageOccupancy || 0}%`,
-      Growth: `${reportData.kpiData?.occupancyGrowth || 0}%`,
+      Value: `${kpiData?.averageOccupancy || 0}%`,
+      Growth: `${kpiData?.occupancyGrowth || 0}%`,
       Category: "KPI",
     });
 
     // Monthly Data
-    if (reportData.monthlyData && reportData.monthlyData.length > 0) {
-      reportData.monthlyData.forEach((item: Record<string, unknown>) => {
+    const monthlyData = reportData.monthlyData as
+      | Record<string, unknown>[]
+      | undefined;
+    if (monthlyData && monthlyData.length > 0) {
+      monthlyData.forEach((item: Record<string, unknown>) => {
         excelData.push({
           Metric: item.name,
           Value: item.value,
@@ -131,11 +150,11 @@ export class ExportUtils {
     }
 
     // Property Performance
-    if (
-      reportData.propertyPerformance &&
-      reportData.propertyPerformance.length > 0
-    ) {
-      reportData.propertyPerformance.forEach((item: Record<string, unknown>) => {
+    const propertyPerformance = reportData.propertyPerformance as
+      | Record<string, unknown>[]
+      | undefined;
+    if (propertyPerformance && propertyPerformance.length > 0) {
+      propertyPerformance.forEach((item: Record<string, unknown>) => {
         excelData.push({
           Metric: item.name,
           Value: item.revenue,
@@ -146,11 +165,11 @@ export class ExportUtils {
     }
 
     // Booking Status
-    if (
-      reportData.bookingStatusData &&
-      reportData.bookingStatusData.length > 0
-    ) {
-      reportData.bookingStatusData.forEach((item: Record<string, unknown>) => {
+    const bookingStatusData = reportData.bookingStatusData as
+      | Record<string, unknown>[]
+      | undefined;
+    if (bookingStatusData && bookingStatusData.length > 0) {
+      bookingStatusData.forEach((item: Record<string, unknown>) => {
         excelData.push({
           Metric: item.name,
           Value: item.value,

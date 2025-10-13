@@ -57,66 +57,69 @@ export function useBookingDetail(bookingId?: string) {
   const finalBookingId = bookingId || (params.id as string);
 
   // Handle redirects based on booking status
-  const handleStatusBasedRedirect = useCallback((bookingData: Record<string, unknown>) => {
-    if (!bookingData) return;
+  const handleStatusBasedRedirect = useCallback(
+    (bookingData: Record<string, unknown>) => {
+      if (!bookingData) return;
 
-    const { status, paymentMethod } = bookingData;
+      const { status, paymentMethod } = bookingData;
 
-    // If payment is confirmed, show success message and redirect
-    if (status === "confirmed") {
-      toast.success("Payment confirmed! Your booking is now confirmed.");
-      setTimeout(() => {
-        router.push(`/bookings/${finalBookingId}`);
-      }, 3000);
-      return;
-    }
-
-    // If payment is completed, show completion message
-    if (status === "completed") {
-      toast.success("Booking completed! Thank you for your stay.");
-      return;
-    }
-
-    // If booking is cancelled, show cancellation message
-    if (status === "cancelled") {
-      toast.error("This booking has been cancelled.");
-      setTimeout(() => {
-        router.push("/bookings");
-      }, 3000);
-      return;
-    }
-
-    // If booking is expired, show expiration message
-    if (status === "expired") {
-      toast.error("This booking has expired.");
-      setTimeout(() => {
-        router.push("/bookings");
-      }, 3000);
-      return;
-    }
-
-    // If payment is still pending, check if we should redirect to payment pages
-    if (status === "waiting_for_payment") {
-      const urlParams = new URLSearchParams(window.location.search);
-      const fromPayment = urlParams.get("from");
-
-      if (fromPayment === "success") {
-        toast.success("Payment successful! Your booking is being processed.");
+      // If payment is confirmed, show success message and redirect
+      if (status === "confirmed") {
+        toast.success("Payment confirmed! Your booking is now confirmed.");
         setTimeout(() => {
-          router.replace(`/bookings/${finalBookingId}`);
-        }, 2000);
-      } else if (fromPayment === "error") {
-        toast.error("Payment failed. Please try again.");
-        setTimeout(() => {
-          if (paymentMethod === "payment_gateway") {
-            router.push(`/bookings/${finalBookingId}/payment-pending`);
-          } else {
-            router.push(`/bookings/${finalBookingId}/upload-payment`);
-          }
-        }, 2000);
+          router.push(`/bookings/${finalBookingId}`);
+        }, 3000);
+        return;
       }
-    }
-  }, [finalBookingId, router]);
+
+      // If payment is completed, show completion message
+      if (status === "completed") {
+        toast.success("Booking completed! Thank you for your stay.");
+        return;
+      }
+
+      // If booking is cancelled, show cancellation message
+      if (status === "cancelled") {
+        toast.error("This booking has been cancelled.");
+        setTimeout(() => {
+          router.push("/bookings");
+        }, 3000);
+        return;
+      }
+
+      // If booking is expired, show expiration message
+      if (status === "expired") {
+        toast.error("This booking has expired.");
+        setTimeout(() => {
+          router.push("/bookings");
+        }, 3000);
+        return;
+      }
+
+      // If payment is still pending, check if we should redirect to payment pages
+      if (status === "waiting_for_payment") {
+        const urlParams = new URLSearchParams(window.location.search);
+        const fromPayment = urlParams.get("from");
+
+        if (fromPayment === "success") {
+          toast.success("Payment successful! Your booking is being processed.");
+          setTimeout(() => {
+            router.replace(`/bookings/${finalBookingId}`);
+          }, 2000);
+        } else if (fromPayment === "error") {
+          toast.error("Payment failed. Please try again.");
+          setTimeout(() => {
+            if (paymentMethod === "payment_gateway") {
+              router.push(`/bookings/${finalBookingId}/payment-pending`);
+            } else {
+              router.push(`/bookings/${finalBookingId}/upload-payment`);
+            }
+          }, 2000);
+        }
+      }
+    },
+    [finalBookingId, router]
+  );
 
   // Load booking data from API
   useEffect(() => {
@@ -131,23 +134,34 @@ export function useBookingDetail(bookingId?: string) {
       } catch (error: unknown) {
         console.error("Error loading booking data:", error);
 
-        if (error.response?.status === 403) {
-          toast.error(
-            "Access denied. You may not have permission to view this booking."
-          );
-          setTimeout(() => {
-            router.push("/bookings");
-          }, 2000);
-        } else if (error.response?.status === 404) {
-          toast.error("Booking not found.");
-          setTimeout(() => {
-            router.push("/bookings/not-found");
-          }, 2000);
-        } else if (error.response?.status === 401) {
-          toast.error("Please login to view your bookings.");
-          setTimeout(() => {
-            router.push("/login");
-          }, 2000);
+        // Type guard untuk AxiosError
+        const isAxiosError = (
+          err: unknown
+        ): err is { response?: { status: number } } => {
+          return typeof err === "object" && err !== null && "response" in err;
+        };
+
+        if (isAxiosError(error)) {
+          if (error.response?.status === 403) {
+            toast.error(
+              "Access denied. You may not have permission to view this booking."
+            );
+            setTimeout(() => {
+              router.push("/bookings");
+            }, 2000);
+          } else if (error.response?.status === 404) {
+            toast.error("Booking not found.");
+            setTimeout(() => {
+              router.push("/bookings/not-found");
+            }, 2000);
+          } else if (error.response?.status === 401) {
+            toast.error("Please login to view your bookings.");
+            setTimeout(() => {
+              router.push("/login");
+            }, 2000);
+          } else {
+            toast.error("Failed to load booking data. Please try again.");
+          }
         } else {
           toast.error("Failed to load booking data. Please try again.");
         }
@@ -242,7 +256,21 @@ export function useBookingDetail(bookingId?: string) {
       setBookingData(data);
     } catch (error: unknown) {
       console.error("Error cancelling booking:", error);
-      toast.error(error.response?.data?.message || "Failed to cancel booking");
+
+      // Type guard untuk AxiosError
+      const isAxiosError = (
+        err: unknown
+      ): err is { response?: { data?: { message?: string } } } => {
+        return typeof err === "object" && err !== null && "response" in err;
+      };
+
+      if (isAxiosError(error)) {
+        toast.error(
+          error.response?.data?.message || "Failed to cancel booking"
+        );
+      } else {
+        toast.error("Failed to cancel booking");
+      }
     } finally {
       setIsCancelling(false);
     }

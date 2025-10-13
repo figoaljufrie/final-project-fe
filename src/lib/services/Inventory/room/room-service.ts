@@ -61,6 +61,7 @@ export const listsRoomsByProperty = async (
     id: room.id,
     propertyId: room.propertyId,
     name: room.name,
+    description: room.description || null,
     capacity: room.capacity,
     basePrice: room.basePrice,
     totalUnits: room.totalUnits,

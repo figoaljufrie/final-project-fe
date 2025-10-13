@@ -23,7 +23,16 @@ export function useDashboardData() {
         const data = await DashboardService.getDashboardData();
         setDashboardData(data);
       } catch (err: unknown) {
-        setError(err.message || "Failed to load dashboard data");
+        // Type guard untuk Error
+        const isError = (error: unknown): error is Error => {
+          return error instanceof Error;
+        };
+
+        if (isError(err)) {
+          setError(err.message || "Failed to load dashboard data");
+        } else {
+          setError("Failed to load dashboard data");
+        }
       } finally {
         setIsLoading(false);
       }
@@ -63,7 +72,16 @@ export function useKPIData() {
         const data = await DashboardService.getKPIData();
         setKpiData(data);
       } catch (err: unknown) {
-        setError(err.message || "Failed to load KPI data");
+        // Type guard untuk Error
+        const isError = (error: unknown): error is Error => {
+          return error instanceof Error;
+        };
+
+        if (isError(err)) {
+          setError(err.message || "Failed to load KPI data");
+        } else {
+          setError("Failed to load KPI data");
+        }
       } finally {
         setIsLoading(false);
       }
@@ -89,7 +107,16 @@ export function useMonthlyRevenueData() {
         const data = await DashboardService.getMonthlyRevenueData();
         setMonthlyData(data);
       } catch (err: unknown) {
-        setError(err.message || "Failed to load monthly revenue data");
+        // Type guard untuk Error
+        const isError = (error: unknown): error is Error => {
+          return error instanceof Error;
+        };
+
+        if (isError(err)) {
+          setError(err.message || "Failed to load monthly revenue data");
+        } else {
+          setError("Failed to load monthly revenue data");
+        }
       } finally {
         setIsLoading(false);
       }
@@ -115,7 +142,16 @@ export function useRecentTransactions() {
         const data = await DashboardService.getRecentTransactions();
         setTransactions(data);
       } catch (err: unknown) {
-        setError(err.message || "Failed to load recent transactions");
+        // Type guard untuk Error
+        const isError = (error: unknown): error is Error => {
+          return error instanceof Error;
+        };
+
+        if (isError(err)) {
+          setError(err.message || "Failed to load recent transactions");
+        } else {
+          setError("Failed to load recent transactions");
+        }
       } finally {
         setIsLoading(false);
       }

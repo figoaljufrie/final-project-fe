@@ -66,62 +66,65 @@ export function useTenantApproval() {
   const [pendingCount, setPendingCount] = useState(0);
 
   // Load bookings data
-  const loadBookings = useCallback(async (filters: BookingFilters = {}) => {
-    try {
-      setIsLoading(true);
-      const requestParams = {
-        page: filters.page || pagination.page,
-        limit: pagination.limit,
-        status: statusFilter !== "all" ? statusFilter : undefined,
-        bookingNo: searchTerm || undefined,
-        ...filters,
-      };
+  const loadBookings = useCallback(
+    async (filters: BookingFilters = {}) => {
+      try {
+        setIsLoading(true);
+        const requestParams = {
+          page: filters.page || pagination.page,
+          limit: pagination.limit,
+          status: statusFilter !== "all" ? statusFilter : undefined,
+          bookingNo: searchTerm || undefined,
+          ...filters,
+        };
 
-      const result = await TenantApprovalService.getTenantBookings(
-        requestParams
-      );
+        const result = await TenantApprovalService.getTenantBookings(
+          requestParams
+        );
 
-      setBookings(result.bookings || []);
+        setBookings(result.bookings || []);
 
-      if (result.pagination) {
-        const backendPage = result.pagination.page || 1;
-        const totalPages = result.pagination.totalPages || 0;
-        const validPage = backendPage > totalPages ? 1 : backendPage;
+        if (result.pagination) {
+          const backendPage = result.pagination.page || 1;
+          const totalPages = result.pagination.totalPages || 0;
+          const validPage = backendPage > totalPages ? 1 : backendPage;
 
-        setPagination({
-          total: result.pagination.total || 0,
-          page: validPage,
-          limit: result.pagination.limit || 10,
-          totalPages: totalPages,
-        });
+          setPagination({
+            total: result.pagination.total || 0,
+            page: validPage,
+            limit: result.pagination.limit || 10,
+            totalPages: totalPages,
+          });
 
-        // If we had to reset to page 1, reload with page 1
-        if (validPage === 1 && backendPage > totalPages) {
-          loadBookings({ page: 1 });
-          return;
+          // If we had to reset to page 1, reload with page 1
+          if (validPage === 1 && backendPage > totalPages) {
+            loadBookings({ page: 1 });
+            return;
+          }
+        } else {
+          setPagination({
+            total: 0,
+            page: 1,
+            limit: 10,
+            totalPages: 0,
+          });
         }
-      } else {
+      } catch (error: unknown) {
+        console.error("Error loading bookings:", error);
+        toast.error("Failed to load bookings");
+        setBookings([]);
         setPagination({
           total: 0,
           page: 1,
           limit: 10,
           totalPages: 0,
         });
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error: unknown) {
-      console.error("Error loading bookings:", error);
-      toast.error("Failed to load bookings");
-      setBookings([]);
-      setPagination({
-        total: 0,
-        page: 1,
-        limit: 10,
-        totalPages: 0,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [pagination.page, pagination.limit, statusFilter, searchTerm]);
+    },
+    [pagination.page, pagination.limit, statusFilter, searchTerm]
+  );
 
   // Load pending count
   const loadPendingCount = useCallback(async () => {
@@ -169,7 +172,21 @@ export function useTenantApproval() {
       loadPendingCount();
     } catch (error: unknown) {
       console.error("Error confirming payment:", error);
-      toast.error(error.response?.data?.message || "Failed to confirm payment");
+
+      // Type guard untuk AxiosError
+      const isAxiosError = (
+        err: unknown
+      ): err is { response?: { data?: { message?: string } } } => {
+        return typeof err === "object" && err !== null && "response" in err;
+      };
+
+      if (isAxiosError(error)) {
+        toast.error(
+          error.response?.data?.message || "Failed to confirm payment"
+        );
+      } else {
+        toast.error("Failed to confirm payment");
+      }
     }
   };
 
@@ -186,7 +203,21 @@ export function useTenantApproval() {
       loadPendingCount();
     } catch (error: unknown) {
       console.error("Error rejecting payment:", error);
-      toast.error(error.response?.data?.message || "Failed to reject payment");
+
+      // Type guard untuk AxiosError
+      const isAxiosError = (
+        err: unknown
+      ): err is { response?: { data?: { message?: string } } } => {
+        return typeof err === "object" && err !== null && "response" in err;
+      };
+
+      if (isAxiosError(error)) {
+        toast.error(
+          error.response?.data?.message || "Failed to reject payment"
+        );
+      } else {
+        toast.error("Failed to reject payment");
+      }
     }
   };
 
@@ -200,7 +231,19 @@ export function useTenantApproval() {
       loadPendingCount();
     } catch (error: unknown) {
       console.error("Error cancelling order:", error);
-      toast.error(error.response?.data?.message || "Failed to cancel order");
+
+      // Type guard untuk AxiosError
+      const isAxiosError = (
+        err: unknown
+      ): err is { response?: { data?: { message?: string } } } => {
+        return typeof err === "object" && err !== null && "response" in err;
+      };
+
+      if (isAxiosError(error)) {
+        toast.error(error.response?.data?.message || "Failed to cancel order");
+      } else {
+        toast.error("Failed to cancel order");
+      }
     }
   };
 
@@ -212,7 +255,19 @@ export function useTenantApproval() {
       toast.success("Reminder sent successfully");
     } catch (error: unknown) {
       console.error("Error sending reminder:", error);
-      toast.error(error.response?.data?.message || "Failed to send reminder");
+
+      // Type guard untuk AxiosError
+      const isAxiosError = (
+        err: unknown
+      ): err is { response?: { data?: { message?: string } } } => {
+        return typeof err === "object" && err !== null && "response" in err;
+      };
+
+      if (isAxiosError(error)) {
+        toast.error(error.response?.data?.message || "Failed to send reminder");
+      } else {
+        toast.error("Failed to send reminder");
+      }
     }
   };
 

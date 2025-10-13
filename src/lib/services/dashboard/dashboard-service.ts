@@ -97,13 +97,23 @@ export class DashboardService {
       // Transform backend data to dashboard format
       return this.transformBookingsToDashboardData(bookingsData.bookings);
     } catch (error: unknown) {
+      // Type guard untuk AxiosError
+      const isAxiosError = (
+        err: unknown
+      ): err is { response?: { status: number } } => {
+        return typeof err === "object" && err !== null && "response" in err;
+      };
+
       // If authentication error, return empty dashboard data
-      if (error.response?.status === 401 || error.response?.status === 403) {
+      if (
+        isAxiosError(error) &&
+        (error.response?.status === 401 || error.response?.status === 403)
+      ) {
         return this.getEmptyDashboardData();
       }
 
       // If 400 error, might be validation issue
-      if (error.response?.status === 400) {
+      if (isAxiosError(error) && error.response?.status === 400) {
         return this.getEmptyDashboardData();
       }
 

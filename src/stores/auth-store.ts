@@ -13,6 +13,7 @@ type AuthState = {
   logout: () => Promise<void>;
   hydrate: () => Promise<void>;
   clearUser: () => void;
+  setUser: (user: User) => void;
 };
 
 export const useAuthStore = create<AuthState>()(
@@ -62,6 +63,10 @@ export const useAuthStore = create<AuthState>()(
 
     clearUser: () => {
       set({ user: null, hydrated: true });
+    },
+
+    setUser: (user: User) => {
+      set({ user, hydrated: true });
     },
   }))
 );

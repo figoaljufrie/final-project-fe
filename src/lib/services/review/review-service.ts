@@ -48,9 +48,21 @@ export class ReviewService {
       return response.data.data;
     } catch (error: unknown) {
       console.error("Error submitting review:", error);
-      throw new Error(
-        error.response?.data?.message || "Failed to submit review"
-      );
+
+      // Type guard untuk AxiosError
+      const isAxiosError = (
+        err: unknown
+      ): err is { response?: { data?: { message?: string } } } => {
+        return typeof err === "object" && err !== null && "response" in err;
+      };
+
+      if (isAxiosError(error)) {
+        throw new Error(
+          error.response?.data?.message || "Failed to submit review"
+        );
+      } else {
+        throw new Error("Failed to submit review");
+      }
     }
   }
 
@@ -68,9 +80,21 @@ export class ReviewService {
       return response.data.data;
     } catch (error: unknown) {
       console.error("Error fetching property reviews:", error);
-      throw new Error(
-        error.response?.data?.message || "Failed to fetch reviews"
-      );
+
+      // Type guard untuk AxiosError
+      const isAxiosError = (
+        err: unknown
+      ): err is { response?: { data?: { message?: string } } } => {
+        return typeof err === "object" && err !== null && "response" in err;
+      };
+
+      if (isAxiosError(error)) {
+        throw new Error(
+          error.response?.data?.message || "Failed to fetch reviews"
+        );
+      } else {
+        throw new Error("Failed to fetch reviews");
+      }
     }
   }
 
@@ -87,9 +111,21 @@ export class ReviewService {
       return response.data.data;
     } catch (error: unknown) {
       console.error("Error fetching user reviews:", error);
-      throw new Error(
-        error.response?.data?.message || "Failed to fetch user reviews"
-      );
+
+      // Type guard untuk AxiosError
+      const isAxiosError = (
+        err: unknown
+      ): err is { response?: { data?: { message?: string } } } => {
+        return typeof err === "object" && err !== null && "response" in err;
+      };
+
+      if (isAxiosError(error)) {
+        throw new Error(
+          error.response?.data?.message || "Failed to fetch user reviews"
+        );
+      } else {
+        throw new Error("Failed to fetch user reviews");
+      }
     }
   }
 
@@ -119,9 +155,21 @@ export class ReviewService {
       return response.data.data;
     } catch (error: unknown) {
       console.error("Error fetching tenant reviews:", error);
-      throw new Error(
-        error.response?.data?.message || "Failed to fetch tenant reviews"
-      );
+
+      // Type guard untuk AxiosError
+      const isAxiosError = (
+        err: unknown
+      ): err is { response?: { data?: { message?: string } } } => {
+        return typeof err === "object" && err !== null && "response" in err;
+      };
+
+      if (isAxiosError(error)) {
+        throw new Error(
+          error.response?.data?.message || "Failed to fetch tenant reviews"
+        );
+      } else {
+        throw new Error("Failed to fetch tenant reviews");
+      }
     }
   }
 
@@ -136,9 +184,21 @@ export class ReviewService {
       return response.data.data;
     } catch (error: unknown) {
       console.error("Error fetching review stats:", error);
-      throw new Error(
-        error.response?.data?.message || "Failed to fetch review statistics"
-      );
+
+      // Type guard untuk AxiosError
+      const isAxiosError = (
+        err: unknown
+      ): err is { response?: { data?: { message?: string } } } => {
+        return typeof err === "object" && err !== null && "response" in err;
+      };
+
+      if (isAxiosError(error)) {
+        throw new Error(
+          error.response?.data?.message || "Failed to fetch review statistics"
+        );
+      } else {
+        throw new Error("Failed to fetch review statistics");
+      }
     }
   }
 }
