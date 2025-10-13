@@ -50,6 +50,12 @@ const navigation = [
     description: "Set seasonal pricing",
   },
   {
+    name: "Reviews",
+    href: "/dashboard/reviews",
+    icon: Star,
+    description: "Manage Reviews",
+  },
+  {
     name: "Reports & Analytics",
     href: "/dashboard/reports",
     icon: BarChart3,

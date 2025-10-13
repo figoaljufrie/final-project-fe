@@ -63,6 +63,7 @@ export default function UploadPaymentProof() {
     "idle" | "success" | "error"
   >("idle");
   const [dragActive, setDragActive] = useState(false);
+  const [fileError, setFileError] = useState<string | null>(null);
   const [bookingData, setBookingData] = useState<BookingData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [timeRemaining, setTimeRemaining] = useState({
@@ -121,23 +122,28 @@ export default function UploadPaymentProof() {
   };
 
   const validateAndSetFile = (file: File) => {
+    // Clear previous errors
+    setFileError(null);
+
     // Validate file type
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
     if (!allowedTypes.includes(file.type)) {
-      toast.error("Please upload a valid image file (JPG or PNG only)");
+      const errorMsg = "Please upload a valid image file (JPG or PNG only)";
+      setFileError(errorMsg);
+      toast.error(errorMsg);
       return;
     }
 
     // Validate file size (max 1MB)
     const maxSize = 1 * 1024 * 1024; // 1MB
     if (file.size > maxSize) {
-      toast.error(
-        `File size must be less than 1MB. Your file is ${(
-          file.size /
-          1024 /
-          1024
-        ).toFixed(2)}MB`
-      );
+      const errorMsg = `File size must be less than 1MB. Your file is ${(
+        file.size /
+        1024 /
+        1024
+      ).toFixed(2)}MB`;
+      setFileError(errorMsg);
+      toast.error(errorMsg);
       return;
     }
 
@@ -357,12 +363,25 @@ export default function UploadPaymentProof() {
                           Choose File
                         </label>
                       </div>
-                      <p className="text-xs text-gray-400">
-                        Supported formats: JPEG, PNG, WebP (Max 1MB)
-                      </p>
                     </div>
                   )}
                 </div>
+
+                {/* File Error Message */}
+                {fileError && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg"
+                  >
+                    <div className="flex items-center gap-2">
+                      <AlertCircle size={16} className="text-red-600" />
+                      <p className="text-red-800 text-sm font-medium">
+                        {fileError}
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
 
                 {/* Upload Button */}
                 {file && (

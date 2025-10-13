@@ -83,13 +83,8 @@ export class DashboardService {
   // Get dashboard overview data from tenant bookings
   static async getDashboardData(): Promise<DashboardData> {
     try {
-      // Check if user is authenticated
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("User not authenticated");
-      }
-
       // Get all bookings for the tenant (using max allowed limit of 100)
+      // Authentication is handled by cookies automatically
       const response = await api.get("/tenant/bookings?limit=100");
 
       // Check if response has the expected structure

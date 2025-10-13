@@ -51,8 +51,8 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
     // ========== 2️⃣ TENANT ROLE ==========
     if (role === UserRole.TENANT) {
-      // Tenants can access dashboard and public routes
-      const allowedTenantRoutes = ["/dashboard", ...publicRoutes];
+      // Tenants can access dashboard
+      const allowedTenantRoutes = ["/dashboard"];
       const isAllowed = allowedTenantRoutes.some((route) =>
         pathname.startsWith(route)
       );
@@ -75,8 +75,19 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         return;
       }
 
-      // Users can access all other routes
-      setIsAuthorized(true);
+      // Users can access bookings and public routes
+      const allowedUserRoutes = ["/bookings", ...publicRoutes];
+      const isAllowed = allowedUserRoutes.some((route) =>
+        pathname.startsWith(route)
+      );
+
+      if (isAllowed) {
+        setIsAuthorized(true);
+        return;
+      }
+
+      // Redirect to home for other routes
+      router.replace("/");
       return;
     }
 

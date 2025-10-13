@@ -1,14 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { FileText, CreditCard, MessageCircle } from "lucide-react";
+import { FileText, CreditCard } from "lucide-react";
 import BookingDetailsTab from "./BookingDetailsTab";
 import BookingPaymentTab from "./BookingPaymentTab";
-import BookingContactTab from "./BookingContactTab";
 
 interface BookingDetailTabsProps {
-  activeTab: "details" | "payment" | "contact";
-  setActiveTab: (tab: "details" | "payment" | "contact") => void;
+  activeTab: "details" | "payment";
+  setActiveTab: (tab: "details" | "payment") => void;
   bookingData: {
     checkIn: string;
     checkOut: string;
@@ -62,7 +61,6 @@ export default function BookingDetailTabs({
   const tabs = [
     { id: "details", label: "Booking Details", icon: FileText },
     { id: "payment", label: "Payment Info", icon: CreditCard },
-    { id: "contact", label: "Contact Host", icon: MessageCircle },
   ];
 
   return (
@@ -108,10 +106,6 @@ export default function BookingDetailTabs({
             formatDate={formatDate}
             formatTime={formatTime}
           />
-        )}
-
-        {activeTab === "contact" && (
-          <BookingContactTab bookingData={bookingData} />
         )}
       </div>
     </div>
