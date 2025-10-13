@@ -42,7 +42,7 @@ export default function LoginPage() {
       } else {
         router.push("/");
       }
-    } catch (err) {
+    } catch (error: unknown) {
       toast.error(emailError || "Login failed");
     }
   };
@@ -157,7 +157,7 @@ export default function LoginPage() {
 
         <div className="mt-8 text-center space-y-2">
           <p className="text-sm text-gray-600">
-            Don't have an account?{" "}
+            Dont have an account?{" "}
             <button
               onClick={() => router.push("/auth/register/user")}
               className="text-indigo-600 hover:underline font-medium"

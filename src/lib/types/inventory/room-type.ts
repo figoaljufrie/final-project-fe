@@ -22,6 +22,7 @@ export interface RoomListItem {
   id: number;
   propertyId: number;
   name: string;
+  description: string | null;
   capacity: number;
   basePrice: number;
   totalUnits: number;

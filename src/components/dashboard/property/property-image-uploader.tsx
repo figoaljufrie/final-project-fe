@@ -3,6 +3,7 @@
 import { useUpdateProperty } from "@/hooks/Inventory/property/use-property-mutation";
 import { useState } from "react";
 import { Loader2, ImagePlus } from "lucide-react";
+import Image from "next/image";
 
 export default function PropertyImageUploader({
   propertyId,
@@ -32,12 +33,12 @@ export default function PropertyImageUploader({
     <div className="flex flex-col items-end space-y-2">
       <div className="flex gap-2 flex-wrap">
         {images.map((img) => (
-          <img
+          <div
             key={img.id}
-            src={img.url}
-            alt=""
-            className="w-16 h-16 object-cover rounded-md border"
-          />
+            className="w-16 h-16 relative rounded-md border overflow-hidden"
+          >
+            <Image src={img.url} alt="" fill className="object-cover" />
+          </div>
         ))}
       </div>
       <label className="flex items-center gap-2 cursor-pointer text-rose-600 hover:text-rose-700 text-sm">

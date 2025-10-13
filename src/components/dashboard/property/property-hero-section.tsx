@@ -1,13 +1,11 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useState } from "react";
-import { MapPin } from "lucide-react";
-import { Globe2 } from "lucide-react";
-import { ImagePlus } from "lucide-react";
-import PropertyUpdateForm from "./property-update-form";
-import PropertyImageUploader from "./property-image-uploader";
 import { PropertyDetail } from "@/lib/types/inventory/property-types";
+import { motion } from "framer-motion";
+import { Globe2, MapPin } from "lucide-react";
+import { useState } from "react";
+import PropertyImageUploader from "./property-image-uploader";
+import PropertyUpdateForm from "./property-update-form";
 
 export default function PropertyHeroSection({
   property,

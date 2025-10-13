@@ -1,34 +1,36 @@
-// app/components/explore/filter-sidebar.tsx
 "use client";
 
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useExploreQuery } from "@/hooks/Inventory/property/use-explore-query";
+import { PropertyCategory } from "@/lib/types/enums/enums-type";
+import {
+  PropertySortField,
+  PriceSort,
+} from "@/lib/types/inventory/property-types";
 
-interface FilterState {
-  propertyTypes: string[];
-  guests: string;
-  priceRange: string;
-}
+type ExpandedSections = {
+  propertyType: boolean;
+  guests: boolean;
+  price: boolean;
+  sortBy: boolean;
+};
 
 export default function FilterSidebar() {
-  const [filters, setFilters] = useState<FilterState>({
-    propertyTypes: [],
-    guests: "",
-    priceRange: "",
-  });
+  const { query, setQuery } = useExploreQuery();
 
-  const [expandedSections, setExpandedSections] = useState({
+  const [expandedSections, setExpandedSections] = useState<ExpandedSections>({
     propertyType: true,
     guests: true,
     price: true,
+    sortBy: true,
   });
 
-  const propertyTypes = [
-    { id: "house", label: "House" },
-    { id: "hotel", label: "Hotel" },
-    { id: "apartment", label: "Apartment" },
-    { id: "guesthouse", label: "GuestHouse" },
+  const propertyTypes: { id: PropertyCategory; label: string }[] = [
+    { id: PropertyCategory.HOUSE, label: "House" },
+    { id: PropertyCategory.VILLA, label: "Villa" },
+    { id: PropertyCategory.APARTMENT, label: "Apartment" },
   ];
 
   const guestOptions = [
@@ -38,41 +40,23 @@ export default function FilterSidebar() {
     { id: "10+", label: "10+" },
   ];
 
-  const priceOptions = [
-    { id: "lowest", label: "Lowest" },
-    { id: "highest", label: "Highest" },
+  const priceOptions: { id: PriceSort; label: string }[] = [
+    { id: PriceSort.ASC, label: "Lowest" },
+    { id: PriceSort.DESC, label: "Highest" },
   ];
 
-  const toggleSection = (section: keyof typeof expandedSections) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }));
-  };
+  const sortOptions: { id: PropertySortField; label: string }[] = [
+    { id: PropertySortField.PRICE, label: "Price" },
+    { id: PropertySortField.NAME, label: "Name" },
+    { id: PropertySortField.CREATED_AT, label: "Created At" },
+  ];
 
-  const togglePropertyType = (type: string) => {
-    setFilters(prev => ({
-      ...prev,
-      propertyTypes: prev.propertyTypes.includes(type)
-        ? prev.propertyTypes.filter(t => t !== type)
-        : [...prev.propertyTypes, type]
-    }));
-  };
-
-  const handleGuestChange = (guest: string) => {
-    setFilters(prev => ({ ...prev, guests: guest }));
-  };
-
-  const handlePriceChange = (price: string) => {
-    setFilters(prev => ({ ...prev, priceRange: price }));
+  const toggleSection = (key: keyof ExpandedSections) => {
+    setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   const clearFilters = () => {
-    setFilters({
-      propertyTypes: [],
-      guests: "",
-      priceRange: "",
-    });
+    setQuery({ name: "" });
   };
 
   return (
@@ -90,10 +74,10 @@ export default function FilterSidebar() {
         </Button>
       </div>
 
-      {/* Property Type Filter */}
+      {/* Property Type */}
       <div className="mb-6">
         <button
-          onClick={() => toggleSection('propertyType')}
+          onClick={() => toggleSection("propertyType")}
           className="flex items-center justify-between w-full mb-4 text-left"
         >
           <h3 className="font-medium text-gray-800">Property Type</h3>
@@ -103,15 +87,20 @@ export default function FilterSidebar() {
             <ChevronDown className="w-4 h-4 text-gray-500" />
           )}
         </button>
-
         {expandedSections.propertyType && (
           <div className="space-y-3">
             {propertyTypes.map((type) => (
               <label key={type.id} className="flex items-center cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={filters.propertyTypes.includes(type.id)}
-                  onChange={() => togglePropertyType(type.id)}
+                  checked={query.category === type.id}
+                  onChange={() =>
+                    setQuery({
+                      ...query,
+                      category:
+                        query.category === type.id ? undefined : type.id,
+                    })
+                  }
                   className="w-4 h-4 text-[#8B7355] rounded border-[#D6D5C9] focus:ring-[#8B7355]"
                 />
                 <span className="ml-3 text-sm text-gray-700">{type.label}</span>
@@ -121,10 +110,10 @@ export default function FilterSidebar() {
         )}
       </div>
 
-      {/* Guests Filter */}
+      {/* Guests */}
       <div className="mb-6">
         <button
-          onClick={() => toggleSection('guests')}
+          onClick={() => toggleSection("guests")}
           className="flex items-center justify-between w-full mb-4 text-left"
         >
           <h3 className="font-medium text-gray-800">Guests</h3>
@@ -134,30 +123,33 @@ export default function FilterSidebar() {
             <ChevronDown className="w-4 h-4 text-gray-500" />
           )}
         </button>
-
         {expandedSections.guests && (
           <div className="space-y-3">
             {guestOptions.map((option) => (
-              <label key={option.id} className="flex items-center cursor-pointer">
+              <label
+                key={option.id}
+                className="flex items-center cursor-pointer"
+              >
                 <input
                   type="radio"
                   name="guests"
-                  value={option.id}
-                  checked={filters.guests === option.id}
-                  onChange={() => handleGuestChange(option.id)}
+                  checked={query.guests === option.id}
+                  onChange={() => setQuery({ ...query, guests: option.id })}
                   className="w-4 h-4 text-[#8B7355] border-[#D6D5C9] focus:ring-[#8B7355]"
                 />
-                <span className="ml-3 text-sm text-gray-700">{option.label}</span>
+                <span className="ml-3 text-sm text-gray-700">
+                  {option.label}
+                </span>
               </label>
             ))}
           </div>
         )}
       </div>
 
-      {/* Price Filter */}
+      {/* Price */}
       <div className="mb-6">
         <button
-          onClick={() => toggleSection('price')}
+          onClick={() => toggleSection("price")}
           className="flex items-center justify-between w-full mb-4 text-left"
         >
           <h3 className="font-medium text-gray-800">Price</h3>
@@ -167,47 +159,64 @@ export default function FilterSidebar() {
             <ChevronDown className="w-4 h-4 text-gray-500" />
           )}
         </button>
-
         {expandedSections.price && (
           <div className="space-y-3">
             {priceOptions.map((option) => (
-              <label key={option.id} className="flex items-center cursor-pointer">
+              <label
+                key={option.id}
+                className="flex items-center cursor-pointer"
+              >
                 <input
                   type="radio"
                   name="price"
-                  value={option.id}
-                  checked={filters.priceRange === option.id}
-                  onChange={() => handlePriceChange(option.id)}
+                  checked={query.priceSort === option.id}
+                  onChange={() => setQuery({ ...query, priceSort: option.id })}
                   className="w-4 h-4 text-[#8B7355] border-[#D6D5C9] focus:ring-[#8B7355]"
                 />
-                <span className="ml-3 text-sm text-gray-700">{option.label}</span>
+                <span className="ml-3 text-sm text-gray-700">
+                  {option.label}
+                </span>
               </label>
             ))}
           </div>
         )}
       </div>
 
-      {/* Show Filter Button */}
-      <Button 
-        className="w-full bg-[#8B7355] hover:bg-[#7A6349] text-white"
-        size="lg"
-      >
-        Show Filter
-      </Button>
-
-      {/* Active Filters Summary */}
-      {(filters.propertyTypes.length > 0 || filters.guests || filters.priceRange) && (
-        <div className="mt-6 p-4 bg-[#F2EEE3] rounded-lg">
-          <h4 className="font-medium text-sm text-[#8B7355] mb-2">Active Filters:</h4>
-          <div className="space-y-1 text-xs text-gray-600">
-            {filters.propertyTypes.length > 0 && (
-              <div>Property: {filters.propertyTypes.join(", ")}</div>
-            )}
-            {filters.guests && <div>Guests: {filters.guests}</div>}
-            {filters.priceRange && <div>Price: {filters.priceRange}</div>}
+      {/* Sort */}
+      <div className="mb-6">
+        <button
+          onClick={() => toggleSection("sortBy")}
+          className="flex items-center justify-between w-full mb-4 text-left"
+        >
+          <h3 className="font-medium text-gray-800">Sort By</h3>
+          {expandedSections.sortBy ? (
+            <ChevronUp className="w-4 h-4 text-gray-500" />
+          ) : (
+            <ChevronDown className="w-4 h-4 text-gray-500" />
+          )}
+        </button>
+        {expandedSections.sortBy && (
+          <div className="space-y-3">
+            {sortOptions.map((option) => (
+              <label
+                key={option.id}
+                className="flex items-center cursor-pointer"
+              >
+                <input
+                  type="radio"
+                  name="sortBy"
+                  checked={query.sortBy === option.id}
+                  onChange={() => setQuery({ ...query, sortBy: option.id })}
+                  className="w-4 h-4 text-[#8B7355] border-[#D6D5C9] focus:ring-[#8B7355]"
+                />
+                <span className="ml-3 text-sm text-gray-700">
+                  {option.label}
+                </span>
+              </label>
+            ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </aside>
   );
 }

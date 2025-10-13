@@ -1,18 +1,16 @@
 import {
-  QueryClient,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
-import {
   createPeakSeason,
-  updatePeakSeason,
   deletePeakSeason,
+  updatePeakSeason,
 } from "@/lib/services/Inventory/pricing/pricing-service";
 import type {
   CreatePeakSeason,
-  UpdatePeakSeason,
-  PeakSeason,
+  UpdatePeakSeason
 } from "@/lib/types/inventory/pricing-type";
+import {
+  useMutation,
+  useQueryClient
+} from "@tanstack/react-query";
 
 export const usePeakMutations = () => {
   const queryClient = useQueryClient();

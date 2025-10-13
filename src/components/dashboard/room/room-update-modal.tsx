@@ -28,13 +28,20 @@ export default function UpdateRoomModal({
   roomId,
   onUpdated,
 }: UpdateRoomModalProps) {
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    name: string;
+    capacity: number;
+    basePrice: number;
+    description: string;
+    totalUnits: number;
+  }>({
     name: "",
     capacity: 1,
     basePrice: 0,
     description: "",
     totalUnits: 1,
   });
+
   const [images, setImages] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -44,18 +51,15 @@ export default function UpdateRoomModal({
     const fetchRoom = async () => {
       setLoading(true);
       try {
-        // Fetch all rooms for this property
-        const rooms = await listsRoomsByProperty(propertyId);
-        // Find the specific room by ID
+        const rooms: RoomListItem[] = await listsRoomsByProperty(propertyId);
         const room = rooms.find((r) => r.id === roomId);
-
         if (!room) throw new Error("Room not found");
 
         setForm({
           name: room.name,
           capacity: room.capacity,
           basePrice: room.basePrice,
-          description: (room as any).description || "",
+          description: room.description || "",
           totalUnits: room.totalUnits,
         });
       } catch (err) {
@@ -71,7 +75,13 @@ export default function UpdateRoomModal({
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => ({
+      ...prev,
+      [name]:
+        name === "capacity" || name === "totalUnits" || name === "basePrice"
+          ? Number(value)
+          : value,
+    }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

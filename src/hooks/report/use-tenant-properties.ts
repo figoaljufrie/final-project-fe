@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import api from "@/lib/api";
+import api from "@/lib/api"; // assuming your api wrapper types response
+import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 
 export interface TenantProperty {
@@ -18,6 +18,10 @@ export interface TenantProperty {
   updatedAt: string;
 }
 
+interface TenantPropertiesResponse {
+  data: TenantProperty[];
+}
+
 export function useTenantProperties() {
   const [properties, setProperties] = useState<TenantProperty[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -27,12 +31,28 @@ export function useTenantProperties() {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await api.get("/tenant/properties");
-      const data = response.data.data || response.data;
+
+      const response = await api.get<TenantPropertiesResponse>(
+        "/tenant/properties"
+      );
+      const data = response.data?.data ?? [];
       setProperties(data);
-    } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to load properties";
+    } catch (err: unknown) {
+      let errorMessage = "Failed to load properties";
+
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      } else if (
+        typeof err === "object" &&
+        err !== null &&
+        "response" in err &&
+        typeof (err as { response?: { data?: { message?: string } } })?.response
+          ?.data?.message === "string"
+      ) {
+        errorMessage = (err as { response?: { data?: { message: string } } })
+          .response!.data!.message;
+      }
+
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {

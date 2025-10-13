@@ -5,113 +5,86 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { usePropertyGallery } from "@/hooks/Inventory/property/use-property-gallery";
 
-const roomImages = [
-  {
-    id: 1,
-    url: "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-    alt: "Ocean View Villa - Main View",
-  },
-  {
-    id: 2,
-    url: "https://images.unsplash.com/photo-1613490493576-7fde63acd811?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-    alt: "Ocean View Villa - Living Room",
-  },
-  {
-    id: 3,
-    url: "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-    alt: "Ocean View Villa - Bedroom",
-  },
-  {
-    id: 4,
-    url: "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-    alt: "Ocean View Villa - Kitchen",
-  },
-  {
-    id: 5,
-    url: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-    alt: "Ocean View Villa - Bathroom",
-  },
-];
+interface PropertyGalleryProps {
+  propertyId: number; // changed to accept propertyId
+}
 
-export default function RoomGallery() {
-  const [selectedImage, setSelectedImage] = useState<number | null>(null);
+export default function PropertyGallery({ propertyId }: PropertyGalleryProps) {
+  const { images, isLoading } = usePropertyGallery(propertyId);
+
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  if (isLoading || images.length === 0) return null; // wait for images
 
   const openLightbox = (index: number) => {
     setCurrentImageIndex(index);
-    setSelectedImage(roomImages[index].id);
+    setLightboxOpen(true);
   };
 
-  const closeLightbox = () => setSelectedImage(null);
+  const closeLightbox = () => setLightboxOpen(false);
 
   const nextImage = () => {
-    const nextIndex = (currentImageIndex + 1) % roomImages.length;
-    setCurrentImageIndex(nextIndex);
-    setSelectedImage(roomImages[nextIndex].id);
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
   };
 
   const prevImage = () => {
-    const prevIndex =
-      currentImageIndex === 0
-        ? roomImages.length - 1
-        : currentImageIndex - 1;
-    setCurrentImageIndex(prevIndex);
-    setSelectedImage(roomImages[prevIndex].id);
+    setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
   };
 
   return (
     <>
       {/* Gallery Grid */}
-      <div className="grid grid-cols-4 grid-rows-2 gap-2 h-96 rounded-xl overflow-hidden">
+      <div className="grid grid-cols-4 gap-2 h-96 rounded-xl overflow-hidden">
         {/* Main Image */}
-        <motion.div
-          className="col-span-2 row-span-2 relative cursor-pointer group"
-          whileHover={{ scale: 1.02 }}
+        <motion.button
           onClick={() => openLightbox(0)}
+          className="col-span-2 row-span-2 relative group cursor-pointer"
+          whileHover={{ scale: 1.02 }}
         >
           <Image
-            src={roomImages[0].url}
-            alt={roomImages[0].alt}
+            src={images[0]}
+            alt="Main property view"
             fill
             className="object-cover"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 50vw"
+            sizes="(max-width: 768px) 100vw, 50vw"
           />
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
-        </motion.div>
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
+        </motion.button>
 
         {/* Side Images */}
-        {roomImages.slice(1, 5).map((image, index) => (
-          <motion.div
-            key={image.id}
-            className="relative cursor-pointer group overflow-hidden"
-            whileHover={{ scale: 1.02 }}
+        {images.slice(1, 5).map((image, index) => (
+          <motion.button
+            key={index}
             onClick={() => openLightbox(index + 1)}
+            className="relative group cursor-pointer overflow-hidden"
+            whileHover={{ scale: 1.02 }}
           >
             <Image
-              src={image.url}
-              alt={image.alt}
+              src={image}
+              alt={`Property view ${index + 2}`}
               fill
               className="object-cover"
               sizes="25vw"
             />
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
 
-            {/* Show More Overlay on Last Image */}
-            {index === 3 && (
+            {index === 3 && images.length > 5 && (
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                 <span className="text-white font-semibold">
-                  +{roomImages.length - 4} more
+                  Show All Photos
                 </span>
               </div>
             )}
-          </motion.div>
+          </motion.button>
         ))}
       </div>
 
       {/* Lightbox Modal */}
       <AnimatePresence>
-        {selectedImage && (
+        {lightboxOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -119,7 +92,6 @@ export default function RoomGallery() {
             className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center"
             onClick={closeLightbox}
           >
-            {/* Close Button */}
             <Button
               variant="ghost"
               size="icon"
@@ -129,7 +101,6 @@ export default function RoomGallery() {
               <X size={24} />
             </Button>
 
-            {/* Navigation Buttons */}
             <Button
               variant="ghost"
               size="icon"
@@ -154,46 +125,43 @@ export default function RoomGallery() {
               <ChevronRight size={24} />
             </Button>
 
-            {/* Main Image */}
             <motion.div
-              key={selectedImage}
+              key={currentImageIndex}
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               className="max-w-5xl max-h-[80vh] mx-4 relative w-full h-full flex items-center justify-center"
               onClick={(e) => e.stopPropagation()}
             >
               <Image
-                src={roomImages[currentImageIndex].url}
-                alt={roomImages[currentImageIndex].alt}
+                src={images[currentImageIndex]}
+                alt="Property view"
                 fill
                 className="object-contain rounded-lg"
                 sizes="80vw"
               />
             </motion.div>
 
-            {/* Image Counter */}
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/50 px-4 py-2 rounded-full text-white text-sm">
-              {currentImageIndex + 1} / {roomImages.length}
+              {currentImageIndex + 1} / {images.length}
             </div>
 
-            {/* Thumbnail Navigation */}
-            <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 flex gap-2">
-              {roomImages.map((image, index) => (
+            <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 flex gap-2 max-w-full overflow-x-auto px-4">
+              {images.map((image, index) => (
                 <button
-                  key={image.id}
+                  key={index}
                   onClick={(e) => {
                     e.stopPropagation();
                     openLightbox(index);
                   }}
-                  className={`relative w-12 h-8 rounded overflow-hidden border-2 transition-all ${
+                  className={`relative w-12 h-8 rounded overflow-hidden border-2 transition-all flex-shrink-0 ${
                     index === currentImageIndex
                       ? "border-white"
                       : "border-transparent opacity-60 hover:opacity-80"
                   }`}
                 >
                   <Image
-                    src={image.url}
-                    alt={image.alt}
+                    src={image}
+                    alt={`Thumbnail ${index + 1}`}
                     fill
                     className="object-cover"
                     sizes="50px"
