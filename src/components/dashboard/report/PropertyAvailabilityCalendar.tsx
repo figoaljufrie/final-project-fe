@@ -1,6 +1,4 @@
-"use client";
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
   Calendar,
@@ -35,13 +33,11 @@ export default function PropertyAvailabilityCalendar({
 
   const { properties: tenantProperties } = useTenantProperties();
 
-  const loadPropertyData = async () => {
+  const loadPropertyData = useCallback(async () => {
     try {
       setIsLoading(true);
 
-      // If no specific propertyId, get the first property from tenant properties
       let targetPropertyId = propertyId;
-
       if (!targetPropertyId && tenantProperties.length > 0) {
         targetPropertyId = tenantProperties[0].id;
       }
@@ -59,21 +55,23 @@ export default function PropertyAvailabilityCalendar({
             .split("T")[0]
       );
       setPropertyData(data);
-    } catch (error: any) {
-      console.error("Error loading property data:", error);
-      toast.error(
-        error.response?.data?.message || "Failed to load property data"
-      );
+    } catch (err: unknown) {
+      console.error("Error loading property data:", err);
+      if (err instanceof Error) {
+        toast.error(err.message);
+      } else {
+        toast.error("Failed to load property data");
+      }
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [propertyId, startDate, endDate, tenantProperties]);
 
   useEffect(() => {
     if (tenantProperties.length > 0) {
       loadPropertyData();
     }
-  }, [propertyId, startDate, endDate, tenantProperties]);
+  }, [tenantProperties, loadPropertyData]);
 
   const getCalendarDays = () => {
     const year = currentMonth.getFullYear();
@@ -83,7 +81,7 @@ export default function PropertyAvailabilityCalendar({
     const daysInMonth = lastDay.getDate();
     const startingDayOfWeek = firstDay.getDay();
 
-    const days = [];
+    const days: (Date | null)[] = [];
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(null);
     }

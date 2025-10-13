@@ -38,6 +38,7 @@ export interface PropertyImage {
 export interface RoomForPropertyList {
   id: number;
   basePrice: number;
+  capacity: number;
 }
 
 export interface PropertyDetail {
@@ -64,7 +65,7 @@ export interface PropertyListItem {
   name: string;
   city: string | null;
   category: PropertyCategory;
-  minBasePrice: number | null;
+  minPrice: number | null;
   rooms: RoomForPropertyList[];
   images?: PropertyImage[];
 }
@@ -72,12 +73,13 @@ export interface PropertyListItem {
 export interface PropertySearchQuery {
   page?: number;
   limit?: number;
-  name?: string;
+  name?: string;       // free text search
+  city?: string;       // <-- new
   category?: PropertyCategory;
   sortBy?: PropertySortField;
   sortOrder?: PriceSort;
   checkInDate?: string;
-  checkoutDate?: string;
+  checkOutDate?: string;
 }
 
 export interface PropertySearchResponse {

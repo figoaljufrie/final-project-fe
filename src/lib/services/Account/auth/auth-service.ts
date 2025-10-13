@@ -33,12 +33,9 @@ export async function getMe(): Promise<User> {
 }
 
 // --- Email Verification ---
+// --- Email Verification ---
 export async function verifyEmail(token: string): Promise<User> {
-  const { data } = await api.post(
-    "/auth/verify-email",
-    {},
-    { headers: { Authorization: `Bearer ${token}` } }
-  );
+  const { data } = await api.post("/auth/verify-email", { token });
   return data.data.user;
 }
 
@@ -46,11 +43,10 @@ export async function verifyEmailAndSetPassword(
   token: string,
   password: string
 ): Promise<User> {
-  const { data } = await api.post(
-    "/auth/verify-email-set-password",
-    { password },
-    { headers: { Authorization: `Bearer ${token}` } }
-  );
+  const { data } = await api.post("/auth/verify-email-set-password", {
+    token,
+    password,
+  });
   return data.data.user;
 }
 

@@ -24,16 +24,16 @@ export const useAuthStore = create<AuthState>()(
     login: async (email, password) => {
       set({ loading: true });
       try {
-        const loginResult = await authService.login(email, password);
+        await authService.login(email, password);
 
         // Wait a tiny bit for cookie to be set
         await new Promise((resolve) => setTimeout(resolve, 100));
 
         const user = await authService.getMe();
         set({ user, loading: false, hydrated: true });
-      } catch (err) {
+      } catch {
         set({ user: null, loading: false, hydrated: true });
-        throw err;
+        throw new Error("Login failed");
       }
     },
 
@@ -41,7 +41,7 @@ export const useAuthStore = create<AuthState>()(
       set({ loading: true });
       try {
         await authService.logout();
-      } catch (err) {
+      } catch {
         // Ignore
       } finally {
         set({ user: null, loading: false, hydrated: true });
@@ -55,7 +55,7 @@ export const useAuthStore = create<AuthState>()(
       try {
         const user = await authService.getMe();
         set({ user, hydrated: true, loading: false });
-      } catch (err) {
+      } catch {
         set({ user: null, hydrated: true, loading: false });
       }
     },

@@ -1,6 +1,6 @@
 import api from "@/lib/api"; // Assuming '@/lib/api' is your Axios instance
 import type {
-  CreatePropertyPayload, // Assuming you define this type for updates
+  CreatePropertyPayload,
   PropertyDetail,
   PropertyListItem,
   PropertySearchQuery,
@@ -84,7 +84,7 @@ export async function getPropertyCalendar(
   propertyId: number,
   month: number,
   year: number
-): Promise<any> {
+): Promise<Record<string, unknown>> {
   const { data } = await api.get(`/properties/${propertyId}/calendar`, {
     params: { month, year },
   });
@@ -95,3 +95,10 @@ export async function getTenantProperties(): Promise<PropertyListItem[]> {
   const { data } = await api.get("/tenant/properties");
   return data.data;
 }
+
+export const getPublicProperties = async (
+  filters: PropertySearchQuery
+): Promise<PropertySearchResponse> => {
+  const { data } = await api.get("/properties/search", { params: filters });
+  return data.data;
+};

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Heart, Star, MapPin, Users, Wifi, Coffee } from "lucide-react";
+import { Heart, Star, MapPin } from "lucide-react";
 import Image from "next/image";
 
 interface CardProps {
@@ -14,9 +14,9 @@ interface CardProps {
   image: string;
   saved: boolean;
   category: string;
-  guests: number;
-  amenities: string[];
   onToggleSave: (id: number) => void;
+  onView?: (id: number) => void;
+  onClick?: () => void; // New prop for card-level click
 }
 
 export default function PropertyCard({
@@ -29,9 +29,9 @@ export default function PropertyCard({
   image,
   saved,
   category,
-  guests,
-  amenities,
   onToggleSave,
+  onView,
+  onClick,
 }: CardProps) {
   return (
     <motion.div
@@ -40,6 +40,7 @@ export default function PropertyCard({
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -5 }}
       className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 group cursor-pointer"
+      onClick={onClick} // Clicking anywhere triggers card click
     >
       {/* Image */}
       <div className="relative h-48 overflow-hidden">
@@ -93,31 +94,25 @@ export default function PropertyCard({
           <span className="text-sm text-gray-500 line-clamp-1">{location}</span>
         </div>
 
-        {/* Guests & amenities */}
-        <div className="flex items-center gap-3 mb-3">
-          <div className="flex items-center gap-1">
-            <Users size={12} className="text-gray-400" />
-            <span className="text-xs text-gray-500">{guests} guests</span>
-          </div>
-          <div className="flex gap-1">
-            {amenities.includes("wifi") && (
-              <Wifi size={12} className="text-gray-400" />
-            )}
-            {amenities.includes("coffee") && (
-              <Coffee size={12} className="text-gray-400" />
-            )}
-          </div>
-        </div>
-
-        {/* Price + Book */}
-        <div className="flex items-center justify-between">
-          <div>
+        {/* Price + View */}
+        <div className="flex items-center justify-between mt-1">
+          <div className="flex flex-col">
+            <span className="text-sm text-gray-500">Starts from</span>
             <span className="text-lg font-bold text-[#8B7355]">${price}</span>
-            <span className="text-sm text-gray-500"> / night</span>
+            <span className="text-sm text-gray-500">/ night</span>
           </div>
-          <button className="px-4 py-2 bg-[#8B7355] text-white rounded-lg hover:bg-[#7a6348] transition">
-            Book
-          </button>
+
+          {onView && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent triggering card click
+                onView(id);
+              }}
+              className="px-4 py-2 bg-[#8B7355] text-white rounded-lg hover:bg-[#7a6348] transition"
+            >
+              View
+            </button>
+          )}
         </div>
       </div>
     </motion.div>

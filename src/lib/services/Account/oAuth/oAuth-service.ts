@@ -30,7 +30,7 @@ export async function socialLogin(
     }
 
     return { user } as SocialLoginResponse;
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("OAuth login failed:", err);
     throw err;
   }
