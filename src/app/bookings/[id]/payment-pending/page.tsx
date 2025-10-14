@@ -20,7 +20,7 @@ import Header from "@/components/landing-page/header";
 import Footer from "@/components/landing-page/footer";
 import Link from "next/link";
 import Image from "next/image";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { PaymentService } from "@/lib/services/payment/payment-service";
 import { toast } from "react-hot-toast";
 import { 
@@ -74,6 +74,7 @@ export default function PaymentPending() {
   const [timeRemaining, setTimeRemaining] = useState({ hours: 0, minutes: 0, seconds: 0, isExpired: false });
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const bookingId = params.id as string;
 
   // Load booking data
@@ -84,6 +85,12 @@ export default function PaymentPending() {
         const data = await PaymentService.getBookingDetails(Number(bookingId));
         console.log('Loaded booking data:', data);
         setBookingData(data);
+        
+        // Check if redirected from Midtrans
+        const fromMidtrans = searchParams.get('from');
+        if (fromMidtrans === 'pending') {
+          toast("Payment is still being processed. Please wait for confirmation.");
+        }
         
         // Don't start automatic polling - let user manually check status
         // if (data.midtransPayment?.orderId) {
@@ -100,7 +107,7 @@ export default function PaymentPending() {
     if (bookingId) {
       loadBookingData();
     }
-  }, [bookingId]);
+  }, [bookingId, searchParams]);
 
   // Timer for elapsed time
   useEffect(() => {
