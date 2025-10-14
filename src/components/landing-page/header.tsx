@@ -82,20 +82,6 @@ export default function Header({ initialQuery = "" }: HeaderProps) {
             <CalendarDays className="h-5 w-5" />
           </Button>
 
-          {/* MY BOOKINGS - NEW */}
-          {user && (
-            <Link href="/bookings">
-              <Button 
-                variant="ghost" 
-                className="hidden sm:flex items-center gap-2 text-gray-700 hover:text-rose-600 hover:bg-rose-50 transition-all duration-200"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                <span className="font-medium">My Bookings</span>
-              </Button>
-            </Link>
-          )}
 
           {/* User Profile / Login */}
           {user ? (
@@ -109,15 +95,26 @@ export default function Header({ initialQuery = "" }: HeaderProps) {
               </Button>
 
               {openProfile && (
-                <div className="absolute right-0 top-12 bg-white shadow-lg rounded-md py-2 w-40">
-                  <button className="block w-full text-left px-4 py-2 hover:bg-gray-100">
-                    Profile
-                  </button>
+                <div className="absolute right-0 top-12 bg-white/95 backdrop-blur-xl shadow-2xl rounded-2xl border border-gray-200/50 py-2 w-48 overflow-hidden">
+                  <Link href="/profile/home">
+                    <button className="block w-full text-left px-4 py-3 hover:bg-gradient-to-r hover:from-rose-50 hover:to-rose-100 transition-all duration-200 text-gray-700 hover:text-rose-600">
+                      <div className="flex items-center gap-3">
+                        <User className="w-4 h-4" />
+                        <span className="font-medium">Profile</span>
+                      </div>
+                    </button>
+                  </Link>
+                  <div className="border-t border-gray-200/50 my-1"></div>
                   <button
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                    className="block w-full text-left px-4 py-3 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 transition-all duration-200 text-gray-700 hover:text-red-600"
                     onClick={handleLogout}
                   >
-                    Logout
+                    <div className="flex items-center gap-3">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      <span className="font-medium">Logout</span>
+                    </div>
                   </button>
                 </div>
               )}

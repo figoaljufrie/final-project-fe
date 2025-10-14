@@ -103,51 +103,55 @@ export default function UserProfileForm() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-md space-y-6">
-      <h2 className="text-2xl font-bold">My Profile</h2>
-
+    <div className="max-w-2xl mx-auto p-8 space-y-6">
       {/* Edit Button */}
       {!isEditing && (
-        <button
-          onClick={() => setIsEditing(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition"
-        >
-          <Edit2 size={16} /> Edit
-        </button>
+        <div className="flex justify-end">
+          <button
+            onClick={() => setIsEditing(true)}
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-xl hover:from-rose-600 hover:to-rose-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl"
+          >
+            <Edit2 size={16} /> Edit Profile
+          </button>
+        </div>
       )}
 
       {/* Avatar */}
-      <div className="flex flex-col items-center space-y-2">
+      <div className="flex flex-col items-center space-y-4">
         {avatarPreview ? (
           <Image
             src={avatarPreview}
             alt={formData.name ?? "User Avatar"}
             width={128}
             height={128}
-            className={`w-32 h-32 rounded-full object-cover border-4 border-teal-600 ${
+            className={`w-32 h-32 rounded-full object-cover border-4 border-rose-500 shadow-lg ${
               !isEditing ? "opacity-70" : ""
             }`}
           />
         ) : (
           <div
-            className={`w-32 h-32 rounded-full flex items-center justify-center bg-teal-200 text-teal-800 border-4 border-teal-600 ${
+            className={`w-32 h-32 rounded-full flex items-center justify-center bg-gradient-to-br from-rose-100 to-rose-200 text-rose-600 border-4 border-rose-500 shadow-lg ${
               !isEditing ? "opacity-70" : ""
             }`}
           >
             <UserIcon size={48} />
           </div>
         )}
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleAvatarChange}
-          disabled={!isEditing}
-          className={`${!isEditing ? "opacity-50 cursor-not-allowed" : ""}`}
-        />
+        {isEditing && (
+          <div className="text-center">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarChange}
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-rose-50 file:text-rose-700 hover:file:bg-rose-100 transition-all duration-200"
+            />
+            <p className="text-xs text-gray-500 mt-1">Click to change profile picture</p>
+          </div>
+        )}
       </div>
 
       {/* Form Fields */}
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-6">
         {[
           { label: "Name", name: "name", type: "text" },
           { label: "Date of Birth", name: "dateOfBirth", type: "date" },
@@ -159,8 +163,8 @@ export default function UserProfileForm() {
           const value = formData[field.name as keyof User];
 
           return (
-            <div key={field.name}>
-              <label className="block font-medium">{field.label}</label>
+            <div key={field.name} className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-700">{field.label}</label>
               {field.type === "textarea" ? (
                 <textarea
                   name={field.name}
@@ -169,11 +173,12 @@ export default function UserProfileForm() {
                   }
                   onChange={handleChange}
                   disabled={!isEditing}
-                  className={`w-full px-3 py-2 border rounded-lg ${
+                  className={`w-full px-4 py-3 border-2 rounded-xl transition-all duration-200 ${
                     !isEditing
-                      ? "bg-gray-100 text-gray-500 cursor-not-allowed"
-                      : ""
+                      ? "bg-gray-50 text-gray-500 cursor-not-allowed border-gray-200"
+                      : "border-gray-200 focus:ring-4 focus:ring-rose-500/20 focus:border-rose-500 hover:border-gray-300"
                   }`}
+                  rows={3}
                 />
               ) : (
                 <input
@@ -192,10 +197,10 @@ export default function UserProfileForm() {
                     field.type === "date" ? handleDateChange : handleChange
                   }
                   disabled={!isEditing}
-                  className={`w-full px-3 py-2 border rounded-lg ${
+                  className={`w-full px-4 py-3 border-2 rounded-xl transition-all duration-200 ${
                     !isEditing
-                      ? "bg-gray-100 text-gray-500 cursor-not-allowed"
-                      : ""
+                      ? "bg-gray-50 text-gray-500 cursor-not-allowed border-gray-200"
+                      : "border-gray-200 focus:ring-4 focus:ring-rose-500/20 focus:border-rose-500 hover:border-gray-300"
                   }`}
                 />
               )}
@@ -206,16 +211,16 @@ export default function UserProfileForm() {
 
       {/* Save / Discard Buttons */}
       {isEditing && (
-        <div className="flex gap-4">
+        <div className="flex gap-4 pt-4">
           <button
             onClick={handleSave}
-            className="flex items-center gap-2 px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition"
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-xl hover:from-rose-600 hover:to-rose-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl"
           >
-            <Check size={16} /> Save
+            <Check size={16} /> Save Changes
           </button>
           <button
             onClick={handleDiscard}
-            className="flex items-center gap-2 px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
+            className="flex items-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-200 font-semibold border-2 border-gray-200 hover:border-gray-300"
           >
             <X size={16} /> Discard Changes
           </button>
