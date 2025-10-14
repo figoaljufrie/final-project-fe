@@ -193,7 +193,7 @@ export default function BookingDetails() {
               formatDate={formatDate}
               formatTime={formatTime}
             />
-          </div>
+              </div>
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
@@ -206,9 +206,9 @@ export default function BookingDetails() {
               canReview={canReview}
               isCheckingReview={isCheckingReview}
             />
-          </div>
-        </div>
-      </div>
+                          </div>
+                        </div>
+                      </div>
 
       <Footer />
 
@@ -243,14 +243,14 @@ export default function BookingDetails() {
             <div className="text-center mb-6">
               <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <XCircle size={24} className="text-white" />
-              </div>
+                          </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">
                 Cancel Booking
-              </h3>
+                        </h3>
               <p className="text-gray-600">
                 Are you sure you want to cancel this booking? This action cannot be undone.
-              </p>
-            </div>
+                              </p>
+                            </div>
             
             <div className="mb-6">
               <label className="block text-sm font-semibold text-gray-700 mb-3">
@@ -263,8 +263,8 @@ export default function BookingDetails() {
                 className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-red-500/20 focus:border-red-500 transition-all duration-300 resize-none bg-gray-50/50 hover:bg-white"
                 rows={4}
               />
-            </div>
-            
+                    </div>
+
             <div className="flex gap-4">
               <Button
                 variant="outline"
@@ -290,11 +290,11 @@ export default function BookingDetails() {
                 ) : (
                   "Cancel Booking"
                 )}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
     </main>
   );
 }

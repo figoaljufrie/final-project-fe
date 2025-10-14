@@ -115,6 +115,15 @@ export function useBookingDetail(bookingId?: string) {
               router.push(`/bookings/${finalBookingId}/upload-payment`);
             }
           }, 2000);
+        } else if (fromPayment === "pending") {
+          toast("Payment is still being processed. Please wait for confirmation.");
+          setTimeout(() => {
+            if (paymentMethod === "payment_gateway") {
+              router.push(`/bookings/${finalBookingId}/payment-pending`);
+            } else {
+              router.push(`/bookings/${finalBookingId}/upload-payment`);
+            }
+          }, 2000);
         }
       }
     },

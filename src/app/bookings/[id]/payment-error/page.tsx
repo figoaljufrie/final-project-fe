@@ -23,7 +23,7 @@ import Header from "@/components/landing-page/header";
 import Footer from "@/components/landing-page/footer";
 import Link from "next/link";
 import Image from "next/image";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useBookingPaymentStatus } from "@/hooks/payment/use-payment-status";
 import { toast } from "react-hot-toast";
 import { 
@@ -37,9 +37,18 @@ export default function PaymentError() {
   const [isRetrying, setIsRetrying] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState({ hours: 0, minutes: 0, seconds: 0, isExpired: false });
   const params = useParams();
+  const searchParams = useSearchParams();
   const bookingId = params.id as string;
 
   const { bookingData, isLoading, error, reloadBooking } = useBookingPaymentStatus(Number(bookingId));
+
+  // Check if redirected from Midtrans
+  useEffect(() => {
+    const fromMidtrans = searchParams.get('from');
+    if (fromMidtrans === 'error') {
+      toast.error("Payment failed. Redirected from payment gateway.");
+    }
+  }, [searchParams]);
 
   // Update countdown timer every second - moved to top to avoid conditional hook
   useEffect(() => {

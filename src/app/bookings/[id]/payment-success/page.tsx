@@ -2,23 +2,23 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import {
-  CheckCircle,
+import { 
+  CheckCircle, 
   Clock,
   AlertCircle,
   ArrowLeft,
   Loader2,
   CreditCard,
-  Calendar,
+  Calendar, 
   Users,
-  MapPin,
+  MapPin, 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/landing-page/header";
 import Footer from "@/components/landing-page/footer";
 import Link from "next/link";
 import Image from "next/image";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { PaymentService } from "@/lib/services/payment/payment-service";
 import { toast } from "react-hot-toast";
 import { FullScreenLoadingSpinner } from "@/components/ui/loading-spinner";
@@ -58,6 +58,7 @@ export default function PaymentSuccess() {
   const [currentStatus, setCurrentStatus] = useState<string>("");
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const bookingId = params.id as string;
 
   // Load initial booking data
@@ -68,6 +69,12 @@ export default function PaymentSuccess() {
         const data = await PaymentService.getBookingDetails(Number(bookingId));
         setBookingData(data);
         setCurrentStatus(data.status);
+
+        // Check if redirected from Midtrans
+        const fromMidtrans = searchParams.get('from');
+        if (fromMidtrans === 'success') {
+          toast.success("Payment successful! Redirected from payment gateway.");
+        }
 
         // If already confirmed, show success immediately
         if (data.status === "confirmed") {
@@ -86,7 +93,7 @@ export default function PaymentSuccess() {
     if (bookingId) {
       loadBookingData();
     }
-  }, [bookingId]);
+  }, [bookingId, searchParams]);
 
   // Start polling for status changes
   useEffect(() => {
@@ -208,7 +215,7 @@ export default function PaymentSuccess() {
   return (
     <main className="min-h-screen bg-[#F2EEE3]">
       <Header />
-
+      
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Back Button */}
         <Link
@@ -281,17 +288,17 @@ export default function PaymentSuccess() {
               >
                 Try Again
               </Button>
-            </div>
+          </div>
           )}
         </motion.div>
 
         {/* Booking Summary */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white rounded-xl shadow-lg p-6"
-        >
+              className="bg-white rounded-xl shadow-lg p-6"
+            >
           <h2 className="text-xl font-bold text-[#8B7355] mb-6">
             Booking Summary
           </h2>
@@ -299,26 +306,26 @@ export default function PaymentSuccess() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Property Info */}
             <div className="flex items-start gap-4">
-              <Image
+                <Image
                 src={
                   property?.images[0]?.url ||
                   "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
                 }
                 alt={property?.name || "Property"}
-                width={80}
-                height={80}
-                className="w-20 h-20 rounded-lg object-cover"
-              />
-              <div>
+                  width={80}
+                  height={80}
+                  className="w-20 h-20 rounded-lg object-cover"
+                />
+                <div>
                 <h3 className="font-semibold text-[#8B7355]">
                   {property?.name || "Property"}
-                </h3>
+                  </h3>
                 <p className="text-gray-600 text-sm flex items-center gap-1">
                   <MapPin size={14} />
                   {property?.address || "Address not available"}
                 </p>
+                </div>
               </div>
-            </div>
 
             {/* Booking Details */}
             <div className="space-y-3">
@@ -327,7 +334,7 @@ export default function PaymentSuccess() {
                 <span className="text-sm">
                   <strong>Check-in:</strong> {formatDate(bookingData.checkIn)}
                 </span>
-              </div>
+                </div>
               <div className="flex items-center gap-2">
                 <Calendar size={16} className="text-gray-500" />
                 <span className="text-sm">
@@ -339,14 +346,14 @@ export default function PaymentSuccess() {
                 <span className="text-sm">
                   <strong>Guests:</strong> {bookingData.totalGuests} guests
                 </span>
-              </div>
+                  </div>
               <div className="flex items-center gap-2">
                 <CreditCard size={16} className="text-gray-500" />
                 <span className="text-sm">
                   <strong>Total:</strong> Rp{" "}
                   {bookingData.totalAmount.toLocaleString("id-ID")}
                 </span>
-              </div>
+                  </div>
             </div>
           </div>
         </motion.div>
