@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import type { User, UpdateUserPayload } from "@/lib/types/account/user-type";
+import type { User } from "@/lib/types/account/user-type";
 
 // --- Get Users ---
 export async function getAllUsers(): Promise<User[]> {
@@ -23,7 +23,7 @@ export async function updateEmail(email: string): Promise<User> {
   return data.data;
 }
 
-export async function updateUser(payload: UpdateUserPayload): Promise<User> {
+export async function updateUser(payload: Partial<User>): Promise<User> {
   const { data } = await api.patch("/users/update-user", payload);
   return data.data;
 }

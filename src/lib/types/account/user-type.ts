@@ -5,17 +5,15 @@ export interface User {
   id: number;
   name: string;
   email: string;
-  username?: string;
-  avatar?: string;
+  username?: string | null;
+  avatarUrl?: string | null;
   role: UserRole;
-  isVerified: boolean;
+  isEmailVerified: boolean;
+  dateOfBirth?: Date | null;
+  phoneNumber?: string | null;
+  address?: string | null;
+  city?: string | null;
+  country?: string | null;
   createdAt: string;
   updatedAt: string;
-}
-
-// Payloads
-export interface UpdateUserPayload {
-  name?: string;
-  username?: string;
-  bio?: string;
 }
