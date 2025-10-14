@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import { usePropertyDetail } from "@/hooks/Inventory/property/use-property-detail";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { FullScreenLoadingSpinner } from "@/components/ui/loading-spinner";
 
 // Host interface
 interface Host {
@@ -80,12 +81,14 @@ export default function PropertyDetailsPage() {
     fetchHost();
   }, [propertyData?.tenantId]);
 
-  if (isLoading)
+  if (isLoading) {
     return (
-      <p className="py-16 text-center text-gray-500">
-        Loading property details...
-      </p>
+      <FullScreenLoadingSpinner
+        message="Loading property details"
+        subMessage="Please wait while we fetch the property information..."
+      />
     );
+  }
   if (isError || !propertyData)
     return (
       <section className="py-16 text-center text-red-500">
@@ -105,81 +108,101 @@ export default function PropertyDetailsPage() {
     ) ?? [];
 
   return (
-    <main className="flex flex-col min-h-screen bg-[#F2EEE3]">
+    <div className="bg-gradient-to-br from-gray-50 via-white to-gray-100 min-h-screen">
       <Header />
-
-      <div className="flex-1 max-w-7xl mx-auto w-full px-4 py-6">
-        {/* Property Name */}
-        <h1 className="text-3xl font-bold text-[#8B7355] mb-6">
-          {propertyData.name}
-        </h1>
-
-        {/* Gallery */}
-        <div className="mb-6">
+      
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        {/* Gallery - Full width */}
+        <div className="mb-8">
           <PropertyGallery propertyId={propertyId} />
         </div>
-
-        {/* Property Info */}
-        <div className="mb-6">
-          <PropertyInfo propertyId={propertyId} />
-        </div>
-
-        {/* Host Info */}
-        <div className="mb-6">
-          {hostLoading ? (
-            <p className="text-gray-500">Loading host info...</p>
-          ) : (
-            <PropertyHost
-              host={host ?? { name: "Unknown", rating: 4.9, reviews: 0 }}
-            />
-          )}
-        </div>
-
-        {/* Rooms & Booking */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <div className="lg:col-span-2">
-            <RoomSelection
-              propertyId={propertyId}
-              selectedRooms={selectedRooms}
-              setSelectedRooms={setSelectedRooms}
-            />
-          </div>
-
-          <div className="lg:col-span-1">
-            <BookingCard 
-              selectedRooms={selectedRooms} 
-              rooms={bookingRooms} 
-              propertyId={propertyId}
-            />
-          </div>
-        </div>
-
-        {/* Reviews */}
-        <div className="mb-6">
-          <h2 className="text-2xl font-semibold mb-4">Reviews</h2>
-          {mockReviews.length === 0 ? (
-            <p className="text-gray-500">No reviews yet.</p>
-          ) : (
-            <div className="space-y-4">
-              {mockReviews.map((rev) => (
-                <div
-                  key={rev.id}
-                  className="p-4 bg-white rounded shadow-sm border"
-                >
-                  <div className="flex justify-between mb-2">
-                    <span className="font-semibold">{rev.userName}</span>
-                    <span className="text-yellow-500">{rev.rating} ★</span>
-                  </div>
-                  <p className="text-gray-700">{rev.comment}</p>
-                  <p className="text-gray-400 text-sm mt-1">{rev.date}</p>
-                </div>
-              ))}
+        
+        {/* Content Grid - 2 columns on desktop */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+          {/* Left Column: Property Info & Rooms */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Property Name */}
+            <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-6 border border-gray-200/50 shadow-lg">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                {propertyData.name}
+              </h1>
+              <p className="text-gray-600">{propertyData.address}</p>
             </div>
-          )}
+
+            {/* Property Info */}
+            <PropertyInfo propertyId={propertyId} />
+
+            {/* Room Selection */}
+            <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-6 border border-gray-200/50 shadow-lg">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Select Rooms</h2>
+              <RoomSelection
+                propertyId={propertyId}
+                selectedRooms={selectedRooms}
+                setSelectedRooms={setSelectedRooms}
+              />
+            </div>
+
+            {/* Host Info */}
+            <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-6 border border-gray-200/50 shadow-lg">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Meet Your Host</h2>
+              {hostLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="text-center">
+                    <div className="w-12 h-12 bg-gradient-to-br from-rose-500 to-rose-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
+                      <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                    <p className="text-gray-500 text-sm">Loading host info...</p>
+                  </div>
+                </div>
+              ) : (
+                <PropertyHost
+                  host={host ?? { name: "Unknown", rating: 4.9, reviews: 0 }}
+                />
+              )}
+            </div>
+            
+            {/* Reviews Section */}
+            <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-6 border border-gray-200/50 shadow-lg">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Reviews</h2>
+              {mockReviews.length === 0 ? (
+                <p className="text-gray-500">No reviews yet for this property.</p>
+              ) : (
+                <div className="space-y-4">
+                  {mockReviews.map((rev) => (
+                    <div
+                      key={rev.id}
+                      className="p-4 bg-gray-50 rounded-xl border border-gray-200"
+                    >
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="font-semibold text-gray-900">{rev.userName}</span>
+                        <div className="flex items-center gap-1">
+                          <span className="text-yellow-500">★</span>
+                          <span className="font-medium text-gray-700">{rev.rating}</span>
+                        </div>
+                      </div>
+                      <p className="text-gray-700 mb-2">{rev.comment}</p>
+                      <p className="text-gray-400 text-sm">{rev.date}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          
+          {/* Right Column: Booking Card (Sticky) */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-24">
+              <BookingCard 
+                selectedRooms={selectedRooms}
+                rooms={bookingRooms}
+                propertyId={propertyId}
+              />
+            </div>
+          </div>
         </div>
       </div>
-
+      
       <Footer />
-    </main>
+    </div>
   );
 }

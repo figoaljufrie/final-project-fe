@@ -52,10 +52,10 @@ export default function BookingDetailHeader({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-xl shadow-lg p-6 mb-6"
+      className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200/50 p-8 mb-8"
     >
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div className="flex items-center gap-6">
           <div className="relative">
             <Image
               src={
@@ -63,13 +63,13 @@ export default function BookingDetailHeader({
                 "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
               }
               alt={property?.name || "Property"}
-              width={80}
-              height={80}
-              className="w-20 h-20 rounded-lg object-cover"
+              width={100}
+              height={100}
+              className="w-24 h-24 rounded-2xl object-cover shadow-lg"
             />
-            <div className="absolute -top-2 -right-2">
+            <div className="absolute -top-3 -right-3">
               <span
-                className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(
+                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl text-xs font-semibold shadow-lg ${getStatusColor(
                   bookingData.status
                 )}`}
               >
@@ -79,23 +79,23 @@ export default function BookingDetailHeader({
             </div>
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-[#8B7355]">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">
               {property?.name || "Property"}
             </h1>
-            <p className="text-gray-600">
+            <p className="text-lg text-gray-600 font-medium mb-1">
               {property?.address || "Address not available"}
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 font-medium">
               Booking #{bookingData.bookingNo}
             </p>
           </div>
         </div>
 
         <div className="text-right">
-          <div className="text-3xl font-bold text-[#8B7355]">
+          <div className="text-4xl font-bold bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent mb-1">
             Rp {bookingData.totalAmount.toLocaleString("id-ID")}
           </div>
-          <p className="text-sm text-gray-600">Total Amount</p>
+          <p className="text-sm text-gray-600 font-medium">Total Amount</p>
         </div>
       </div>
     </motion.div>

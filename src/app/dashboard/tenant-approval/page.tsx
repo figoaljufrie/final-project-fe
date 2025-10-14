@@ -5,9 +5,9 @@ import { useTenantApproval } from "@/hooks/tenant-approval/use-tenant-approval";
 import BookingSearchFilter from "@/components/dashboard/booking/BookingSearchFilter";
 import BookingStatsCards from "@/components/dashboard/booking/BookingStatsCards";
 import BookingTable from "@/components/dashboard/booking/BookingTable";
-import BookingSkeleton from "@/components/dashboard/booking/BookingSkeleton";
 import TenantApprovalHeader from "@/components/dashboard/tenant-approval/TenantApprovalHeader";
 import TenantApprovalPagination from "@/components/dashboard/tenant-approval/TenantApprovalPagination";
+import { FullScreenLoadingSpinner } from "@/components/ui/loading-spinner";
 
 // Interface for BookingTable compatibility
 interface BookingTableBooking {
@@ -67,6 +67,15 @@ export default function TenantApprovalPage() {
     visible: { opacity: 1, y: 0 },
   };
 
+  if (isLoading) {
+    return (
+      <FullScreenLoadingSpinner
+        message="Loading tenant approvals"
+        subMessage="Please wait while we fetch booking requests..."
+      />
+    );
+  }
+
   return (
         <motion.div
       variants={containerVariants}
@@ -95,9 +104,7 @@ export default function TenantApprovalPage() {
           variants={itemVariants}
           className="bg-white rounded-xl shadow-lg overflow-hidden"
         >
-          {isLoading ? (
-            <BookingSkeleton />
-          ) : bookings.length === 0 ? (
+          {bookings.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-gray-500 text-lg mb-2">
                 No bookings found

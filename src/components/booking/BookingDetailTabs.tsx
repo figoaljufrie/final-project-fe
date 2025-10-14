@@ -63,8 +63,8 @@ export default function BookingDetailTabs({
   ];
 
   return (
-    <div className="bg-white rounded-xl shadow-lg mb-6">
-      <div className="border-b border-gray-200">
+    <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200/50 mb-8">
+      <div className="border-b border-gray-200/50">
         <nav className="flex">
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -72,13 +72,13 @@ export default function BookingDetailTabs({
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as 'details' | 'payment')}
-                className={`flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
+                className={`flex items-center gap-3 px-8 py-5 text-sm font-semibold border-b-2 transition-all duration-300 ${
                   activeTab === tab.id
-                    ? "border-[#8B7355] text-[#8B7355]"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    ? "border-rose-500 text-rose-600 bg-rose-50/50"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50/50"
                 }`}
               >
-                <Icon size={16} />
+                <Icon size={18} />
                 {tab.label}
               </button>
             );
@@ -86,7 +86,7 @@ export default function BookingDetailTabs({
         </nav>
       </div>
 
-      <div className="p-6">
+      <div className="p-8">
         {activeTab === "details" && (
           <BookingDetailsTab
             bookingData={bookingData}

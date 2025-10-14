@@ -7,7 +7,7 @@ import HeroCarousel from "@/components/landing-page/hero-carousel";
 
 export default function HomePage() {
   return (
-    <main className="flex flex-col min-h-screen bg-[#F2EEE3]">
+    <main className="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
       <Header />
 
       <HeroCarousel />

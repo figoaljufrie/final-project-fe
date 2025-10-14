@@ -11,6 +11,7 @@ import {
   useExploreQuery,
 } from "@/hooks/Inventory/property/use-explore-query";
 import { PropertyCategory } from "@/lib/types/enums/enums-type";
+import { CardLoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface PropertyListProps {
   pageType?: "landing" | "explore";
@@ -61,12 +62,16 @@ export default function PropertyList({
     console.log("Saved toggled:", id);
   };
 
-  if (isLoading)
+  if (isLoading) {
     return (
-      <section className="py-16 text-center text-gray-500">
-        <p>Loading properties...</p>
+      <section className="py-16 flex items-center justify-center">
+        <CardLoadingSpinner
+          message="Loading properties"
+          subMessage="Please wait while we fetch available properties..."
+        />
       </section>
     );
+  }
 
   if (isError)
     return (
@@ -94,10 +99,10 @@ export default function PropertyList({
       {/* Landing page header */}
       {pageType === "landing" && (
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-[#8B7355] mb-4">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">
             Explore by Category
           </h2>
-          <p className="text-[#D6D5C9] text-lg max-w-2xl mx-auto">
+          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
             Find the perfect place to stay from our curated collection
           </p>
         </div>

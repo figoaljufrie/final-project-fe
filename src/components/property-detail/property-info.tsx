@@ -2,6 +2,7 @@
 
 import { MapPin, Home } from "lucide-react";
 import { usePropertyDetail } from "@/hooks/Inventory/property/use-property-detail";
+import { CardLoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface PropertyInfoProps {
   propertyId: number;
@@ -10,8 +11,16 @@ interface PropertyInfoProps {
 export default function PropertyInfo({ propertyId }: PropertyInfoProps) {
   const { data, isLoading, isError, refetch } = usePropertyDetail(propertyId);
 
-  if (isLoading)
-    return <p className="text-gray-500">Loading property info...</p>;
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <CardLoadingSpinner
+          message="Loading property info"
+          subMessage="Please wait while we fetch property details..."
+        />
+      </div>
+    );
+  }
   if (isError || !data)
     return (
       <div className="text-red-500">

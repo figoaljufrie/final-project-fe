@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import {
   Upload,
   CheckCircle,
@@ -26,6 +25,7 @@ import {
   formatTimeRemaining,
   getDeadlineText,
 } from "@/lib/utils/payment-deadline";
+import { FullScreenLoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface BookingData {
   id: number;
@@ -216,26 +216,32 @@ export default function UploadPaymentProof() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2
-            size={48}
-            className="animate-spin mx-auto mb-4 text-[#8B7355]"
-          />
-          <p className="text-gray-600">Loading booking data...</p>
-        </div>
-      </div>
+      <FullScreenLoadingSpinner
+        message="Loading booking details"
+        subMessage="Please wait while we fetch your booking information..."
+      />
     );
   }
 
   if (!bookingData) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <AlertCircle size={48} className="mx-auto mb-4 text-red-500" />
-          <p className="text-gray-600">Booking not found</p>
-          <Link href="/" className="text-[#8B7355] hover:underline">
-            Return to home
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-40" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f3f4f6' fill-opacity='0.3'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+        }}></div>
+        
+        <div className="relative text-center">
+          <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <AlertCircle size={32} className="text-white" />
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">Booking not found</h3>
+          <p className="text-gray-600 mb-6">The booking you&apos;re looking for doesn&apos;t exist or has been removed.</p>
+          <Link
+            href="/"
+            className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-xl hover:from-rose-600 hover:to-rose-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl"
+          >
+            Return to Home
           </Link>
         </div>
       </div>
@@ -246,355 +252,261 @@ export default function UploadPaymentProof() {
   const nights = bookingData.items[0]?.nights || 0;
 
   return (
-    <main className="min-h-screen bg-[#F2EEE3]">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
       <Header />
-
-      <div className="container mx-auto px-4 py-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="max-w-4xl mx-auto"
-        >
-          {/* Header */}
-          <div className="flex items-center gap-4 mb-8">
-            <Link
-              href={`/bookings/${bookingId}`}
-              className="p-2 hover:bg-white/50 rounded-full transition-colors"
-            >
-              <ArrowLeft size={20} className="text-[#8B7355]" />
-            </Link>
-            <div>
-              <h1 className="text-3xl font-bold text-[#8B7355]">
-                Upload Payment Proof
-              </h1>
-              <p className="text-gray-600">
-                Upload your bank transfer receipt to complete the booking
-              </p>
-            </div>
+      
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        {/* Back Button */}
+        <Link href={`/bookings/${bookingId}`} className="inline-flex items-center gap-2 text-rose-600 hover:text-rose-700 transition-all duration-200 mb-6 group">
+          <ArrowLeft className="w-5 h-5 transform group-hover:-translate-x-1 transition-transform duration-200" />
+          <span className="font-medium">Back to Booking Details</span>
+        </Link>
+        
+        {/* Page Header */}
+        <div className="text-center mb-8">
+          <div className="w-20 h-20 bg-gradient-to-br from-rose-500 to-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <Upload size={32} className="text-white" />
           </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Upload Payment Proof</h1>
+          <p className="text-gray-600">Complete your booking by uploading bank transfer receipt</p>
+        </div>
 
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Upload Section */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="lg:col-span-2 space-y-6"
-            >
-              {/* Upload Area */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-xl font-bold text-[#8B7355] mb-4">
-                  Payment Proof Upload
-                </h2>
-
-                <div
-                  className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
-                    dragActive
-                      ? "border-[#8B7355] bg-[#8B7355]/5"
-                      : file
-                      ? "border-green-500 bg-green-50"
-                      : "border-gray-300 hover:border-gray-400"
-                  }`}
-                  onDragEnter={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDragOver={handleDrag}
-                  onDrop={handleDrop}
-                >
-                  {file ? (
-                    <motion.div
-                      initial={{ scale: 0.9, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      className="space-y-4"
-                    >
-                      <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-                        <CheckCircle size={32} className="text-green-600" />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-green-800">
-                          {file.name}
-                        </p>
-                        <p className="text-sm text-green-600">
-                          {(file.size / 1024 / 1024).toFixed(2)} MB
-                        </p>
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setFile(null)}
-                        className="border-red-300 text-red-700 hover:bg-red-50"
-                      >
-                        Remove File
-                      </Button>
-                    </motion.div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
-                        <Upload size={32} className="text-gray-400" />
-                      </div>
-                      <div>
-                        <p className="text-lg font-semibold text-gray-700 mb-2">
-                          Drop your payment proof here
-                        </p>
-                        <p className="text-gray-500 mb-2">
-                          or click to browse files
-                        </p>
-                        <p className="text-sm text-gray-400">
-                          Maximum file size: 1MB (JPG, PNG only)
-                        </p>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleFileChange}
-                          className="hidden"
-                          id="file-upload"
-                        />
-                        <label
-                          htmlFor="file-upload"
-                          className="inline-block px-6 py-2 bg-[#8B7355] text-white rounded-lg cursor-pointer hover:bg-[#7A6349] transition-colors"
-                        >
-                          Choose File
-                        </label>
-                      </div>
-                    </div>
-                  )}
+        {/* Main Grid: Upload Zone + Booking Info */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+          
+          {/* LEFT: Upload Zone */}
+          <div className="lg:col-span-2">
+            <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-8 border border-gray-200/50 shadow-xl">
+              <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-rose-500 to-rose-600 rounded-lg flex items-center justify-center">
+                  <Upload size={16} className="text-white" />
                 </div>
-
-                {/* File Error Message */}
-                {fileError && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg"
-                  >
-                    <div className="flex items-center gap-2">
-                      <AlertCircle size={16} className="text-red-600" />
-                      <p className="text-red-800 text-sm font-medium">
-                        {fileError}
+                Payment Proof Upload
+              </h2>
+              
+              {/* Deadline Timer - Beautiful */}
+              {!timeRemaining.isExpired && bookingData?.paymentDeadline && (
+                <div className="mb-6 p-4 bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-200 rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center shadow-lg">
+                      <Clock size={20} className="text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-bold text-orange-900 mb-1">Payment Deadline</h3>
+                      <div className="text-2xl font-bold text-orange-800">
+                        {formatTimeRemaining(timeRemaining.hours, timeRemaining.minutes, timeRemaining.seconds)}
+                      </div>
+                      <p className="text-xs text-orange-600 mt-1">
+                        Complete within {getDeadlineText(bookingData.paymentMethod)} from booking creation
                       </p>
                     </div>
-                  </motion.div>
-                )}
+                  </div>
+                </div>
+              )}
 
-                {/* Upload Button */}
+              {/* Upload Zone - Enhanced */}
+              <div 
+                className={`border-3 border-dashed rounded-2xl p-12 text-center transition-all duration-300 ${
+                  dragActive 
+                    ? 'border-rose-500 bg-rose-50' 
+                    : 'border-gray-300 bg-gray-50/50 hover:border-rose-300 hover:bg-rose-50/30'
+                }`}
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+              >
+                <div className="w-16 h-16 bg-gradient-to-br from-gray-200 to-gray-300 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Upload size={28} className="text-gray-600" />
+                </div>
+                
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Drop your payment proof here</h3>
+                <p className="text-gray-600 mb-4">or click to browse files</p>
+                <p className="text-sm text-gray-500 mb-6">Maximum file size: 1MB (JPG, PNG only)</p>
+                
+                <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" id="file-input" />
+                <label htmlFor="file-input">
+                  <Button className="bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer">
+                    Choose File
+                  </Button>
+                </label>
+                
+                {/* File Preview */}
                 {file && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-6"
-                  >
-                    <Button
-                      onClick={handleUpload}
-                      disabled={isUploading}
-                      className="w-full bg-[#8B7355] hover:bg-[#7A6349] text-white"
-                    >
-                      {isUploading ? (
-                        <>
-                          <Loader2 size={16} className="animate-spin mr-2" />
-                          Uploading...
-                        </>
-                      ) : (
-                        <>
-                          <Upload size={16} className="mr-2" />
-                          Upload Payment Proof
-                        </>
-                      )}
-                    </Button>
-                  </motion.div>
+                  <div className="mt-6 p-4 bg-white rounded-xl border-2 border-green-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                          <CheckCircle size={20} className="text-green-600" />
+                        </div>
+                        <div className="text-left">
+                          <p className="font-medium text-gray-900">{file.name}</p>
+                          <p className="text-sm text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                        </div>
+                      </div>
+                      <button onClick={() => setFile(null)} className="text-red-500 hover:text-red-700">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
                 )}
-
-                {/* Upload Status */}
-                {uploadStatus === "success" && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg"
-                  >
-                    <div className="flex items-center gap-2">
-                      <CheckCircle size={20} className="text-green-600" />
-                      <p className="text-green-800 font-medium">
-                        Upload successful!
-                      </p>
-                    </div>
-                    <p className="text-green-700 text-sm mt-1">
-                      Your payment proof has been submitted for review.
-                    </p>
-                    <p className="text-green-600 text-xs mt-2">
-                      The property owner will review and confirm your payment.
-                      You&apos;ll receive an email notification once confirmed.
-                    </p>
-                  </motion.div>
-                )}
-
-                {uploadStatus === "error" && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg"
-                  >
-                    <div className="flex items-center gap-2">
-                      <AlertCircle size={20} className="text-red-600" />
-                      <p className="text-red-800 font-medium">Upload failed</p>
-                    </div>
-                    <p className="text-red-700 text-sm mt-1">
-                      Please try again or contact support if the problem
-                      persists.
-                    </p>
-                  </motion.div>
-                )}
-              </div>
-
-              {/* Bank Details */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="text-lg font-bold text-[#8B7355] mb-4">
-                  Bank Transfer Details
-                </h3>
-                <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Bank Name:</span>
-                    <span className="font-medium">Bank Central Asia (BCA)</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Account Number:</span>
-                    <span className="font-medium font-mono">1234567890</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Account Name:</span>
-                    <span className="font-medium">Nginepin Property</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Amount:</span>
-                    <span className="font-bold text-[#8B7355]">
-                      Rp {bookingData.totalAmount.toLocaleString("id-ID")}
-                    </span>
-                  </div>
                 </div>
-                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <p className="text-yellow-800 text-sm">
-                    <strong>Important:</strong> Please include your booking
-                    number ({bookingData.bookingNo}) in the transfer
-                    description.
-                  </p>
-                </div>
-              </div>
-            </motion.div>
 
-            {/* Booking Summary */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 }}
-              className="space-y-6"
-            >
-              {/* Property Card */}
-              <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                <div className="relative h-48">
-                  <Image
-                    src={
-                      property?.images[0]?.url ||
-                      "https://images.unsplash.com/photo-1572120360610-d971b9d7767c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                    }
-                    alt={property?.name || "Property"}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div className="p-4">
-                  <h3 className="font-bold text-[#8B7355] mb-2">
-                    {property?.name}
-                  </h3>
-                  <div className="flex items-center gap-2 text-gray-600 mb-3">
-                    <MapPin size={14} />
-                    <span className="text-sm">{property?.address}</span>
-                  </div>
-
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2">
-                      <Calendar size={14} className="text-gray-500" />
-                      <span className="text-gray-600">Check-in:</span>
-                      <span className="font-medium">
-                        {formatDate(bookingData.checkIn)}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Calendar size={14} className="text-gray-500" />
-                      <span className="text-gray-600">Check-out:</span>
-                      <span className="font-medium">
-                        {formatDate(bookingData.checkOut)}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Users size={14} className="text-gray-500" />
-                      <span className="text-gray-600">Guests:</span>
-                      <span className="font-medium">
-                        {bookingData.totalGuests} • {nights} nights
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Payment Summary */}
-              <div className="bg-white rounded-xl shadow-lg p-4">
-                <h3 className="font-bold text-[#8B7355] mb-4">
-                  Payment Summary
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Subtotal</span>
-                    <span className="font-medium">
-                      Rp {bookingData.totalAmount.toLocaleString("id-ID")}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Taxes & Fees</span>
-                    <span className="font-medium">$0</span>
-                  </div>
-                  <div className="border-t pt-3">
-                    <div className="flex justify-between">
-                      <span className="font-semibold">Total</span>
-                      <span className="font-bold text-[#8B7355]">
-                        Rp {bookingData.totalAmount.toLocaleString("id-ID")}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Payment Deadline */}
-              {bookingData.paymentDeadline && !timeRemaining.isExpired && (
-                <div className="bg-white rounded-xl shadow-lg p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Clock size={16} className="text-orange-600" />
-                    <h3 className="font-bold text-orange-800">
-                      Payment Deadline
-                    </h3>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-orange-800">
-                      {formatTimeRemaining(
-                        timeRemaining.hours,
-                        timeRemaining.minutes,
-                        timeRemaining.seconds
-                      )}
-                    </div>
-                    <p className="text-sm text-orange-600">
-                      {timeRemaining.isExpired
-                        ? "Payment deadline has expired"
-                        : "Time remaining to upload payment proof"}
-                    </p>
-                    <p className="text-xs text-orange-500 mt-1">
-                      Complete within{" "}
-                      {getDeadlineText(bookingData.paymentMethod)} from booking
-                      creation
+              {/* File Error Message */}
+              {fileError && (
+                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle size={16} className="text-red-600" />
+                    <p className="text-red-800 text-sm font-medium">
+                      {fileError}
                     </p>
                   </div>
                 </div>
               )}
-            </motion.div>
-          </div>
-        </motion.div>
-      </div>
+              
+              {/* Upload Button */}
+              <Button 
+                onClick={handleUpload}
+                disabled={!file || isUploading}
+                className="w-full mt-6 bg-gradient-to-r from-rose-500 via-rose-600 to-pink-600 text-white py-4 rounded-xl hover:from-rose-600 hover:via-rose-700 hover:to-pink-700 transition-all duration-300 disabled:opacity-50 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-[1.02] active:scale-[0.98]"
+              >
+                {isUploading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 size={20} className="animate-spin" />
+                    Uploading...
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center gap-2">
+                    <Upload size={20} />
+                    Upload Payment Proof
+                  </div>
+                )}
+              </Button>
 
+              {/* Upload Status */}
+              {uploadStatus === "success" && (
+                <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-xl">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle size={20} className="text-green-600" />
+                    <p className="text-green-800 font-medium">
+                      Upload successful!
+                    </p>
+                  </div>
+                  <p className="text-green-700 text-sm mt-1">
+                    Your payment proof has been submitted for review.
+                  </p>
+                  <p className="text-green-600 text-xs mt-2">
+                    The property owner will review and confirm your payment.
+                    You&apos;ll receive an email notification once confirmed.
+                  </p>
+                </div>
+              )}
+
+              {uploadStatus === "error" && (
+                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle size={20} className="text-red-600" />
+                    <p className="text-red-800 font-medium">Upload failed</p>
+                  </div>
+                  <p className="text-red-700 text-sm mt-1">
+                    Please try again or contact support if the problem persists.
+                  </p>
+                </div>
+              )}
+            </div>
+            
+            {/* Bank Transfer Instructions */}
+            <div className="mt-6 bg-white/95 backdrop-blur-xl rounded-2xl p-6 border border-gray-200/50 shadow-lg">
+              <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <div className="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                Bank Transfer Instructions
+              </h3>
+              <ol className="space-y-3 text-sm text-gray-700">
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                  <span>Transfer to our bank account (details will be sent via email)</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                  <span>Take a screenshot of your transfer receipt</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                  <span>Upload the receipt using the form above</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex-shrink-0 w-6 h-6 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center text-xs font-bold">4</span>
+                  <span>Wait for tenant confirmation (usually within 24 hours)</span>
+                </li>
+              </ol>
+            </div>
+          </div>
+
+          {/* RIGHT: Booking Summary - Sticky */}
+          <div className="lg:col-span-1">
+            <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-6 border border-gray-200/50 shadow-xl sticky top-24">
+              {/* Property Image */}
+              {property?.images[0] && (
+                <div className="relative h-48 rounded-xl overflow-hidden mb-4">
+                  <Image 
+                    src={property.images[0].url}
+                    alt={property.name}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              )}
+              
+              {/* Property Name */}
+              <h3 className="text-lg font-bold text-gray-900 mb-4">
+                {property?.name}
+              </h3>
+              
+              {/* Booking Details */}
+              <div className="space-y-3 text-sm">
+                <div className="flex items-center gap-2 text-gray-700">
+                  <MapPin size={16} className="text-rose-600" />
+                  <span>{property?.address}</span>
+                </div>
+                
+                <div className="flex items-center gap-2 text-gray-700">
+                  <Calendar size={16} className="text-rose-600" />
+                  <span>Check-in: {formatDate(bookingData.checkIn)}</span>
+                </div>
+                
+                <div className="flex items-center gap-2 text-gray-700">
+                  <Calendar size={16} className="text-rose-600" />
+                  <span>Check-out: {formatDate(bookingData.checkOut)}</span>
+                </div>
+                
+                <div className="flex items-center gap-2 text-gray-700">
+                  <Users size={16} className="text-rose-600" />
+                  <span>{bookingData.totalGuests} Guests • {nights} nights</span>
+                </div>
+              </div>
+              
+              {/* Total Amount */}
+              <div className="mt-6 pt-6 border-t-2 border-gray-200">
+                <div className="flex justify-between items-center">
+                  <span className="text-lg font-semibold text-gray-700">Total Amount</span>
+                  <span className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                    Rp {bookingData.totalAmount.toLocaleString('id-ID')}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+      
       <Footer />
-    </main>
+    </div>
   );
 }

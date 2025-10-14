@@ -60,12 +60,6 @@ const navigation = [
     icon: BarChart3,
     description: "Business Insights",
   },
-  {
-    name: "Reviews",
-    href: "/dashboard/reviews",
-    icon: Star,
-    description: "Guest Reviews",
-  },
 ];
 
 const userMenu = [

@@ -70,7 +70,7 @@ export default function PropertyCard({
 
         {/* Category */}
         <div className="absolute top-3 left-3">
-          <span className="px-2 py-1 text-xs font-medium bg-[#8B7355] text-white rounded-full">
+          <span className="px-2 py-1 text-xs font-medium bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-full">
             {category}
           </span>
         </div>
@@ -98,7 +98,7 @@ export default function PropertyCard({
         <div className="flex items-center justify-between mt-1">
           <div className="flex flex-col">
             <span className="text-sm text-gray-500">Starts from</span>
-            <span className="text-lg font-bold text-[#8B7355]">${price}</span>
+            <span className="text-lg font-bold text-gray-900">${price}</span>
             <span className="text-sm text-gray-500">/ night</span>
           </div>
 
@@ -108,7 +108,7 @@ export default function PropertyCard({
                 e.stopPropagation(); // Prevent triggering card click
                 onView(id);
               }}
-              className="px-4 py-2 bg-[#8B7355] text-white rounded-lg hover:bg-[#7a6348] transition"
+              className="px-4 py-2 bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-lg hover:from-rose-600 hover:to-rose-700 transition-all duration-200"
             >
               View
             </button>
