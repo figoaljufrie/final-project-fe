@@ -32,15 +32,15 @@ export default function PropertyInfo({ propertyId }: PropertyInfoProps) {
   const { description, city, province, address, category } = data;
 
   return (
-    <div className="bg-white rounded-lg shadow-lg border border-[#D6D5C9] p-6">
-      <h2 className="text-xl font-bold text-[#8B7355] mb-4">
+    <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200/50 p-6">
+      <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-4">
         About this property
       </h2>
 
       {/* Location & Category Info */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 pb-4 border-b border-[#D6D5C9]">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 pb-4 border-b border-gray-200/50">
         <div className="flex items-start gap-3">
-          <MapPin className="w-5 h-5 text-[#8B7355] flex-shrink-0 mt-0.5" />
+          <MapPin className="w-5 h-5 text-rose-500 flex-shrink-0 mt-0.5" />
           <div>
             <div className="text-xs text-gray-500 uppercase font-medium">
               City
@@ -50,7 +50,7 @@ export default function PropertyInfo({ propertyId }: PropertyInfoProps) {
         </div>
 
         <div className="flex items-start gap-3">
-          <MapPin className="w-5 h-5 text-[#8B7355] flex-shrink-0 mt-0.5" />
+          <MapPin className="w-5 h-5 text-rose-500 flex-shrink-0 mt-0.5" />
           <div>
             <div className="text-xs text-gray-500 uppercase font-medium">
               Province
@@ -62,7 +62,7 @@ export default function PropertyInfo({ propertyId }: PropertyInfoProps) {
         </div>
 
         <div className="flex items-start gap-3">
-          <Home className="w-5 h-5 text-[#8B7355] flex-shrink-0 mt-0.5" />
+          <Home className="w-5 h-5 text-rose-500 flex-shrink-0 mt-0.5" />
           <div>
             <div className="text-xs text-gray-500 uppercase font-medium">
               Category
@@ -77,7 +77,7 @@ export default function PropertyInfo({ propertyId }: PropertyInfoProps) {
       {/* Full Address */}
       {address && (
         <div className="mb-4 flex items-start gap-3">
-          <MapPin className="w-5 h-5 text-[#8B7355] flex-shrink-0 mt-0.5" />
+          <MapPin className="w-5 h-5 text-rose-500 flex-shrink-0 mt-0.5" />
           <div>
             <div className="text-xs text-gray-500 uppercase font-medium mb-1">
               Address

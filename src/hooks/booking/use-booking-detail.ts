@@ -63,40 +63,8 @@ export function useBookingDetail(bookingId?: string) {
 
       const { status, paymentMethod } = bookingData;
 
-      // If payment is confirmed, show success message and redirect
-      if (status === "confirmed") {
-        toast.success("Payment confirmed! Your booking is now confirmed.");
-        setTimeout(() => {
-          router.push(`/bookings/${finalBookingId}`);
-        }, 3000);
-        return;
-      }
-
-      // If payment is completed, show completion message
-      if (status === "completed") {
-        toast.success("Booking completed! Thank you for your stay.");
-        return;
-      }
-
-      // If booking is cancelled, show cancellation message
-      if (status === "cancelled") {
-        toast.error("This booking has been cancelled.");
-        setTimeout(() => {
-          router.push("/bookings");
-        }, 3000);
-        return;
-      }
-
-      // If booking is expired, show expiration message
-      if (status === "expired") {
-        toast.error("This booking has expired.");
-        setTimeout(() => {
-          router.push("/bookings");
-        }, 3000);
-        return;
-      }
-
-      // If payment is still pending, check if we should redirect to payment pages
+      // Only handle redirects for specific payment-related scenarios
+      // Don't auto-redirect for normal status viewing
       if (status === "waiting_for_payment") {
         const urlParams = new URLSearchParams(window.location.search);
         const fromPayment = urlParams.get("from");

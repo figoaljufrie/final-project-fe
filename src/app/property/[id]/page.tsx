@@ -20,23 +20,8 @@ interface Host {
   reviews: number;
 }
 
-// Simple mock reviews
-const mockReviews = [
-  {
-    id: 1,
-    userName: "Alice",
-    rating: 5,
-    comment: "Amazing stay!",
-    date: "2025-10-13",
-  },
-  {
-    id: 2,
-    userName: "Bob",
-    rating: 4,
-    comment: "Very comfortable",
-    date: "2025-10-12",
-  },
-];
+// Import ReviewService
+import { ReviewService, ReviewData } from "@/lib/services/review/review-service";
 
 export default function PropertyDetailsPage() {
   const params = useParams();
@@ -55,6 +40,14 @@ export default function PropertyDetailsPage() {
   // Host state
   const [host, setHost] = useState<Host | null>(null);
   const [hostLoading, setHostLoading] = useState(false);
+
+  // Reviews state
+  const [reviews, setReviews] = useState<ReviewData[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewStats, setReviewStats] = useState<{
+    averageRating: number;
+    totalReviews: number;
+  } | null>(null);
 
   // Fetch host info
   useEffect(() => {
@@ -80,6 +73,35 @@ export default function PropertyDetailsPage() {
 
     fetchHost();
   }, [propertyData?.tenantId]);
+
+  // Fetch reviews
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        setReviewsLoading(true);
+        const [reviewsData, statsData] = await Promise.all([
+          ReviewService.getPropertyReviews(propertyId, 1, 10),
+          ReviewService.getPropertyReviewStats(propertyId)
+        ]);
+        setReviews(reviewsData.reviews);
+        setReviewStats({
+          averageRating: statsData.averageRating,
+          totalReviews: statsData.totalReviews
+        });
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+        // Fallback to empty state
+        setReviews([]);
+        setReviewStats({ averageRating: 0, totalReviews: 0 });
+      } finally {
+        setReviewsLoading(false);
+      }
+    };
+
+    if (propertyId) {
+      fetchReviews();
+    }
+  }, [propertyId]);
 
   if (isLoading) {
     return (
@@ -163,25 +185,74 @@ export default function PropertyDetailsPage() {
             
             {/* Reviews Section */}
             <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-6 border border-gray-200/50 shadow-lg">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Reviews</h2>
-              {mockReviews.length === 0 ? (
-                <p className="text-gray-500">No reviews yet for this property.</p>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                  Reviews
+                </h2>
+                {reviewStats && reviewStats.totalReviews > 0 && (
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
+                      <span className="text-yellow-500">★</span>
+                      <span className="font-semibold text-gray-800">{reviewStats.averageRating.toFixed(1)}</span>
+                    </div>
+                    <span className="text-gray-500">•</span>
+                    <span className="text-sm text-gray-600">{reviewStats.totalReviews} reviews</span>
+                  </div>
+                )}
+              </div>
+              
+              {reviewsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="text-center">
+                    <div className="w-12 h-12 bg-gradient-to-br from-rose-500 to-rose-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
+                      <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                    <p className="text-gray-500 text-sm">Loading reviews...</p>
+                  </div>
+                </div>
+              ) : reviews.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl">⭐</span>
+                  </div>
+                  <p className="text-gray-500">No reviews yet for this property.</p>
+                  <p className="text-sm text-gray-400 mt-1">Be the first to share your experience!</p>
+                </div>
               ) : (
                 <div className="space-y-4">
-                  {mockReviews.map((rev) => (
+                  {reviews.map((review) => (
                     <div
-                      key={rev.id}
-                      className="p-4 bg-gray-50 rounded-xl border border-gray-200"
+                      key={review.id}
+                      className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200/50"
                     >
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="font-semibold text-gray-900">{rev.userName}</span>
+                      <div className="flex justify-between items-center mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-gradient-to-br from-rose-500 to-rose-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                            {review.user.name[0].toUpperCase()}
+                          </div>
+                          <span className="font-semibold text-gray-900">{review.user.name}</span>
+                        </div>
                         <div className="flex items-center gap-1">
-                          <span className="text-yellow-500">★</span>
-                          <span className="font-medium text-gray-700">{rev.rating}</span>
+                          {Array.from({ length: 5 }, (_, i) => (
+                            <span
+                              key={i}
+                              className={`text-sm ${
+                                i < review.rating ? "text-yellow-500" : "text-gray-300"
+                              }`}
+                            >
+                              ★
+                            </span>
+                          ))}
                         </div>
                       </div>
-                      <p className="text-gray-700 mb-2">{rev.comment}</p>
-                      <p className="text-gray-400 text-sm">{rev.date}</p>
+                      <p className="text-gray-700 mb-2">{review.comment}</p>
+                      <p className="text-gray-400 text-sm">
+                        {new Date(review.createdAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </p>
                     </div>
                   ))}
                 </div>
