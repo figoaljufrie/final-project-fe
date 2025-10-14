@@ -40,8 +40,8 @@ export default function BookingPaymentTab({
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
-          <h3 className="font-semibold text-[#8B7355] flex items-center gap-2">
-            <CreditCard size={20} />
+          <h3 className="font-semibold text-gray-800 flex items-center gap-3 text-lg">
+            <CreditCard size={22} className="text-rose-500" />
             Payment Method
           </h3>
           <div className="space-y-2">
@@ -61,8 +61,8 @@ export default function BookingPaymentTab({
         </div>
 
         <div className="space-y-4">
-          <h3 className="font-semibold text-[#8B7355] flex items-center gap-2">
-            <Clock size={20} />
+          <h3 className="font-semibold text-gray-800 flex items-center gap-3 text-lg">
+            <Clock size={22} className="text-rose-500" />
             Payment Status
           </h3>
           <div className="space-y-2">
@@ -91,8 +91,8 @@ export default function BookingPaymentTab({
 
       {bookingData.paymentProofUrl && (
         <div>
-          <h3 className="font-semibold text-[#8B7355] mb-4">Payment Proof</h3>
-          <div className="border border-gray-200 rounded-lg p-4">
+          <h3 className="font-semibold text-gray-800 mb-6 text-lg">Payment Proof</h3>
+          <div className="bg-gray-50/50 border border-gray-200/50 rounded-2xl p-6 shadow-sm">
             <div className="flex items-center gap-4">
               <Image
                 src={bookingData.paymentProofUrl}
@@ -110,7 +110,7 @@ export default function BookingPaymentTab({
                   Waiting for verification
                 </p>
               </div>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all duration-300">
                 <Download size={16} className="mr-2" />
                 Download
               </Button>
@@ -124,7 +124,7 @@ export default function BookingPaymentTab({
         !bookingData.paymentProofUrl && (
           <div className="pt-6 border-t">
             <div className="space-y-4">
-              <h4 className="font-semibold text-[#8B7355]">
+              <h4 className="font-semibold text-gray-800 text-lg">
                 Complete Your Payment
               </h4>
 
@@ -134,7 +134,7 @@ export default function BookingPaymentTab({
                     {getDeadlineMessage(bookingData.paymentMethod)}
                   </p>
                   <Link href={`/bookings/${bookingId}/upload-payment`}>
-                    <Button className="bg-[#8B7355] hover:bg-[#7A6349] text-white">
+                    <Button className="bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white shadow-lg hover:shadow-xl transition-all duration-300">
                       Upload Payment Proof
                     </Button>
                   </Link>
@@ -145,7 +145,7 @@ export default function BookingPaymentTab({
                     {getDeadlineMessage(bookingData.paymentMethod)}
                   </p>
                   <Button
-                    className="bg-[#8B7355] hover:bg-[#7A6349] text-white"
+                    className="bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
                     onClick={() => {
                       window.location.href = `/bookings/${bookingId}/payment-pending`;
                     }}
@@ -162,7 +162,7 @@ export default function BookingPaymentTab({
                 </p>
                 <Button
                   variant="outline"
-                  className="w-full"
+                  className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all duration-300"
                   onClick={() => setShowPaymentModal(true)}
                 >
                   Change Payment Method

@@ -21,6 +21,7 @@ import { useParams, useRouter } from "next/navigation";
 import { PaymentService } from "@/lib/services/payment/payment-service";
 import { ReviewService } from "@/lib/services/review/review-service";
 import { toast } from "react-hot-toast";
+import { FullScreenLoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface BookingData {
   id: number;
@@ -137,15 +138,10 @@ export default function ReviewPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#F2EEE3] flex items-center justify-center">
-        <div className="text-center">
-          <Loader2
-            size={48}
-            className="animate-spin mx-auto mb-4 text-[#8B7355]"
-          />
-          <p className="text-gray-600">Loading booking data...</p>
-        </div>
-      </div>
+      <FullScreenLoadingSpinner
+        message="Loading booking data"
+        subMessage="Please wait while we fetch your booking information..."
+      />
     );
   }
 

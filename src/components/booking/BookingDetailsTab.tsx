@@ -35,8 +35,8 @@ export default function BookingDetailsTab({
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
-          <h3 className="font-semibold text-[#8B7355] flex items-center gap-2">
-            <Calendar size={20} />
+          <h3 className="font-semibold text-gray-800 flex items-center gap-3 text-lg">
+            <Calendar size={22} className="text-rose-500" />
             Check-in & Check-out
           </h3>
           <div className="space-y-2">
@@ -58,8 +58,8 @@ export default function BookingDetailsTab({
         </div>
 
         <div className="space-y-4">
-          <h3 className="font-semibold text-[#8B7355] flex items-center gap-2">
-            <Users size={20} />
+          <h3 className="font-semibold text-gray-800 flex items-center gap-3 text-lg">
+            <Users size={22} className="text-rose-500" />
             Guest Information
           </h3>
           <div className="space-y-2">
@@ -78,12 +78,12 @@ export default function BookingDetailsTab({
       </div>
 
       <div>
-        <h3 className="font-semibold text-[#8B7355] mb-4">Room Details</h3>
+        <h3 className="font-semibold text-gray-800 mb-6 text-lg">Room Details</h3>
         <div className="space-y-3">
           {bookingData.items.map((item) => (
             <div
               key={item.id}
-              className="border border-gray-200 rounded-lg p-4"
+              className="bg-gray-50/50 border border-gray-200/50 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300"
             >
               <div className="flex justify-between items-start">
                 <div>

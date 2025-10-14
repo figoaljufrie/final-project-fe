@@ -21,6 +21,7 @@ import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { PaymentService } from "@/lib/services/payment/payment-service";
 import { toast } from "react-hot-toast";
+import { FullScreenLoadingSpinner } from "@/components/ui/loading-spinner";
 import { StatusPolling } from "@/lib/utils/status-polling";
 
 interface BookingData {
@@ -180,15 +181,10 @@ export default function PaymentSuccess() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#F2EEE3] flex items-center justify-center">
-        <div className="text-center">
-          <Loader2
-            size={48}
-            className="animate-spin mx-auto mb-4 text-[#8B7355]"
-          />
-          <p className="text-gray-600">Loading payment status...</p>
-        </div>
-      </div>
+      <FullScreenLoadingSpinner
+        message="Loading payment status"
+        subMessage="Please wait while we verify your payment..."
+      />
     );
   }
 

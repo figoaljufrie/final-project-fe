@@ -33,7 +33,7 @@ export default function BookingEmptyState({
       </p>
       {!searchTerm && activeFilter === "all" && (
         <Link href="/explore">
-          <Button className="bg-[#8B7355] hover:bg-[#7A6349] text-white">
+          <Button className="bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white">
             Explore Properties
           </Button>
         </Link>

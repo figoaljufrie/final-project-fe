@@ -50,7 +50,7 @@ export default function BookingCard({ booking }: BookingCardProps) {
               <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-xl font-bold text-[#8B7355]">
+                    <h3 className="text-xl font-bold text-gray-900">
                       {property?.name}
                     </h3>
                     <span
@@ -109,7 +109,7 @@ export default function BookingCard({ booking }: BookingCardProps) {
                 {/* Price and Action */}
                 <div className="lg:w-48 flex-shrink-0">
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-[#8B7355]">
+                    <p className="text-2xl font-bold text-gray-900">
                       Rp {booking.totalAmount.toLocaleString("id-ID")}
                     </p>
                     <p className="text-sm text-gray-500 mb-4">
@@ -122,7 +122,7 @@ export default function BookingCard({ booking }: BookingCardProps) {
                     <div className="space-y-2">
                       <Button
                         variant="outline"
-                        className="w-full border-[#8B7355] text-[#8B7355] hover:bg-[#8B7355] hover:text-white"
+                        className="w-full border-rose-500 text-rose-600 hover:bg-rose-500 hover:text-white"
                       >
                         View Details
                       </Button>

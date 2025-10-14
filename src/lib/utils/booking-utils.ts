@@ -66,7 +66,9 @@ export const filterBookings = (
   activeFilter: FilterStatus,
   searchTerm: string
 ): BookingData[] => {
-  let filtered = bookings;
+  // Ensure bookings is always an array
+  const safeBookings = Array.isArray(bookings) ? bookings : [];
+  let filtered = safeBookings;
 
   // Filter by status
   if (activeFilter !== "all") {
@@ -77,9 +79,9 @@ export const filterBookings = (
   if (searchTerm) {
     filtered = filtered.filter(
       (booking) =>
-        booking.bookingNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        booking.items[0]?.room?.property?.name
-          .toLowerCase()
+        booking.bookingNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        booking.items?.[0]?.room?.property?.name
+          ?.toLowerCase()
           .includes(searchTerm.toLowerCase())
     );
   }

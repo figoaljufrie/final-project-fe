@@ -28,6 +28,7 @@ import Image from "next/image";
 import { TenantApprovalService, TenantBooking } from "@/lib/services/tenant/tenant-approval-service";
 import { toast } from "react-hot-toast";
 import { getDeadlineText } from "@/lib/utils/payment-deadline";
+import { FullScreenLoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function TenantBookingDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const [activeTab, setActiveTab] = useState<'details' | 'payment' | 'contact'>('details');
@@ -187,13 +188,10 @@ export default function TenantBookingDetailPage({ params }: { params: Promise<{ 
 
   if (isLoading) {
     return (
-      <div className="w-full">
-        <div className="animate-pulse space-y-6">
-          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-          <div className="h-64 bg-gray-200 rounded"></div>
-          <div className="h-96 bg-gray-200 rounded"></div>
-        </div>
-      </div>
+      <FullScreenLoadingSpinner
+        message="Loading booking details"
+        subMessage="Please wait while we fetch the booking information..."
+      />
     );
   }
 

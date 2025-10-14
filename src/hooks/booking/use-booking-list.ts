@@ -16,11 +16,38 @@ export function useBookingList() {
       try {
         setIsLoading(true);
         const data = await PaymentService.getUserBookings();
-        setBookings(data);
-        setFilteredBookings(data);
+        
+        // Handle different response structures from backend
+        let bookingsArray: BookingData[] = [];
+        
+        if (Array.isArray(data)) {
+          // If data is already an array
+          bookingsArray = data;
+        } else if (data && typeof data === 'object') {
+          // If data is an object, check for common array properties
+          if (Array.isArray(data.bookings)) {
+            bookingsArray = data.bookings;
+          } else if (Array.isArray(data.data)) {
+            bookingsArray = data.data;
+          } else if (Array.isArray(data.results)) {
+            bookingsArray = data.results;
+          } else {
+            // If it's a single booking object, wrap it in an array
+            bookingsArray = [data];
+          }
+        }
+        
+        console.log("Raw data from backend:", data);
+        console.log("Processed bookings array:", bookingsArray);
+        
+        setBookings(bookingsArray);
+        setFilteredBookings(bookingsArray);
       } catch (error: unknown) {
         console.error("Error loading bookings:", error);
         toast.error("Failed to load bookings");
+        // Set empty arrays on error
+        setBookings([]);
+        setFilteredBookings([]);
       } finally {
         setIsLoading(false);
       }

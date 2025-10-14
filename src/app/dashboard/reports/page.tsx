@@ -13,6 +13,7 @@ import {
 } from "@/lib/services/report/report-service";
 import { toast } from "react-hot-toast";
 import { ExportUtils } from "@/lib/utils/export-utils";
+import { FullScreenLoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function ReportsPage() {
   const [dateRange, setDateRange] = useState<{
@@ -97,7 +98,10 @@ export default function ReportsPage() {
 
         {isLoading ? (
           <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-500"></div>
+            <FullScreenLoadingSpinner
+              message="Loading reports"
+              subMessage="Please wait while we generate your analytics..."
+            />
           </div>
         ) : (
           <>

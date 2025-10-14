@@ -37,8 +37,8 @@ export default function BookingDetailSidebar({
       className="space-y-6"
     >
       {/* Quick Actions */}
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <h3 className="font-bold text-[#8B7355] mb-4">Quick Actions</h3>
+      <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200/50 p-6">
+        <h3 className="font-bold text-gray-800 mb-6 text-lg">Quick Actions</h3>
         <div className="space-y-3">
           {bookingData.status === "waiting_for_payment" &&
             !bookingData.paymentProofUrl && (
@@ -48,13 +48,13 @@ export default function BookingDetailSidebar({
                     href={`/bookings/${bookingId}/upload-payment`}
                     className="block"
                   >
-                    <Button className="w-full bg-[#8B7355] hover:bg-[#7A6349] text-white">
+                    <Button className="w-full bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white shadow-lg hover:shadow-xl transition-all duration-300">
                       Upload Payment Proof
                     </Button>
                   </Link>
                 ) : (
                   <Button
-                    className="w-full bg-[#8B7355] hover:bg-[#7A6349] text-white"
+                    className="w-full bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
                     onClick={() => {
                       window.location.href = `/bookings/${bookingId}/payment-pending`;
                     }}
@@ -65,12 +65,12 @@ export default function BookingDetailSidebar({
               </>
             )}
 
-          <Button variant="outline" className="w-full">
+          <Button variant="outline" className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all duration-300">
             <Download size={16} className="mr-2" />
             Download Receipt
           </Button>
 
-          <Button variant="outline" className="w-full">
+          <Button variant="outline" className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all duration-300">
             <MessageCircle size={16} className="mr-2" />
             Contact Host
           </Button>
@@ -85,7 +85,7 @@ export default function BookingDetailSidebar({
                 </Button>
               ) : canReview ? (
                 <Link href={`/bookings/${bookingId}/review`} className="block">
-                  <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
+                  <Button className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-300">
                     <Star size={16} className="mr-2" />
                     Write a Review
                   </Button>
@@ -102,7 +102,7 @@ export default function BookingDetailSidebar({
           {bookingData.status === "waiting_for_payment" && (
             <Button
               variant="outline"
-              className="w-full text-red-600 border-red-200 hover:bg-red-50"
+              className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 transition-all duration-300"
               onClick={() => setShowCancelModal(true)}
             >
               Cancel Booking
@@ -112,8 +112,8 @@ export default function BookingDetailSidebar({
       </div>
 
       {/* Booking Timeline */}
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <h3 className="font-bold text-[#8B7355] mb-4">Booking Timeline</h3>
+      <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200/50 p-6">
+        <h3 className="font-bold text-gray-800 mb-6 text-lg">Booking Timeline</h3>
         <div className="space-y-4">
           <div className="flex items-start gap-3">
             <div className="w-3 h-3 bg-green-500 rounded-full mt-1"></div>

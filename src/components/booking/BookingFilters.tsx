@@ -31,7 +31,7 @@ export default function BookingFilters({
               placeholder="Search by booking number or property name..."
               value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B7355] focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent"
             />
           </div>
         </div>
@@ -41,7 +41,7 @@ export default function BookingFilters({
           <select
             value={activeFilter}
             onChange={(e) => onFilterChange(e.target.value as FilterStatus)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B7355] focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent"
           >
             {filterOptions.map((option) => (
               <option key={option.value} value={option.value}>

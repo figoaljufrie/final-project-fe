@@ -130,7 +130,7 @@ export default function PaymentMethodModal({
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-100">
               <div>
-                <h3 className="text-xl font-bold text-[#8B7355]">Choose Payment Method</h3>
+                <h3 className="text-xl font-bold text-gray-900">Choose Payment Method</h3>
                 <p className="text-sm text-gray-600 mt-1">Select your preferred payment option</p>
               </div>
               <button
@@ -142,8 +142,8 @@ export default function PaymentMethodModal({
             </div>
 
             {/* Booking Summary */}
-            <div className="p-6 bg-[#F2EEE3] border-b border-gray-100">
-              <h4 className="font-semibold text-[#8B7355] mb-3">Booking Summary</h4>
+            <div className="p-6 bg-gray-50 border-b border-gray-100">
+              <h4 className="font-semibold text-gray-900 mb-3">Booking Summary</h4>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="text-gray-600">Check-in:</span>
@@ -166,7 +166,7 @@ export default function PaymentMethodModal({
 
             {/* Payment Methods */}
             <div className="p-6">
-              <h4 className="font-semibold text-[#8B7355] mb-4">Available Payment Methods</h4>
+              <h4 className="font-semibold text-gray-900 mb-4">Available Payment Methods</h4>
               <div className="space-y-4">
                 {paymentMethods.map((method) => {
                   const Icon = method.icon;
@@ -232,7 +232,7 @@ export default function PaymentMethodModal({
                   <p className="text-sm text-gray-600">Including taxes and fees</p>
                 </div>
                 <div className="text-right">
-                  <span className="text-2xl font-bold text-[#8B7355]">Rp {totalAmount.toLocaleString('id-ID')}</span>
+                  <span className="text-2xl font-bold text-gray-900">Rp {totalAmount.toLocaleString('id-ID')}</span>
                 </div>
               </div>
 
@@ -247,7 +247,7 @@ export default function PaymentMethodModal({
                 <Button
                   onClick={handleConfirm}
                   disabled={!selectedMethod || isProcessing}
-                  className="flex-1 bg-[#8B7355] hover:bg-[#7A6349] text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isProcessing ? (
                     <>

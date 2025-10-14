@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Minus, Loader2 } from "lucide-react";
+import { Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCreateBooking } from "@/hooks/booking/use-create-booking";
 import { useAuthStore } from "@/stores/auth-store";
@@ -81,53 +81,74 @@ export default function BookingCard({
   };
 
   return (
-    <div className="bg-white rounded-lg border-2 border-[#D6D5C9] p-6 sticky top-24">
-      <h3 className="text-xl font-bold text-[#8B7355] mb-4">Room Price</h3>
+    <div className="bg-white/95 backdrop-blur-xl rounded-2xl border border-gray-200/50 p-8 sticky top-24 shadow-xl hover:shadow-2xl transition-all duration-300">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 bg-gradient-to-br from-rose-500 to-rose-600 rounded-xl flex items-center justify-center">
+          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+          </svg>
+        </div>
+        <h3 className="text-xl font-bold text-gray-900">Room Price</h3>
+      </div>
 
       {/* Check-in/Check-out */}
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        <div>
-          <label className="text-xs text-gray-600 font-medium block mb-1">
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-gray-700 block">
             Check-In
           </label>
-          <input
-            type="date"
-            value={checkIn}
-            onChange={(e) => setCheckIn(e.target.value)}
-            className="w-full border border-[#D6D5C9] rounded px-3 py-2 text-sm focus:outline-none focus:border-[#8B7355]"
-          />
+          <div className="relative">
+            <input
+              type="date"
+              value={checkIn}
+              onChange={(e) => setCheckIn(e.target.value)}
+              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-rose-500 focus:ring-4 focus:ring-rose-500/20 transition-all duration-300 bg-gray-50/50 hover:bg-white"
+            />
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+              <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+          </div>
         </div>
-        <div>
-          <label className="text-xs text-gray-600 font-medium block mb-1">
+        <div className="space-y-2">
+          <label className="text-sm font-semibold text-gray-700 block">
             Check-Out
           </label>
-          <input
-            type="date"
-            value={checkOut}
-            onChange={(e) => setCheckOut(e.target.value)}
-            className="w-full border border-[#D6D5C9] rounded px-3 py-2 text-sm focus:outline-none focus:border-[#8B7355]"
-          />
+          <div className="relative">
+            <input
+              type="date"
+              value={checkOut}
+              onChange={(e) => setCheckOut(e.target.value)}
+              className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-rose-500 focus:ring-4 focus:ring-rose-500/20 transition-all duration-300 bg-gray-50/50 hover:bg-white"
+            />
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+              <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Guests */}
       <div className="mb-6">
-        <label className="text-xs text-gray-600 font-medium block mb-2">
+        <label className="text-sm font-semibold text-gray-700 block mb-3">
           Guests
         </label>
-        <div className="flex items-center justify-between border border-[#D6D5C9] rounded px-4 py-2">
-          <span className="font-medium">{guests}</span>
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between border-2 border-gray-200 rounded-xl px-4 py-3 bg-gray-50/50 hover:bg-white transition-all duration-300">
+          <span className="font-semibold text-gray-900">{guests} {guests === 1 ? 'Guest' : 'Guests'}</span>
+          <div className="flex items-center gap-3">
             <button
               onClick={() => setGuests(Math.max(1, guests - 1))}
               disabled={guests <= 1}
-              className="w-8 h-8 rounded-full border border-[#D6D5C9] flex items-center justify-center hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-10 h-10 rounded-full border-2 border-gray-200 flex items-center justify-center hover:bg-gray-100 hover:border-gray-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Minus className="w-4 h-4" />
             </button>
             <button
               onClick={() => setGuests(guests + 1)}
-              className="w-8 h-8 rounded-full border border-[#D6D5C9] flex items-center justify-center hover:bg-gray-50 transition-colors"
+              className="w-10 h-10 rounded-full border-2 border-gray-200 flex items-center justify-center hover:bg-gray-100 hover:border-gray-300 transition-all duration-200"
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -137,86 +158,111 @@ export default function BookingCard({
 
       {/* Selected Rooms Summary */}
       {selectedRooms.size > 0 && (
-        <div className="mb-4 p-3 bg-[#F2EEE3] rounded">
-          <div className="text-sm font-medium text-gray-700 mb-2">
-            Selected Rooms ({selectedRooms.size})
+        <div className="mb-6 p-4 bg-gradient-to-r from-rose-50 to-pink-50 rounded-xl border border-rose-200">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-6 h-6 bg-gradient-to-br from-rose-500 to-rose-600 rounded-lg flex items-center justify-center">
+              <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <div className="text-sm font-semibold text-gray-800">
+              Selected Rooms ({selectedRooms.size})
+            </div>
           </div>
-          {Array.from(selectedRooms).map((roomId) => {
-            const room = rooms.find((r) => r.id === roomId);
-            if (!room) return null;
-            return (
-              <div
-                key={roomId}
-                className="text-xs text-gray-600 flex justify-between"
-              >
-                <span>{room.name}</span>
-                <span>${room.basePrice}/night</span>
-              </div>
-            );
-          })}
+          <div className="space-y-2">
+            {Array.from(selectedRooms).map((roomId) => {
+              const room = rooms.find((r) => r.id === roomId);
+              if (!room) return null;
+              return (
+                <div key={roomId} className="flex justify-between items-center text-sm">
+                  <span className="text-gray-700 font-medium">{room.name}</span>
+                  <span className="text-rose-600 font-semibold">Rp {room.basePrice.toLocaleString("id-ID")}/night</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 
       {/* Payment Method Selection */}
-      <div className="mb-4">
-        <label className="text-sm font-medium text-gray-700 block mb-2">
+      <div className="mb-6">
+        <label className="text-sm font-semibold text-gray-700 block mb-3">
           Payment Method
         </label>
-        <div className="space-y-2">
-          <label className="flex items-center space-x-2 cursor-pointer">
+        <div className="space-y-3">
+          <label className="flex items-center p-3 border-2 border-gray-200 rounded-xl hover:border-rose-300 transition-all duration-200 cursor-pointer">
             <input
               type="radio"
               name="paymentMethod"
               value="payment_gateway"
               checked={paymentMethod === "payment_gateway"}
               onChange={(e) => setPaymentMethod(e.target.value as "payment_gateway")}
-              className="text-[#8B7355] focus:ring-[#8B7355]"
+              className="text-rose-600 focus:ring-rose-500"
             />
-            <span className="text-sm">Payment Gateway (Credit Card)</span>
+            <div className="ml-3 flex items-center gap-2">
+              <svg className="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+              </svg>
+              <span className="text-sm font-medium text-gray-700">
+                Payment Gateway (Credit Card)
+              </span>
+            </div>
           </label>
-          <label className="flex items-center space-x-2 cursor-pointer">
+          <label className="flex items-center p-3 border-2 border-gray-200 rounded-xl hover:border-rose-300 transition-all duration-200 cursor-pointer">
             <input
               type="radio"
               name="paymentMethod"
               value="manual_transfer"
               checked={paymentMethod === "manual_transfer"}
               onChange={(e) => setPaymentMethod(e.target.value as "manual_transfer")}
-              className="text-[#8B7355] focus:ring-[#8B7355]"
+              className="text-rose-600 focus:ring-rose-500"
             />
-            <span className="text-sm">Manual Transfer</span>
+            <div className="ml-3 flex items-center gap-2">
+              <svg className="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+              </svg>
+              <span className="text-sm font-medium text-gray-700">
+                Manual Transfer
+              </span>
+            </div>
           </label>
         </div>
       </div>
 
       {/* Total Price */}
-      <div className="mb-4 py-3 border-t border-[#D6D5C9]">
-        <div className="flex justify-between items-center">
-          <span className="font-semibold text-gray-700">Total</span>
-          <span className="text-2xl font-bold text-[#8B7355]">
+      <div className="mb-6 py-4 border-t-2 border-gray-200">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-lg font-semibold text-gray-700">Total</span>
+          <span className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
             Rp {totalPrice.toLocaleString('id-ID')}
           </span>
         </div>
-        <div className="text-xs text-gray-500 text-right">per night</div>
+        <div className="text-sm text-gray-500 text-right">per night</div>
       </div>
 
       {/* Book Button */}
       <Button
         onClick={handleBook}
         disabled={selectedRooms.size === 0 || !checkIn || !checkOut || isCreating}
-        className="w-full bg-[#8B7355] text-white py-3 rounded-lg font-semibold hover:bg-[#7A6349] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full bg-gradient-to-r from-rose-500 via-rose-600 to-pink-600 text-white py-4 rounded-xl font-bold hover:from-rose-600 hover:via-rose-700 hover:to-pink-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl hover:shadow-2xl transform hover:scale-[1.02] active:scale-[0.98]"
       >
         {isCreating ? (
-          <>
-            <Loader2 size={16} className="animate-spin mr-2" />
+          <div className="flex items-center justify-center">
+            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-3"></div>
             Creating Booking...
-          </>
+          </div>
         ) : (
-          "Book!"
+          <div className="flex items-center justify-center gap-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Book Now
+          </div>
         )}
       </Button>
 
-      <p className="text-xs text-gray-500 text-center mt-3">
-        You wont be charged yet
+      <p className="text-xs text-gray-500 text-center mt-4">
+        You won&apos;t be charged yet
       </p>
     </div>
   );

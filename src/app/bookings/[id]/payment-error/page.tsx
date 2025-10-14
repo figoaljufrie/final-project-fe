@@ -31,6 +31,7 @@ import {
   formatTimeRemaining, 
   getDeadlineText 
 } from "@/lib/utils/payment-deadline";
+import { FullScreenLoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function PaymentError() {
   const [isRetrying, setIsRetrying] = useState(false);
@@ -97,12 +98,10 @@ export default function PaymentError() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 size={48} className="animate-spin mx-auto mb-4 text-[#8B7355]" />
-          <p className="text-gray-600">Loading booking data...</p>
-        </div>
-      </div>
+      <FullScreenLoadingSpinner
+        message="Loading booking data"
+        subMessage="Please wait while we fetch your payment information..."
+      />
     );
   }
 

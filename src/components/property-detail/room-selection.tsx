@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { Users } from "lucide-react";
 import Image from "next/image";
 import { useRoomsByProperty } from "@/hooks/Inventory/room/use-selected-room";
+import { CardLoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface RoomSelectionProps {
   propertyId: number;
@@ -26,7 +27,7 @@ export default function RoomSelection({
     return fetchedRooms.map((room) => ({
       ...room,
       available: true,
-      image: room.image || "https://via.placeholder.com/300",
+      image: room.image || "https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=300&h=200&fit=crop&crop=center",
     }));
   }, [fetchedRooms]);
 
@@ -37,7 +38,16 @@ export default function RoomSelection({
     setSelectedRooms(newSelected);
   };
 
-  if (loading) return <p className="text-gray-500">Loading rooms...</p>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <CardLoadingSpinner
+          message="Loading rooms"
+          subMessage="Please wait while we fetch available rooms..."
+        />
+      </div>
+    );
+  }
   if (error) return <p className="text-red-500">{error}</p>;
   if (!rooms.length)
     return <p className="text-gray-500">No rooms available.</p>;
@@ -51,8 +61,8 @@ export default function RoomSelection({
           disabled={!room.available}
           className={`relative bg-white rounded-lg overflow-hidden border-2 transition-all ${
             selectedRooms.has(room.id)
-              ? "border-[#8B7355] shadow-lg"
-              : "border-[#D6D5C9] hover:border-[#8B7355]/50"
+              ? "border-rose-500 shadow-lg"
+              : "border-gray-200 hover:border-rose-500/50"
           } ${
             !room.available ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
           }`}
@@ -62,7 +72,7 @@ export default function RoomSelection({
             <div
               className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
                 selectedRooms.has(room.id)
-                  ? "bg-[#8B7355] border-[#8B7355]"
+                  ? "bg-rose-500 border-rose-500"
                   : "bg-white border-gray-300"
               }`}
             >
@@ -100,12 +110,12 @@ export default function RoomSelection({
 
           {/* Room Info */}
           <div className="p-4 text-left">
-            <h3 className="font-semibold text-[#8B7355] mb-2">{room.name}</h3>
+            <h3 className="font-semibold text-gray-900 mb-2">{room.name}</h3>
             <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
               <Users className="w-4 h-4" />
               <span>{room.capacity} guests</span>
             </div>
-            <div className="text-lg font-bold text-[#8B7355]">
+            <div className="text-lg font-bold text-rose-600">
               ${room.basePrice}
               <span className="text-sm font-normal text-gray-600">/night</span>
             </div>

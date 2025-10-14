@@ -23,6 +23,7 @@ import {
   getDeadlineMessage,
 } from "@/lib/utils/payment-deadline";
 import { ReviewService } from "@/lib/services/review/review-service";
+import { FullScreenLoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function BookingDetails() {
   const [activeTab, setActiveTab] = useState<"details" | "payment">("details");
@@ -122,27 +123,30 @@ export default function BookingDetails() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#F2EEE3] flex items-center justify-center">
-        <div className="text-center">
-          <Loader2
-            size={48}
-            className="animate-spin mx-auto mb-4 text-[#8B7355]"
-          />
-          <p className="text-gray-600">Loading booking details...</p>
-        </div>
-      </div>
+      <FullScreenLoadingSpinner
+        message="Loading booking details"
+        subMessage="Please wait while we fetch your booking information..."
+      />
     );
   }
 
   if (!bookingData) {
     return (
-      <div className="min-h-screen bg-[#F2EEE3] flex items-center justify-center">
-        <div className="text-center">
-          <AlertCircle size={48} className="mx-auto mb-4 text-red-500" />
-          <p className="text-gray-600">Booking not found</p>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-40" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f3f4f6' fill-opacity='0.3'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+        }}></div>
+        
+        <div className="relative text-center">
+          <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <AlertCircle size={32} className="text-white" />
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">Booking not found</h3>
+          <p className="text-gray-600 mb-6">The booking you&apos;re looking for doesn&apos;t exist or has been removed.</p>
           <Link
-            href="/dashboard/bookings"
-            className="text-[#8B7355] hover:underline"
+            href="/bookings"
+            className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-xl hover:from-rose-600 hover:to-rose-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl"
           >
             Back to My Bookings
           </Link>
@@ -152,16 +156,19 @@ export default function BookingDetails() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F2EEE3]">
+    <main className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
       <Header />
       
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Back Button */}
         <Link 
-          href="/dashboard/bookings"
-          className="inline-flex items-center gap-2 text-[#8B7355] hover:text-[#7A6349] transition-colors mb-6"
+          href="/bookings"
+          className="inline-flex items-center gap-2 text-rose-600 hover:text-rose-700 transition-all duration-200 mb-6 group"
         >
-          <span>Back to My Bookings</span>
+          <svg className="w-5 h-5 transform group-hover:-translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          <span className="font-medium">Back to My Bookings</span>
         </Link>
 
         {/* Header Section */}
@@ -186,7 +193,7 @@ export default function BookingDetails() {
               formatDate={formatDate}
               formatTime={formatTime}
             />
-              </div>
+          </div>
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
@@ -199,9 +206,9 @@ export default function BookingDetails() {
               canReview={canReview}
               isCheckingReview={isCheckingReview}
             />
-                          </div>
-                        </div>
-                      </div>
+          </div>
+        </div>
+      </div>
 
       <Footer />
 
@@ -231,35 +238,41 @@ export default function BookingDetails() {
 
       {/* Cancel Booking Modal */}
       {showCancelModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
-            <h3 className="text-lg font-semibold text-[#8B7355] mb-4">
-              Cancel Booking
-                        </h3>
-            <p className="text-gray-600 mb-4">
-              Are you sure you want to cancel this booking? This action cannot
-              be undone.
-            </p>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-8 w-full max-w-md shadow-2xl border border-gray-200/50 transform animate-fade-in">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <XCircle size={24} className="text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                Cancel Booking
+              </h3>
+              <p className="text-gray-600">
+                Are you sure you want to cancel this booking? This action cannot be undone.
+              </p>
+            </div>
+            
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
                 Reason for cancellation
               </label>
               <textarea
                 value={cancelReason}
                 onChange={(e) => setCancelReason(e.target.value)}
                 placeholder="Please provide a reason for cancelling this booking..."
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8B7355] focus:border-transparent resize-none"
-                rows={3}
+                className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-red-500/20 focus:border-red-500 transition-all duration-300 resize-none bg-gray-50/50 hover:bg-white"
+                rows={4}
               />
-                            </div>
-            <div className="flex gap-3">
+            </div>
+            
+            <div className="flex gap-4">
               <Button
                 variant="outline"
                 onClick={() => {
                   setShowCancelModal(false);
                   setCancelReason("");
                 }}
-                className="flex-1"
+                className="flex-1 py-3 border-2 border-gray-200 hover:border-gray-300 transition-all duration-200"
                 disabled={isCancelling}
               >
                 Keep Booking
@@ -267,7 +280,7 @@ export default function BookingDetails() {
               <Button
                 onClick={handleCancelBooking}
                 disabled={isCancelling || !cancelReason.trim()}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white disabled:opacity-50"
+                className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white disabled:opacity-50 py-3 transition-all duration-200"
               >
                 {isCancelling ? (
                   <>
@@ -277,11 +290,11 @@ export default function BookingDetails() {
                 ) : (
                   "Cancel Booking"
                 )}
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

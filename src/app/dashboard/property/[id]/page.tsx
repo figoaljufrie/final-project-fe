@@ -9,6 +9,7 @@ import { useRooms } from "@/hooks/Inventory/room/use-rooms";
 import { motion } from "framer-motion";
 import { useParams } from "next/navigation";
 import { useState } from "react";
+import { FullScreenLoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function PropertyDetailPage() {
   const { id } = useParams();
@@ -22,7 +23,14 @@ export default function PropertyDetailPage() {
   const [isUpdateModalOpen, setUpdateModalOpen] = useState(false);
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
 
-  if (propertyLoading) return <p>Loading property...</p>;
+  if (propertyLoading) {
+    return (
+      <FullScreenLoadingSpinner
+        message="Loading property details"
+        subMessage="Please wait while we fetch property information..."
+      />
+    );
+  }
   if (!property) return <p>Property not found.</p>;
 
   const handleRoomEdit = (roomId: number) => {
@@ -53,7 +61,14 @@ export default function PropertyDetailPage() {
         </div>
 
         {roomsLoading ? (
-          <p>Loading rooms...</p>
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-rose-500 to-rose-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg">
+                <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              </div>
+              <p className="text-gray-500 text-sm">Loading rooms...</p>
+            </div>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {rooms?.map((room) => (
