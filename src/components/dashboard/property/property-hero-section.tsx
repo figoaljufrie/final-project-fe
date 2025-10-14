@@ -2,10 +2,11 @@
 
 import { PropertyDetail } from "@/lib/types/inventory/property-types";
 import { motion } from "framer-motion";
-import { Globe2, MapPin } from "lucide-react";
+import { Globe2, MapPin, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import PropertyImageUploader from "./property-image-uploader";
 import PropertyUpdateForm from "./property-update-form";
+import { useUpdateProperty } from "@/hooks/Inventory/property/use-property-mutation";
 
 export default function PropertyHeroSection({
   property,
@@ -15,6 +16,20 @@ export default function PropertyHeroSection({
   onUpdated?: () => void;
 }) {
   const [isEditing, setIsEditing] = useState(false);
+  const { mutateAsync: updateProperty, isPending } = useUpdateProperty();
+
+  const handleTogglePublish = async () => {
+    try {
+      await updateProperty({
+        propertyId: property.id,
+        payload: { published: !property.published },
+      });
+      if (onUpdated) onUpdated();
+    } catch (error) {
+      console.error("Failed to toggle publish status:", error);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -24,7 +39,22 @@ export default function PropertyHeroSection({
     >
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{property.name}</h1>
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-3xl font-bold text-gray-900">
+              {property.name}
+            </h1>
+            {property.published ? (
+              <span className="flex items-center gap-1 bg-green-100 text-green-700 text-sm px-3 py-1 rounded-full">
+                <Eye className="w-4 h-4" />
+                Published
+              </span>
+            ) : (
+              <span className="flex items-center gap-1 bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded-full">
+                <EyeOff className="w-4 h-4" />
+                Draft
+              </span>
+            )}
+          </div>
           <p className="text-gray-600 mt-1">
             {property.description || "No description yet."}
           </p>
@@ -43,12 +73,25 @@ export default function PropertyHeroSection({
         </div>
 
         <div className="flex flex-col items-end space-y-3">
-          <button
-            onClick={() => setIsEditing((prev) => !prev)}
-            className="text-sm px-3 py-1.5 bg-rose-600 text-white rounded-md hover:bg-rose-700"
-          >
-            {isEditing ? "Close Edit" : "Edit Property"}
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleTogglePublish}
+              disabled={isPending}
+              className={`text-sm px-4 py-2 rounded-md transition-colors ${
+                property.published
+                  ? "bg-gray-600 text-white hover:bg-gray-700"
+                  : "bg-green-600 text-white hover:bg-green-700"
+              } disabled:opacity-50`}
+            >
+              {isPending ? "..." : property.published ? "Unpublish" : "Publish"}
+            </button>
+            <button
+              onClick={() => setIsEditing((prev) => !prev)}
+              className="text-sm px-3 py-1.5 bg-rose-600 text-white rounded-md hover:bg-rose-700"
+            >
+              {isEditing ? "Close Edit" : "Edit Property"}
+            </button>
+          </div>
           <PropertyImageUploader
             propertyId={property.id}
             images={property.images.map((img, index) => ({

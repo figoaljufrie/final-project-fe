@@ -64,6 +64,7 @@ export interface PropertyListItem {
   id: number;
   name: string;
   city: string | null;
+  published: boolean;
   category: PropertyCategory;
   minPrice: number | null;
   rooms: RoomForPropertyList[];
