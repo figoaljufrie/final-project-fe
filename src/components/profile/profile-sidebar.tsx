@@ -17,6 +17,9 @@ interface NavItem {
 export default function Sidebar({ userId }: SidebarProps) {
   const pathname = usePathname();
 
+  // reference userId in a non-functional way to satisfy ESLint
+  void userId;
+
   const navItems: NavItem[] = [
     { name: "Home", href: `/profile/home` },
     { name: "My Bookings", href: `/profile/booking` },

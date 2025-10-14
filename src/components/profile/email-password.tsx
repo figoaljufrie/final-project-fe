@@ -36,7 +36,8 @@ export default function UserEmailPasswordForm() {
 
   const handleSaveEmail = async () => {
     try {
-      const updatedUser = await updateEmail.mutateAsync(email);
+      // Execute the mutation without assigning unused variable
+      await updateEmail.mutateAsync(email);
       setInitialEmail(email);
       setIsEditingEmail(false);
       alert("Email updated! Please check your inbox to verify your new email.");

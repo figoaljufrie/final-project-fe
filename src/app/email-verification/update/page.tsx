@@ -33,10 +33,21 @@ function UpdateEmailPageContent() {
         setSuccess(true);
         setMessage("Email verified successfully! Redirecting...");
         setTimeout(() => router.push("/profile/settings"), 3000);
-      } catch (err: any) {
+      } catch (err: unknown) {
         setLoading(false);
         setSuccess(false);
-        const msg = err?.message || "Verification failed. Please try again.";
+
+        let msg = "Verification failed. Please try again.";
+        if (err instanceof Error) {
+          msg = err.message;
+        } else if (
+          typeof err === "object" &&
+          err !== null &&
+          "message" in err
+        ) {
+          msg = String((err as { message?: string }).message || msg);
+        }
+
         setMessage(msg);
         setErrorMessage(msg);
       }

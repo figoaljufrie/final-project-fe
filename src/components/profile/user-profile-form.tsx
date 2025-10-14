@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, ChangeEvent, useEffect } from "react";
+import Image from "next/image"; // ✅ Added import
 import {
   useMe,
   useUpdateUser,
@@ -69,7 +70,7 @@ export default function UserProfileForm() {
 
   const handleSave = async () => {
     try {
-      let updatedUserData = { ...formData };
+      const updatedUserData = { ...formData }; // ✅ changed to const
 
       // 1️⃣ Upload avatar first if changed
       if (avatarFile) {
@@ -118,9 +119,11 @@ export default function UserProfileForm() {
       {/* Avatar */}
       <div className="flex flex-col items-center space-y-2">
         {avatarPreview ? (
-          <img
+          <Image
             src={avatarPreview}
             alt={formData.name ?? "User Avatar"}
+            width={128}
+            height={128}
             className={`w-32 h-32 rounded-full object-cover border-4 border-teal-600 ${
               !isEditing ? "opacity-70" : ""
             }`}

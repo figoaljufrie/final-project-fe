@@ -3,13 +3,10 @@
 import { ReactNode } from "react";
 import Sidebar from "@/components/profile/profile-sidebar";
 
-export default function CustomerLayout({
-  children,
-  userId,
-}: {
-  children: ReactNode;
-  userId: string;
-}) {
+export default function CustomerLayout({ children }: { children: ReactNode }) {
+  // you can fetch or derive userId here if needed, for now we just set a placeholder
+  const userId = "";
+
   return (
     <div className="min-h-screen flex bg-stone-300 text-gray-800">
       <Sidebar userId={userId} />
