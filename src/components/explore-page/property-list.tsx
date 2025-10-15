@@ -1,24 +1,28 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
-import { useMemo, useState, useEffect } from "react";
-import PropertyCard from "../landing-page/property-card";
-import { usePublicProperties } from "@/hooks/Inventory/property/use-public-properties";
+import { CardLoadingSpinner } from "@/components/ui/loading-spinner";
 import {
   ExploreQueryState,
   useExploreQuery,
 } from "@/hooks/Inventory/property/use-explore-query";
+import { usePublicProperties } from "@/hooks/Inventory/property/use-public-properties";
 import { PropertyCategory } from "@/lib/types/enums/enums-type";
-import { CardLoadingSpinner } from "@/components/ui/loading-spinner";
+import {
+  PriceSort,
+  PropertySortField,
+} from "@/lib/types/inventory/property-types";
+import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import PropertyCard from "../landing-page/property-card";
 
 interface PropertyListProps {
   pageType?: "landing" | "explore";
   itemsPerPage?: number;
   showCategoryFilter?: boolean;
   showPagination?: boolean;
-  searchQuery?: ExploreQueryState;
+  searchQuery?: ExploreQueryState; // <-- accept query from parent
 }
 
 export default function PropertyList({
@@ -26,17 +30,26 @@ export default function PropertyList({
   itemsPerPage = 6,
   showCategoryFilter = true,
   showPagination = true,
+  searchQuery,
 }: PropertyListProps) {
   const router = useRouter();
-  const { query, setQuery } = useExploreQuery();
+  const { query: internalQuery, setQuery } = useExploreQuery();
+  const query = searchQuery ?? internalQuery; // <-- prioritize prop if provided
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Fetch properties from backend
+  // Fetch properties from backend, now including guests, priceSort, and dates
   const { data, isLoading, isError, refetch } = usePublicProperties({
     page: currentPage,
     limit: itemsPerPage,
     name: pageType === "explore" ? query.name || undefined : undefined,
     category: query.category,
+    sortBy: query.sortBy,
+    sortOrder:
+      query.sortBy === PropertySortField.PRICE
+        ? query.sortOrder ?? PriceSort.ASC
+        : undefined, // <-- pass sortBy as well
+    checkInDate: query.checkInDate,
+    checkOutDate: query.checkOutDate,
   });
 
   const properties = useMemo(() => data?.properties ?? [], [data]);
@@ -56,7 +69,28 @@ export default function PropertyList({
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [query.name, query.category]);
+  }, [
+    query.name,
+    query.category,
+    query.guests,
+    query.sortOrder,
+    query.checkInDate,
+    query.checkOutDate,
+  ]);
+
+  // Refetch properties whenever the query or current page changes
+  useEffect(() => {
+    refetch();
+  }, [
+    query.name,
+    query.category,
+    query.guests,
+    query.sortOrder,
+    query.checkInDate,
+    query.checkOutDate,
+    currentPage,
+    refetch,
+  ]);
 
   const toggleSave = (id: number) => {
     console.log("Saved toggled:", id);
@@ -172,7 +206,7 @@ export default function PropertyList({
               category={p.category}
               onToggleSave={toggleSave}
               onView={(id) => router.push(`/property/${id}`)}
-              onClick={() => router.push(`/property/${p.id}`)} // Card-level click
+              onClick={() => router.push(`/property/${p.id}`)}
             />
           );
         })}

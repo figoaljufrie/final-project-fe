@@ -1,6 +1,9 @@
 import api from "@/lib/api"; // Assuming '@/lib/api' is your Axios instance
 import type {
   CreatePropertyPayload,
+  GeocodingResult,
+  NearbyProperty,
+  NearbyPropertyQuery,
   PropertyDetail,
   PropertyListItem,
   PropertySearchQuery,
@@ -102,3 +105,74 @@ export const getPublicProperties = async (
   const { data } = await api.get("/properties/search", { params: filters });
   return data.data;
 };
+
+//Search for properties near a specific coordinate
+export async function searchNearbyProperties(
+  params: NearbyPropertyQuery
+): Promise<NearbyProperty[]> {
+  const { data } = await api.get("/properties/nearby", {
+    params: {
+      latitude: params.latitude,
+      longitude: params.longitude,
+      radius: params.radius || 10,
+      limit: params.limit || 20,
+    },
+  });
+  return data.data;
+}
+
+/**
+ * @param address*/
+export async function geocodeAddress(
+  address: string
+): Promise<GeocodingResult> {
+  const { data } = await api.get("/properties/geocode", {
+    params: { address },
+  });
+  return data.data;
+}
+
+//Reverse geocode coordinates to get address
+export async function reverseGeocode(
+  latitude: number,
+  longitude: number
+): Promise<GeocodingResult> {
+  const { data } = await api.get("/properties/reverse-geocode", {
+    params: { latitude, longitude },
+  });
+  return data.data;
+}
+
+//Get user's current location using browser geolocation API
+
+//Note: This requires HTTPS and user permission
+export async function getCurrentLocation(): Promise<{
+  latitude: number;
+  longitude: number;
+  accuracy: number;
+}> {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error("Geolocation is not supported by this browser"));
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        resolve({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+        });
+      },
+      (error) => {
+        reject(new Error(`Geolocation error: ${error.message}`));
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
+  });
+}

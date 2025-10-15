@@ -12,8 +12,7 @@ import {
 
 type ExpandedSections = {
   propertyType: boolean;
-  guests: boolean;
-  price: boolean;
+  date: boolean;
   sortBy: boolean;
 };
 
@@ -22,8 +21,7 @@ export default function FilterSidebar() {
 
   const [expandedSections, setExpandedSections] = useState<ExpandedSections>({
     propertyType: true,
-    guests: true,
-    price: true,
+    date: true,
     sortBy: true,
   });
 
@@ -33,22 +31,10 @@ export default function FilterSidebar() {
     { id: PropertyCategory.APARTMENT, label: "Apartment" },
   ];
 
-  const guestOptions = [
-    { id: "1-2", label: "1 - 2" },
-    { id: "3-6", label: "3 - 6" },
-    { id: "7-10", label: "7 - 10" },
-    { id: "10+", label: "10+" },
-  ];
-
-  const priceOptions: { id: PriceSort; label: string }[] = [
-    { id: PriceSort.ASC, label: "Lowest" },
-    { id: PriceSort.DESC, label: "Highest" },
-  ];
-
+  // Removed CREATED_AT option
   const sortOptions: { id: PropertySortField; label: string }[] = [
     { id: PropertySortField.PRICE, label: "Price" },
     { id: PropertySortField.NAME, label: "Name" },
-    { id: PropertySortField.CREATED_AT, label: "Created At" },
   ];
 
   const toggleSection = (key: keyof ExpandedSections) => {
@@ -56,21 +42,21 @@ export default function FilterSidebar() {
   };
 
   const clearFilters = () => {
-    setQuery({ name: "" });
+    setQuery({
+      name: "",
+      category: undefined,
+      sortBy: undefined,
+      sortOrder: undefined,
+      checkInDate: undefined,
+      checkOutDate: undefined,
+    });
   };
 
   return (
     <aside className="w-80 bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl p-6 h-fit border border-gray-200/50 hover:shadow-2xl transition-all duration-300">
-      {/* Filter Header */}
+      {/* Header */}
       <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gradient-to-br from-rose-500 to-rose-600 rounded-lg flex items-center justify-center">
-            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-            </svg>
-          </div>
-          <h2 className="text-xl font-bold text-gray-900">Filters</h2>
-        </div>
+        <h2 className="text-xl font-bold text-gray-900">Filters</h2>
         <Button
           variant="ghost"
           size="sm"
@@ -82,10 +68,10 @@ export default function FilterSidebar() {
       </div>
 
       {/* Property Type */}
-      <div className="mb-8">
+      <div className="mb-6">
         <button
           onClick={() => toggleSection("propertyType")}
-          className="flex items-center justify-between w-full mb-4 text-left p-2 rounded-lg hover:bg-gray-50 transition-all duration-200"
+          className="flex items-center justify-between w-full mb-4 text-left"
         >
           <h3 className="font-semibold text-gray-800">Property Type</h3>
           {expandedSections.propertyType ? (
@@ -97,7 +83,10 @@ export default function FilterSidebar() {
         {expandedSections.propertyType && (
           <div className="space-y-3 pl-2">
             {propertyTypes.map((type) => (
-              <label key={type.id} className="flex items-center cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-all duration-200">
+              <label
+                key={type.id}
+                className="flex items-center cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-all duration-200"
+              >
                 <input
                   type="checkbox"
                   checked={query.category === type.id}
@@ -110,42 +99,8 @@ export default function FilterSidebar() {
                   }
                   className="w-4 h-4 text-rose-600 rounded border-gray-300 focus:ring-rose-500"
                 />
-                <span className="ml-3 text-sm font-medium text-gray-700">{type.label}</span>
-              </label>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Guests */}
-      <div className="mb-6">
-        <button
-          onClick={() => toggleSection("guests")}
-          className="flex items-center justify-between w-full mb-4 text-left"
-        >
-          <h3 className="font-medium text-gray-800">Guests</h3>
-          {expandedSections.guests ? (
-            <ChevronUp className="w-4 h-4 text-gray-500" />
-          ) : (
-            <ChevronDown className="w-4 h-4 text-gray-500" />
-          )}
-        </button>
-        {expandedSections.guests && (
-          <div className="space-y-3">
-            {guestOptions.map((option) => (
-              <label
-                key={option.id}
-                className="flex items-center cursor-pointer"
-              >
-                <input
-                  type="radio"
-                  name="guests"
-                  checked={query.guests === option.id}
-                  onChange={() => setQuery({ ...query, guests: option.id })}
-                  className="w-4 h-4 text-rose-600 border-gray-300 focus:ring-rose-500"
-                />
-                <span className="ml-3 text-sm text-gray-700">
-                  {option.label}
+                <span className="ml-3 text-sm font-medium text-gray-700">
+                  {type.label}
                 </span>
               </label>
             ))}
@@ -153,38 +108,37 @@ export default function FilterSidebar() {
         )}
       </div>
 
-      {/* Price */}
+      {/* Date (Check-in/Check-out) */}
       <div className="mb-6">
         <button
-          onClick={() => toggleSection("price")}
+          onClick={() => toggleSection("date")}
           className="flex items-center justify-between w-full mb-4 text-left"
         >
-          <h3 className="font-medium text-gray-800">Price</h3>
-          {expandedSections.price ? (
+          <h3 className="font-medium text-gray-800">Dates</h3>
+          {expandedSections.date ? (
             <ChevronUp className="w-4 h-4 text-gray-500" />
           ) : (
             <ChevronDown className="w-4 h-4 text-gray-500" />
           )}
         </button>
-        {expandedSections.price && (
-          <div className="space-y-3">
-            {priceOptions.map((option) => (
-              <label
-                key={option.id}
-                className="flex items-center cursor-pointer"
-              >
-                <input
-                  type="radio"
-                  name="price"
-                  checked={query.priceSort === option.id}
-                  onChange={() => setQuery({ ...query, priceSort: option.id })}
-                  className="w-4 h-4 text-rose-600 border-gray-300 focus:ring-rose-500"
-                />
-                <span className="ml-3 text-sm text-gray-700">
-                  {option.label}
-                </span>
-              </label>
-            ))}
+        {expandedSections.date && (
+          <div className="flex flex-col space-y-3">
+            <input
+              type="date"
+              value={query.checkInDate || ""}
+              onChange={(e) =>
+                setQuery({ ...query, checkInDate: e.target.value })
+              }
+              className="border p-2 rounded-lg text-gray-700"
+            />
+            <input
+              type="date"
+              value={query.checkOutDate || ""}
+              onChange={(e) =>
+                setQuery({ ...query, checkOutDate: e.target.value })
+              }
+              className="border p-2 rounded-lg text-gray-700"
+            />
           </div>
         )}
       </div>
@@ -213,7 +167,16 @@ export default function FilterSidebar() {
                   type="radio"
                   name="sortBy"
                   checked={query.sortBy === option.id}
-                  onChange={() => setQuery({ ...query, sortBy: option.id })}
+                  onChange={() =>
+                    setQuery({
+                      ...query,
+                      sortBy: option.id,
+                      sortOrder:
+                        option.id === PropertySortField.PRICE
+                          ? PriceSort.ASC
+                          : undefined,
+                    })
+                  }
                   className="w-4 h-4 text-rose-600 border-gray-300 focus:ring-rose-500"
                 />
                 <span className="ml-3 text-sm text-gray-700">
