@@ -74,8 +74,8 @@ export interface PropertyListItem {
 export interface PropertySearchQuery {
   page?: number;
   limit?: number;
-  name?: string;       // free text search
-  city?: string;       // <-- new
+  name?: string; // free text search
+  city?: string; // <-- new
   category?: PropertyCategory;
   sortBy?: PropertySortField;
   sortOrder?: PriceSort;
@@ -91,4 +91,42 @@ export interface PropertySearchResponse {
     total: number;
     totalPages: number;
   };
+}
+
+export interface GeocodingResult {
+  latitude: number;
+  longitude: number;
+  formattedAddress: string;
+  city?: string;
+  province?: string;
+  country?: string;
+}
+
+export interface NearbyPropertyQuery {
+  latitude: number;
+  longitude: number;
+  radius?: number; // in km
+  limit?: number;
+}
+
+export interface NearbyProperty {
+  id: number;
+  name: string;
+  city: string | null;
+  province: string | null;
+  address: string | null;
+  latitude: number;
+  longitude: number;
+  category: PropertyCategory;
+  distance: number; // in km
+  minPrice: number | null;
+  images: PropertyImage[];
+}
+
+export interface UserLocation {
+  latitude: number;
+  longitude: number;
+  accuracy?: number;
+  city?: string;
+  address?: string;
 }

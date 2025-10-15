@@ -11,8 +11,8 @@ export interface ExploreQueryState {
   name: string;
   category?: PropertyCategory;
   guests?: string;
-  priceSort?: PriceSort; // <-- updated to PriceSort enum
   sortBy?: PropertySortField;
+  sortOrder?: PriceSort
   checkInDate?: string;
   checkOutDate?: string;
 }
@@ -22,7 +22,6 @@ export const useExploreQuery = () => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  // Map string values from URL to PriceSort enum
   const mapPriceSort = (value: string | null): PriceSort | undefined => {
     if (!value) return undefined;
     if (value.toLowerCase() === "asc") return PriceSort.ASC;
@@ -34,7 +33,7 @@ export const useExploreQuery = () => {
     name: searchParams.get("name") || "",
     category: (searchParams.get("category") as PropertyCategory) || undefined,
     guests: searchParams.get("guests") || undefined,
-    priceSort: mapPriceSort(
+    sortOrder: mapPriceSort(
       searchParams.get("priceSort") || searchParams.get("priceRange")
     ),
     sortBy: (searchParams.get("sortBy") as PropertySortField) || undefined,
@@ -42,21 +41,34 @@ export const useExploreQuery = () => {
     checkOutDate: searchParams.get("checkOutDate") || undefined,
   });
 
-  // Sync URL when query changes, but only on the explore page
   useEffect(() => {
-    if (!pathname?.startsWith("/explore")) return; // prevent redirect on landing
+    setQuery({
+      name: searchParams.get("name") || "",
+      category: (searchParams.get("category") as PropertyCategory) || undefined,
+      guests: searchParams.get("guests") || undefined,
+      sortOrder: mapPriceSort(
+        searchParams.get("priceSort") || searchParams.get("priceRange")
+      ),
+      sortBy: (searchParams.get("sortBy") as PropertySortField) || undefined,
+      checkInDate: searchParams.get("checkInDate") || undefined,
+      checkOutDate: searchParams.get("checkOutDate") || undefined,
+    });
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (!pathname?.startsWith("/explore")) return;
 
     const params = new URLSearchParams();
     if (query.name) params.set("name", query.name);
     if (query.category) params.set("category", query.category);
     if (query.guests) params.set("guests", query.guests);
-    if (query.priceSort) params.set("priceSort", query.priceSort); // use enum string
+    if (query.sortOrder) params.set("priceSort", query.sortOrder);
     if (query.sortBy) params.set("sortBy", query.sortBy);
     if (query.checkInDate) params.set("checkInDate", query.checkInDate);
     if (query.checkOutDate) params.set("checkOutDate", query.checkOutDate);
 
     router.replace(`/explore?${params.toString()}`);
-  }, [query, router, pathname]); // <-- added pathname as dependency
+  }, [query, router, pathname]);
 
   return { query, setQuery };
 };
