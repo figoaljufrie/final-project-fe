@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CalendarDays, User } from "lucide-react";
+import { User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/stores/auth-store";
 import { useExploreQuery } from "@/hooks/Inventory/property/use-explore-query";
@@ -14,7 +14,6 @@ interface HeaderProps {
 export default function Header({ initialQuery = "" }: HeaderProps) {
   const { user, hydrate, logout } = useAuthStore();
   const [openProfile, setOpenProfile] = useState(false);
-  const [openCalendar, setOpenCalendar] = useState(false);
 
   const { query, setQuery } = useExploreQuery();
   const [searchQuery, setSearchQuery] = useState(initialQuery || query.name);
@@ -73,16 +72,6 @@ export default function Header({ initialQuery = "" }: HeaderProps) {
 
         {/* Right Section */}
         <div className="flex items-center gap-3 relative">
-          {/* Calendar */}
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={() => setOpenCalendar(!openCalendar)}
-          >
-            <CalendarDays className="h-5 w-5" />
-          </Button>
-
-
           {/* User Profile / Login */}
           {user ? (
             <>
@@ -126,22 +115,6 @@ export default function Header({ initialQuery = "" }: HeaderProps) {
             >
               Login
             </Button>
-          )}
-
-          {/* Calendar dropdown */}
-          {openCalendar && (
-            <div className="absolute right-16 top-12 bg-white shadow-lg rounded-md p-4">
-              <div className="grid grid-cols-2 gap-4 text-center">
-                <div>
-                  <p className="font-medium">Sept 2025</p>
-                  <div className="text-sm">Calendar grid...</div>
-                </div>
-                <div>
-                  <p className="font-medium">Oct 2025</p>
-                  <div className="text-sm">Calendar grid...</div>
-                </div>
-              </div>
-            </div>
           )}
         </div>
       </div>

@@ -20,9 +20,6 @@ export default function ReportKPICards({
   kpiData,
   isLoading = false,
 }: ReportKPICardsProps) {
-  // Debug: Log the data being received
-  console.log("ReportKPICards - kpiData:", kpiData);
-  console.log("ReportKPICards - isLoading:", isLoading);
 
   // Fallback data for testing if kpiData is empty
   const safeKpiData = {
@@ -106,7 +103,14 @@ export default function ReportKPICards({
                   {card.title}
                 </p>
                 <p className="text-2xl font-bold text-gray-900 mb-2">
-                  {isLoading ? "..." : card.value}
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 bg-gradient-to-br from-rose-500 to-rose-600 rounded-full animate-pulse"></div>
+                      <span className="text-gray-400">Loading...</span>
+                    </div>
+                  ) : (
+                    card.value
+                  )}
                 </p>
                 <div className="flex items-center">
                   <TrendIcon
@@ -119,7 +123,7 @@ export default function ReportKPICards({
                       card.trend === "up" ? "text-green-600" : "text-red-600"
                     }`}
                   >
-                    {card.change}
+                    {isLoading ? "..." : card.change}
                   </span>
                 </div>
               </div>

@@ -97,7 +97,7 @@ export default function ReportsPage() {
         </motion.div>
 
         {isLoading ? (
-          <div className="flex items-center justify-center h-64">
+          <div className="flex items-center justify-center min-h-[400px]">
             <FullScreenLoadingSpinner
               message="Loading reports"
               subMessage="Please wait while we generate your analytics..."
