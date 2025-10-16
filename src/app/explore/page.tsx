@@ -1,6 +1,6 @@
 "use client";
 
-import { useExploreQuery } from "@/hooks/Inventory/property/use-explore-query";
+import { useExploreQuery } from "@/hooks/Inventory/property/ui-state/use-explore-query"
 import Header from "@/components/landing-page/header";
 import Footer from "@/components/landing-page/footer";
 import FilterSidebar from "@/components/explore-page/filter-sidebar";

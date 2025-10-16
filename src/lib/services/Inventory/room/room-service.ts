@@ -29,7 +29,6 @@ function forFormData(
       altText: img.altText,
     }));
 
-    // ✅ FIXED: renamed for consistency with backend
     formData.append("imageMeta", JSON.stringify(meta));
 
     images.forEach((img) => {
@@ -74,6 +73,13 @@ export const listsRoomsByProperty = async (
   }));
 };
 
+export async function getRoomDetail(
+  propertyId: number,
+  roomId: number
+): Promise<RoomDetail> {
+  const { data } = await api.get(`/properties/${propertyId}/rooms/${roomId}`);
+  return data.data;
+}
 export async function updateRoom(
   propertyId: number,
   roomId: number,
@@ -96,4 +102,43 @@ export async function deleteRoom(
   roomId: number
 ): Promise<void> {
   await api.delete(`/properties/${propertyId}/rooms/${roomId}`);
+}
+
+export async function updateRoomImages(
+  propertyId: number,
+  roomId: number,
+  images: RoomImagePayload[]
+): Promise<RoomDetail> {
+  const formData = new FormData();
+
+  const meta = images.map((img) => ({
+    isPrimary: img.isPrimary,
+    order: img.order,
+    altText: img.altText,
+  }));
+  formData.append("imageMeta", JSON.stringify(meta));
+
+  images.forEach((img) => {
+    formData.append("images", img.file);
+  });
+
+  const { data } = await api.patch(
+    `/properties/${propertyId}/rooms/${roomId}/images`,
+    formData,
+    {
+      headers: { "Content-Type": "multipart/form-data" },
+    }
+  );
+
+  return data.data;
+}
+
+export async function deleteRoomImage(
+  propertyId: number,
+  roomId: number,
+  imageId: number
+): Promise<void> {
+  await api.delete(
+    `/properties/${propertyId}/rooms/${roomId}/images/${imageId}`
+  );
 }

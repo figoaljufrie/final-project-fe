@@ -1,7 +1,7 @@
 "use client";
 
 import { MapPin, Home } from "lucide-react";
-import { usePropertyDetail } from "@/hooks/Inventory/property/use-property-detail";
+import { usePropertyDetail } from "@/hooks/Inventory/property/query/use-property-detail";
 import { CardLoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface PropertyInfoProps {

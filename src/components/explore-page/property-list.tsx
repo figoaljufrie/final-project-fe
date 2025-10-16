@@ -5,8 +5,8 @@ import { CardLoadingSpinner } from "@/components/ui/loading-spinner";
 import {
   ExploreQueryState,
   useExploreQuery,
-} from "@/hooks/Inventory/property/use-explore-query";
-import { usePublicProperties } from "@/hooks/Inventory/property/use-public-properties";
+} from "@/hooks/Inventory/property/ui-state/use-explore-query";
+import { usePublicProperties } from "@/hooks/Inventory/property/query/use-public-properties";
 import { PropertyCategory } from "@/lib/types/enums/enums-type";
 import {
   PriceSort,

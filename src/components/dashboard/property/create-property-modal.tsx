@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { useCreateProperty } from "@/hooks/Inventory/property/use-property-mutation";
+import { useCreateProperty } from "@/hooks/Inventory/property/mutations/use-property-mutation";
 import { PropertyCategory } from "@/lib/types/enums/enums-type";
 import type { CreatePropertyPayload } from "@/lib/types/inventory/property-types";
 

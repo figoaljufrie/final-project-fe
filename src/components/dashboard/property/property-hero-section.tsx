@@ -6,7 +6,7 @@ import { Globe2, MapPin, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import PropertyImageUploader from "./property-image-uploader";
 import PropertyUpdateForm from "./property-update-form";
-import { useUpdateProperty } from "@/hooks/Inventory/property/use-property-mutation";
+import { useUpdateProperty } from "@/hooks/Inventory/property/mutations/use-property-mutation";
 
 export default function PropertyHeroSection({
   property,

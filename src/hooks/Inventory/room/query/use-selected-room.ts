@@ -1,4 +1,4 @@
-// /hooks/Inventory/property/use-rooms.ts
+
 import { useState, useEffect } from "react";
 import { listsRoomsByProperty } from "@/lib/services/Inventory/room/room-service";
 import type { RoomListItem } from "@/lib/types/inventory/room-type";

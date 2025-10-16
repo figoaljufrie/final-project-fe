@@ -1,8 +1,10 @@
 export interface RoomImage {
+  id: number;
   url: string;
   publicId: string;
   altText: string | null;
   isPrimary: boolean;
+  order: number;
 }
 
 export interface RoomDetail {

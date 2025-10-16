@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useUpdateProperty } from "@/hooks/Inventory/property/use-property-mutation";
+import { useUpdateProperty } from "@/hooks/Inventory/property/mutations/use-property-mutation";
 import type { PropertyDetail } from "@/lib/types/inventory/property-types";
 import { Loader2 } from "lucide-react";
 

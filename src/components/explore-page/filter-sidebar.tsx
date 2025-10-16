@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useExploreQuery } from "@/hooks/Inventory/property/use-explore-query";
+import { useExploreQuery } from "@/hooks/Inventory/property/ui-state/use-explore-query";
 import { PropertyCategory } from "@/lib/types/enums/enums-type";
 import {
   PropertySortField,

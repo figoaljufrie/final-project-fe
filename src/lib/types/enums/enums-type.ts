@@ -4,7 +4,8 @@ export enum UserRole {
 }
 
 export enum PriceChangeType {
-  NOMINAL = "nominal"
+  NOMINAL = "nominal",
+  PERCENTAGE = "percentage"
 }
 
 export enum PropertyCategory {

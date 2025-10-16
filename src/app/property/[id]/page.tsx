@@ -8,7 +8,7 @@ import PropertyHost from "@/components/property-detail/property-host";
 import PropertyInfo from "@/components/property-detail/property-info";
 import RoomSelection from "@/components/property-detail/room-selection";
 import { useState, useEffect } from "react";
-import { usePropertyDetail } from "@/hooks/Inventory/property/use-property-detail";
+import { usePropertyDetail } from "@/hooks/Inventory/property/query/use-property-detail";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { FullScreenLoadingSpinner } from "@/components/ui/loading-spinner";

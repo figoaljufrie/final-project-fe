@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { usePropertyGallery } from "@/hooks/Inventory/property/use-property-gallery";
+import { usePropertyGallery } from "@/hooks/Inventory/property/query/use-property-gallery";
 
 interface PropertyGalleryProps {
   propertyId: number; // changed to accept propertyId

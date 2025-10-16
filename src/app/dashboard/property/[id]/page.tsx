@@ -1,15 +1,15 @@
 "use client";
 
 import PropertyHeroSection from "@/components/dashboard/property/property-hero-section";
+import CreateRoomModal from "@/components/dashboard/room/modal/create/modal-create-room";
+import UpdateRoomModal from "@/components/dashboard/room/modal/update/modal-update-room";
 import RoomCard from "@/components/dashboard/room/room-card";
-import CreateRoomModal from "@/components/dashboard/room/room-create-modal";
-import UpdateRoomModal from "@/components/dashboard/room/room-update-modal";
-import { usePropertyDetail } from "@/hooks/Inventory/property/use-property-detail";
-import { useRooms } from "@/hooks/Inventory/room/use-rooms";
+import { FullScreenLoadingSpinner } from "@/components/ui/loading-spinner";
+import { usePropertyDetail } from "@/hooks/Inventory/property/query/use-property-detail";
+import { useRooms } from "@/hooks/Inventory/room/query/use-rooms";
 import { motion } from "framer-motion";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import { FullScreenLoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function PropertyDetailPage() {
   const { id } = useParams();
@@ -75,6 +75,7 @@ export default function PropertyDetailPage() {
               <RoomCard
                 key={room.id}
                 room={room}
+                propertyId={propertyId}
                 onEdit={() => handleRoomEdit(room.id)}
               />
             ))}

@@ -7,7 +7,7 @@ import {
 } from "@/lib/types/inventory/property-types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { usePublicProperties } from "./use-public-properties";
+import { usePublicProperties } from "../query/use-public-properties";
 
 export interface FilterState {
   propertyTypes: string[];

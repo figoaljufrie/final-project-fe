@@ -2,7 +2,7 @@
 
 import CreatePropertyModal from "@/components/dashboard/property/create-property-modal";
 import PropertyCard from "@/components/dashboard/property/property-card";
-import { useTenantProperties } from "@/hooks/Inventory/property/use-tenant-properties";
+import { useTenantProperties } from "@/hooks/Inventory/property/query/use-tenant-properties";
 import type { PropertyListItem } from "@/lib/types/inventory/property-types";
 import { motion } from "framer-motion";
 import { AlertTriangle, Hotel, Plus } from "lucide-react";
