@@ -6,7 +6,6 @@ import {
 } from "@/lib/types/inventory/property-types";
 import { PropertyCategory } from "@/lib/types/enums/enums-type";
 
-// Updated ExploreQueryState to use PriceSort enum
 export interface ExploreQueryState {
   name: string;
   category?: PropertyCategory;

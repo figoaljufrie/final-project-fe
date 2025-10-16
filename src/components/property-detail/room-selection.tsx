@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { Users } from "lucide-react";
 import Image from "next/image";
-import { useRoomsByProperty } from "@/hooks/Inventory/room/use-selected-room";
+import { useRoomsByProperty } from "@/hooks/Inventory/room/query/use-selected-room";
 import { CardLoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface RoomSelectionProps {

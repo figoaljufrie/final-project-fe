@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { Button } from "@/components/ui/button";
-import { useGeolocation } from "@/hooks/Inventory/property/use-geolocation";
+import { useGeolocation } from "@/hooks/Inventory/property/utils/use-geolocation";
 import type { NearbyProperty } from "@/lib/types/inventory/property-types";
 
 const DefaultIcon = L.Icon.Default.extend({

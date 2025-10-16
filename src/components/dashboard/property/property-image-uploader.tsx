@@ -1,6 +1,6 @@
 "use client";
 
-import { useUpdateProperty } from "@/hooks/Inventory/property/use-property-mutation";
+import { useUpdateProperty } from "@/hooks/Inventory/property/mutations/use-property-mutation";
 import { useState } from "react";
 import { Loader2, ImagePlus } from "lucide-react";
 import Image from "next/image";

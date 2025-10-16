@@ -1,4 +1,4 @@
-// lib/hooks/inventory/use-property-mutations.ts
+
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/stores/auth-store";
-import { useExploreQuery } from "@/hooks/Inventory/property/use-explore-query";
+import { useExploreQuery } from "@/hooks/Inventory/property/ui-state/use-explore-query"
 import Link from "next/link";
 
 interface HeaderProps {

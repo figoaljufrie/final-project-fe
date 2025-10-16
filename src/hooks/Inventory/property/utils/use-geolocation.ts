@@ -1,12 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import * as propertyService from "@/lib/services/Inventory/property/property-service";
-import type {
-  UserLocation,
-  GeocodingResult,
-  NearbyProperty,
-} from "@/lib/types/inventory/property-types";
+import type { UserLocation } from "@/lib/types/inventory/property-types";
+import { useEffect, useState, useCallback } from "react";
 
 interface UseGeolocationOptions {
   autoFetch?: boolean; // Automatically fetch location on mount
@@ -47,14 +43,7 @@ export const useGeolocation = (options: UseGeolocationOptions = {}) => {
     }
   }, []);
 
-  // Auto-fetch location on mount if enabled
-  useEffect(() => {
-    if (autoFetch && permissionStatus === "granted") {
-      getCurrentLocation();
-    }
-  }, [autoFetch, permissionStatus]);
-
-  const getCurrentLocation = async () => {
+  const getCurrentLocation = useCallback(async () => {
     if (!navigator.geolocation) {
       setError("Geolocation is not supported by this browser");
       return null;
@@ -117,7 +106,14 @@ export const useGeolocation = (options: UseGeolocationOptions = {}) => {
         }
       );
     });
-  };
+  }, [enableHighAccuracy, timeout, maximumAge]);
+
+  // Auto-fetch location on mount if enabled
+  useEffect(() => {
+    if (autoFetch && permissionStatus === "granted") {
+      getCurrentLocation();
+    }
+  }, [autoFetch, permissionStatus, getCurrentLocation]);
 
   const clearLocation = () => {
     setLocation(null);
@@ -132,120 +128,5 @@ export const useGeolocation = (options: UseGeolocationOptions = {}) => {
     getCurrentLocation,
     clearLocation,
     isSupported: !!navigator.geolocation,
-  };
-};
-
-// Hook for searching nearby properties
-export const useNearbyProperties = () => {
-  const [properties, setProperties] = useState<NearbyProperty[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const searchNearby = async (
-    latitude: number,
-    longitude: number,
-    radius = 10,
-    limit = 20
-  ) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const results = await propertyService.searchNearbyProperties({
-        latitude,
-        longitude,
-        radius,
-        limit,
-      });
-      setProperties(results);
-      return results;
-    } catch (err) {
-      const errorMsg =
-        err instanceof Error
-          ? err.message
-          : "Failed to search nearby properties";
-      setError(errorMsg);
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const clearResults = () => {
-    setProperties([]);
-    setError(null);
-  };
-
-  return {
-    properties,
-    loading,
-    error,
-    searchNearby,
-    clearResults,
-  };
-};
-
-// Hook for geocoding addresses
-export const useGeocoding = () => {
-  const [result, setResult] = useState<GeocodingResult | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const geocode = async (address: string) => {
-    if (!address.trim()) {
-      setError("Address is required");
-      return null;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const geocodeResult = await propertyService.geocodeAddress(address);
-      setResult(geocodeResult);
-      return geocodeResult;
-    } catch (err) {
-      const errorMsg =
-        err instanceof Error ? err.message : "Failed to geocode address";
-      setError(errorMsg);
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const reverseGeocode = async (latitude: number, longitude: number) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const geocodeResult = await propertyService.reverseGeocode(
-        latitude,
-        longitude
-      );
-      setResult(geocodeResult);
-      return geocodeResult;
-    } catch (err) {
-      const errorMsg =
-        err instanceof Error ? err.message : "Failed to reverse geocode";
-      setError(errorMsg);
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const clearResult = () => {
-    setResult(null);
-    setError(null);
-  };
-
-  return {
-    result,
-    loading,
-    error,
-    geocode,
-    reverseGeocode,
-    clearResult,
   };
 };
