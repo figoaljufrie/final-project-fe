@@ -12,7 +12,7 @@ export default function BookingNotFound() {
   const router = useRouter();
 
   return (
-    <main className="min-h-screen bg-[#F2EEE3]">
+    <main className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-amber-50">
       <Header />
 
       <div className="container mx-auto px-4 py-8">
@@ -28,10 +28,10 @@ export default function BookingNotFound() {
             transition={{ delay: 0.2 }}
             className="mb-8"
           >
-            <div className="w-32 h-32 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="w-32 h-32 bg-gradient-to-br from-red-100 to-rose-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg backdrop-blur-sm border border-red-200/50">
               <AlertCircle size={64} className="text-red-500" />
             </div>
-            <h1 className="text-4xl font-bold text-gray-800 mb-4">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent mb-4">
               Booking Not Found
             </h1>
             <p className="text-xl text-gray-600 mb-2">
@@ -53,7 +53,7 @@ export default function BookingNotFound() {
             <Button
               onClick={() => router.back()}
               variant="outline"
-              className="border-[#8B7355] text-[#8B7355] hover:bg-[#8B7355] hover:text-white"
+              className="border-amber-500/50 text-amber-600 hover:bg-amber-500 hover:text-white backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300"
             >
               <ArrowLeft size={16} className="mr-2" />
               Go Back
@@ -62,14 +62,14 @@ export default function BookingNotFound() {
             <Link href="/bookings">
               <Button
                 variant="outline"
-                className="border-[#8B7355] text-[#8B7355] hover:bg-[#8B7355] hover:text-white"
+                className="border-amber-500/50 text-amber-600 hover:bg-amber-500 hover:text-white backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300"
               >
                 View My Bookings
               </Button>
             </Link>
 
             <Link href="/">
-              <Button className="bg-[#8B7355] hover:bg-[#7A6349] text-white">
+              <Button className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white shadow-lg hover:shadow-xl transition-all duration-300">
                 <Home size={16} className="mr-2" />
                 Back to Homepage
               </Button>
@@ -81,9 +81,9 @@ export default function BookingNotFound() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6 }}
-            className="mt-12 p-6 bg-white rounded-xl shadow-lg"
+            className="mt-12 p-6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20"
           >
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">
+            <h3 className="text-lg font-semibold bg-gradient-to-r from-amber-600 to-rose-600 bg-clip-text text-transparent mb-3">
               Need Help?
             </h3>
             <p className="text-gray-600 mb-4">
@@ -91,19 +91,19 @@ export default function BookingNotFound() {
             </p>
             <ul className="text-left text-gray-600 space-y-2">
               <li className="flex items-start gap-2">
-                <span className="text-[#8B7355] font-bold">•</span>
+                <span className="bg-gradient-to-r from-amber-600 to-rose-600 bg-clip-text text-transparent font-bold">•</span>
                 <span>Make sure you&apos;re logged in with the correct account</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-[#8B7355] font-bold">•</span>
+                <span className="bg-gradient-to-r from-amber-600 to-rose-600 bg-clip-text text-transparent font-bold">•</span>
                 <span>Check if the booking number is correct</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-[#8B7355] font-bold">•</span>
+                <span className="bg-gradient-to-r from-amber-600 to-rose-600 bg-clip-text text-transparent font-bold">•</span>
                 <span>Verify the booking hasn&apos;t been cancelled or expired</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-[#8B7355] font-bold">•</span>
+                <span className="bg-gradient-to-r from-amber-600 to-rose-600 bg-clip-text text-transparent font-bold">•</span>
                 <span>Contact support if the issue persists</span>
               </li>
             </ul>
