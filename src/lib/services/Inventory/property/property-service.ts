@@ -11,24 +11,31 @@ import type {
   UpdatePropertyPayload,
 } from "@/lib/types/inventory/property-types";
 
+async function uploadPropertyImages(
+  propertyId: number,
+  files: File[]
+): Promise<void> {
+  const formData = new FormData();
+  files.forEach((file) => formData.append("images", file));
+
+  await api.post(`/properties/${propertyId}/images`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+}
+
 export async function createProperty(
   payload: CreatePropertyPayload,
   files?: File[]
 ): Promise<PropertyDetail> {
-  const formData = new FormData();
-
-  formData.append("name", payload.name);
-  formData.append("description", payload.description);
-  formData.append("category", payload.category);
+  const { data } = await api.post("/tenant/properties", payload);
+  const propertyId = data.data.id as number;
 
   if (files && files.length > 0) {
-    files.forEach((file) => formData.append("images", file));
+    await uploadPropertyImages(propertyId, files);
   }
 
-  const { data } = await api.post("/tenant/properties", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-  return data.data;
+  const { data: full } = await api.get(`/properties/${propertyId}`);
+  return full.data;
 }
 
 export async function updateProperty(
@@ -36,25 +43,14 @@ export async function updateProperty(
   payload: UpdatePropertyPayload,
   files?: File[]
 ): Promise<PropertyDetail> {
-  const formData = new FormData();
-
-  Object.entries(payload).forEach(([key, value]) => {
-    if (value !== undefined && value !== null)
-      formData.append(key, String(value));
-  });
+  await api.patch(`/tenant/properties/${propertyId}`, payload);
 
   if (files && files.length > 0) {
-    files.forEach((file) => formData.append("images", file));
+    await uploadPropertyImages(propertyId, files);
   }
 
-  const { data } = await api.patch(
-    `/tenant/properties/${propertyId}`,
-    formData,
-    {
-      headers: { "Content-Type": "multipart/form-data" },
-    }
-  );
-  return data.data;
+  const fullResponse = await api.get(`/properties/${propertyId}`);
+  return fullResponse.data;
 }
 
 export async function deleteProperty(propertyId: number): Promise<void> {
@@ -79,7 +75,6 @@ export async function getPropertyDetails(
   if (checkoutDate) params.checkOutDate = checkoutDate;
 
   const { data } = await api.get(`/properties/${propertyId}`, { params });
-
   return data.data;
 }
 
@@ -106,7 +101,6 @@ export const getPublicProperties = async (
   return data.data;
 };
 
-//Search for properties near a specific coordinate
 export async function searchNearbyProperties(
   params: NearbyPropertyQuery
 ): Promise<NearbyProperty[]> {
@@ -121,8 +115,6 @@ export async function searchNearbyProperties(
   return data.data;
 }
 
-/**
- * @param address*/
 export async function geocodeAddress(
   address: string
 ): Promise<GeocodingResult> {
@@ -132,7 +124,6 @@ export async function geocodeAddress(
   return data.data;
 }
 
-//Reverse geocode coordinates to get address
 export async function reverseGeocode(
   latitude: number,
   longitude: number
@@ -143,9 +134,6 @@ export async function reverseGeocode(
   return data.data;
 }
 
-//Get user's current location using browser geolocation API
-
-//Note: This requires HTTPS and user permission
 export async function getCurrentLocation(): Promise<{
   latitude: number;
   longitude: number;

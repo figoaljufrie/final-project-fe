@@ -1,6 +1,6 @@
 "use client";
 
-import CreatePropertyModal from "@/components/dashboard/property/create-property-modal";
+import CreatePropertyModal from "@/components/dashboard/property/create-property/create-modal";
 import PropertyCard from "@/components/dashboard/property/property-card";
 import { useTenantProperties } from "@/hooks/Inventory/property/query/use-tenant-properties";
 import type { PropertyListItem } from "@/lib/types/inventory/property-types";
