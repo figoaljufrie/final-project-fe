@@ -24,7 +24,9 @@ export default function Header({ initialQuery = "" }: HeaderProps) {
 
   const handleLogout = async () => {
     await logout();
-    window.location.href = "/";
+    if (typeof window !== 'undefined') {
+      window.location.href = "/";
+    }
   };
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
@@ -33,13 +35,15 @@ export default function Header({ initialQuery = "" }: HeaderProps) {
     if (!trimmed) return;
 
     // If already on explore page, just update query state
-    if (window.location.pathname.startsWith("/explore")) {
+    if (typeof window !== 'undefined' && window.location.pathname.startsWith("/explore")) {
       setQuery({ ...query, name: trimmed });
     } else {
       // Redirect to explore page with search query
       const params = new URLSearchParams();
       params.set("name", trimmed);
-      window.location.href = `/explore?${params.toString()}`;
+      if (typeof window !== 'undefined') {
+        window.location.href = `/explore?${params.toString()}`;
+      }
     }
   };
 
@@ -49,7 +53,11 @@ export default function Header({ initialQuery = "" }: HeaderProps) {
         {/* Logo */}
         <div
           className="flex items-center cursor-pointer"
-          onClick={() => (window.location.href = "/")}
+          onClick={() => {
+            if (typeof window !== 'undefined') {
+              window.location.href = "/";
+            }
+          }}
         >
           <div className="w-8 h-8 bg-gradient-to-br from-rose-500 to-rose-600 rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">N</span>
@@ -110,7 +118,11 @@ export default function Header({ initialQuery = "" }: HeaderProps) {
             </>
           ) : (
             <Button 
-              onClick={() => (window.location.href = "/auth/login")}
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  window.location.href = "/auth/login";
+                }
+              }}
               className="bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white"
             >
               Login

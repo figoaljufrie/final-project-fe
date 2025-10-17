@@ -6,6 +6,10 @@ import {
   ChevronRight,
   MapPin,
   Users,
+  Download,
+  RefreshCw,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import {
   ReportService,
@@ -13,6 +17,7 @@ import {
 } from "@/lib/services/report/report-service";
 import { useTenantProperties } from "@/hooks/report/use-tenant-properties";
 import { toast } from "react-hot-toast";
+import { ExportUtils } from "@/lib/utils/export-utils";
 
 interface PropertyAvailabilityCalendarProps {
   propertyId?: number;
@@ -30,6 +35,8 @@ export default function PropertyAvailabilityCalendar({
     useState<PropertyReportResponse | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [showRoomDetails, setShowRoomDetails] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const { properties: tenantProperties } = useTenantProperties();
 
@@ -105,6 +112,11 @@ export default function PropertyAvailabilityCalendar({
     const fullyBookedRooms = calendarEntry.rooms.filter(
       (room) => room.status === "fully_booked"
     ).length;
+    const unavailableRooms = calendarEntry.rooms.filter(
+      (room) => room.status === "unavailable"
+    ).length;
+    
+    if (unavailableRooms > 0) return "unavailable";
     if (fullyBookedRooms === totalRooms) return "fully_booked";
     if (availableRooms === totalRooms) return "available";
     return "partially_booked";
@@ -118,6 +130,8 @@ export default function PropertyAvailabilityCalendar({
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "fully_booked":
         return "bg-red-100 text-red-800 border-red-200";
+      case "unavailable":
+        return "bg-gray-100 text-gray-800 border-gray-200";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
@@ -133,6 +147,36 @@ export default function PropertyAvailabilityCalendar({
       }
       return newMonth;
     });
+  };
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await loadPropertyData();
+      toast.success("Calendar data refreshed successfully");
+    } catch {
+      toast.error("Failed to refresh calendar data");
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const handleExportCalendar = async () => {
+    if (!propertyData || !propertyData.calendar) {
+      toast.error("No calendar data to export");
+      return;
+    }
+
+    try {
+      await ExportUtils.exportCalendarToExcel(
+        propertyData.calendar,
+        `property-calendar-${currentMonth.getFullYear()}-${currentMonth.getMonth() + 1}.xlsx`
+      );
+      toast.success("Calendar exported successfully");
+    } catch (error) {
+      console.error("Export error:", error);
+      toast.error("Failed to export calendar");
+    }
   };
 
   const getRoomDetails = (date: Date) => {
@@ -178,6 +222,31 @@ export default function PropertyAvailabilityCalendar({
           Property Availability Calendar
         </h3>
         <div className="flex items-center space-x-2">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleExportCalendar}
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <Download className="h-4 w-4" />
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowRoomDetails(!showRoomDetails)}
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            {showRoomDetails ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </motion.button>
           <button
             onClick={() => navigateMonth("prev")}
             className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
@@ -246,7 +315,7 @@ export default function PropertyAvailabilityCalendar({
         </div>
       </div>
 
-      {selectedDate && (
+      {selectedDate && showRoomDetails && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -263,7 +332,12 @@ export default function PropertyAvailabilityCalendar({
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {getRoomDetails(new Date(selectedDate)).map((room) => (
-              <div key={room.roomId} className="bg-gray-50 rounded-lg p-4">
+              <motion.div 
+                key={room.roomId} 
+                className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-4 border border-gray-200/50"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
                 <div className="flex items-center justify-between mb-2">
                   <h5 className="font-medium text-gray-900">{room.roomName}</h5>
                   <span
@@ -272,12 +346,21 @@ export default function PropertyAvailabilityCalendar({
                         ? "bg-green-100 text-green-800"
                         : room.status === "partially_booked"
                         ? "bg-yellow-100 text-yellow-800"
+                        : room.status === "unavailable"
+                        ? "bg-gray-100 text-gray-800"
                         : "bg-red-100 text-red-800"
                     }`}
                   >
                     {room.status.replace("_", " ")}
                   </span>
                 </div>
+                {room.reason && (
+                  <div className="mb-2">
+                    <p className="text-xs text-gray-500 italic">
+                      {room.reason}
+                    </p>
+                  </div>
+                )}
                 <div className="flex items-center space-x-4 text-sm text-gray-600">
                   <div className="flex items-center space-x-1">
                     <Users className="h-4 w-4" />
@@ -290,7 +373,27 @@ export default function PropertyAvailabilityCalendar({
                     <span>{room.bookedUnits} booked</span>
                   </div>
                 </div>
-              </div>
+                
+                {/* Show booking details if available */}
+                {room.bookings && room.bookings.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-gray-200">
+                    <h6 className="text-xs font-medium text-gray-700 mb-2">Active Bookings:</h6>
+                    <div className="space-y-1">
+                      {room.bookings.map((booking, idx) => (
+                        <div key={idx} className="text-xs text-gray-600 bg-gray-50 rounded px-2 py-1">
+                          <div className="flex justify-between">
+                            <span className="font-medium">{booking.bookingNo}</span>
+                            <span className="text-gray-500">{booking.unitCount} units</span>
+                          </div>
+                          <div className="text-gray-500">
+                            {booking.totalGuests} guests • {booking.status}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </motion.div>
             ))}
           </div>
         </motion.div>

@@ -1,10 +1,39 @@
 import jsPDF from "jspdf";
 import * as XLSX from "xlsx";
 
+interface CalendarExportData {
+  date: string;
+  propertyId: number;
+  propertyName: string;
+  rooms: RoomExportData[];
+}
+
+interface RoomExportData {
+  roomId: number;
+  roomName: string;
+  totalUnits: number;
+  bookedUnits: number;
+  availableUnits: number;
+  status: 'available' | 'partially_booked' | 'fully_booked' | 'unavailable';
+  reason?: string | null;
+  bookings?: BookingExportData[];
+}
+
+interface BookingExportData {
+  unitCount: number;
+  status: string;
+  bookingNo: string;
+  totalGuests: number;
+}
+
 export class ExportUtils {
   // Simple PDF export - text-based only
   static async exportToPDF(elementId: string, filename: string = "report.pdf") {
     try {
+      if (typeof window === 'undefined' || typeof document === 'undefined') {
+        throw new Error("PDF export is only available in browser environment");
+      }
+      
       const element = document.getElementById(elementId);
       if (!element) {
         throw new Error("Element not found");
@@ -87,6 +116,58 @@ export class ExportUtils {
       return true;
     } catch (error) {
       console.error("Error exporting to Excel:", error);
+      throw error;
+    }
+  }
+
+  // Export calendar data to Excel with multiple sheets
+  static exportCalendarToExcel(
+    calendarData: CalendarExportData[],
+    filename: string = "calendar.xlsx"
+  ) {
+    try {
+      const workbook = XLSX.utils.book_new();
+
+      // Summary sheet
+      const summaryData = calendarData.map(entry => ({
+        Date: entry.date,
+        Property: entry.propertyName,
+        TotalRooms: entry.rooms.length,
+        AvailableRooms: entry.rooms.filter((r: RoomExportData) => r.status === 'available').length,
+        PartiallyBookedRooms: entry.rooms.filter((r: RoomExportData) => r.status === 'partially_booked').length,
+        FullyBookedRooms: entry.rooms.filter((r: RoomExportData) => r.status === 'fully_booked').length,
+        TotalAvailableUnits: entry.rooms.reduce((sum: number, r: RoomExportData) => sum + r.availableUnits, 0),
+        TotalBookedUnits: entry.rooms.reduce((sum: number, r: RoomExportData) => sum + r.bookedUnits, 0),
+        TotalUnits: entry.rooms.reduce((sum: number, r: RoomExportData) => sum + r.totalUnits, 0),
+      }));
+
+      const summarySheet = XLSX.utils.json_to_sheet(summaryData);
+      XLSX.utils.book_append_sheet(workbook, summarySheet, "Summary");
+
+      // Detailed sheet
+      const detailedData: Record<string, unknown>[] = [];
+      calendarData.forEach(entry => {
+        entry.rooms.forEach((room: RoomExportData) => {
+          detailedData.push({
+            Date: entry.date,
+            Property: entry.propertyName,
+            Room: room.roomName,
+            Status: room.status,
+            AvailableUnits: room.availableUnits,
+            BookedUnits: room.bookedUnits,
+            TotalUnits: room.totalUnits,
+            OccupancyRate: `${((room.bookedUnits / room.totalUnits) * 100).toFixed(1)}%`,
+          });
+        });
+      });
+
+      const detailedSheet = XLSX.utils.json_to_sheet(detailedData);
+      XLSX.utils.book_append_sheet(workbook, detailedSheet, "Room Details");
+
+      XLSX.writeFile(workbook, filename);
+      return true;
+    } catch (error) {
+      console.error("Error exporting calendar to Excel:", error);
       throw error;
     }
   }

@@ -12,12 +12,14 @@ interface ReportFiltersProps {
     endDate: Date | null;
   }) => void;
   onExport: (format: "pdf" | "excel") => Promise<void>;
+  variant?: "card" | "embedded";
 }
 
 export default function ReportFilters({
   dateRange,
   setDateRange,
   onExport,
+  variant = "card",
 }: ReportFiltersProps) {
   const [isExporting, setIsExporting] = useState<"pdf" | "excel" | null>(null);
 
@@ -32,64 +34,72 @@ export default function ReportFilters({
     }
   };
 
+  const Content = (
+    <div className={variant === "embedded" ? "w-full" : "flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6"}>
+      {/* Left side - Date Range */}
+      <div className="flex-1">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center">
+            <BarChart3 className="h-5 w-5 mr-2 text-rose-500" />
+            <h3 className="text-lg font-semibold text-gray-900">
+              Report Filters
+            </h3>
+          </div>
+        </div>
+        <div className="mt-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Select Date Range
+          </label>
+          <div className="max-w-md">
+            <DateRangePicker
+              value={dateRange}
+              onChange={setDateRange}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Right side - Export Buttons */}
+      <div className={variant === "embedded" ? "flex gap-3 mt-4 lg:mt-0" : "flex flex-col sm:flex-row gap-3"}>
+        <button
+          onClick={() => handleExport("pdf")}
+          disabled={isExporting !== null}
+          className="flex items-center justify-center px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isExporting === "pdf" ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <Download className="h-4 w-4 mr-2" />
+          )}
+          {isExporting === "pdf" ? "Exporting..." : "Export PDF"}
+        </button>
+        <button
+          onClick={() => handleExport("excel")}
+          disabled={isExporting !== null}
+          className="flex items-center justify-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isExporting === "excel" ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <Download className="h-4 w-4 mr-2" />
+          )}
+          {isExporting === "excel" ? "Exporting..." : "Export Excel"}
+        </button>
+      </div>
+    </div>
+  );
+
+  if (variant === "embedded") {
+    return Content;
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="bg-white rounded-xl p-6 mb-6 shadow-sm border border-gray-100"
     >
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-        {/* Left side - Date Range */}
-        <div className="flex-1">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center">
-              <BarChart3 className="h-5 w-5 mr-2 text-rose-500" />
-              <h3 className="text-lg font-semibold text-gray-900">
-                Report Filters
-              </h3>
-            </div>
-          </div>
-          <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select Date Range
-            </label>
-            <div className="max-w-md">
-              <DateRangePicker
-                value={dateRange}
-                onChange={setDateRange}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Right side - Export Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <button
-            onClick={() => handleExport("pdf")}
-            disabled={isExporting !== null}
-            className="flex items-center justify-center px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isExporting === "pdf" ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Download className="h-4 w-4 mr-2" />
-            )}
-            {isExporting === "pdf" ? "Exporting..." : "Export PDF"}
-          </button>
-          <button
-            onClick={() => handleExport("excel")}
-            disabled={isExporting !== null}
-            className="flex items-center justify-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isExporting === "excel" ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Download className="h-4 w-4 mr-2" />
-            )}
-            {isExporting === "excel" ? "Exporting..." : "Export Excel"}
-          </button>
-        </div>
-      </div>
+      {Content}
     </motion.div>
   );
 }

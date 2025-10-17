@@ -1,59 +1,45 @@
 "use client";
 
-import api from "@/lib/api"; // assuming your api wrapper types response
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 
-export interface TenantProperty {
+interface Property {
   id: number;
   name: string;
-  slug: string;
+  address: string;
   description?: string;
-  address?: string;
-  city?: string;
-  province?: string;
-  category: string;
-  published: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface TenantPropertiesResponse {
-  data: TenantProperty[];
+  totalRooms?: number;
+  basePrice?: number;
 }
 
 export function useTenantProperties() {
-  const [properties, setProperties] = useState<TenantProperty[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadProperties = async () => {
+  const fetchProperties = async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      const response = await api.get<TenantPropertiesResponse>(
-        "/tenant/properties"
-      );
-      const data = response.data?.data ?? [];
-      setProperties(data);
-    } catch (err: unknown) {
-      let errorMessage = "Failed to load properties";
+      const response = await fetch("/api/tenant/properties", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
 
-      if (err instanceof Error) {
-        errorMessage = err.message;
-      } else if (
-        typeof err === "object" &&
-        err !== null &&
-        "response" in err &&
-        typeof (err as { response?: { data?: { message?: string } } })?.response
-          ?.data?.message === "string"
-      ) {
-        errorMessage = (err as { response?: { data?: { message: string } } })
-          .response!.data!.message;
+      if (!response.ok) {
+        throw new Error(`Failed to fetch properties: ${response.statusText}`);
       }
 
+      const data = await response.json();
+      setProperties(data.data || data || []);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to fetch properties";
       setError(errorMessage);
+      console.error("Error fetching tenant properties:", err);
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -61,13 +47,13 @@ export function useTenantProperties() {
   };
 
   useEffect(() => {
-    loadProperties();
+    fetchProperties();
   }, []);
 
   return {
     properties,
     isLoading,
     error,
-    refetch: loadProperties,
+    refetch: fetchProperties,
   };
 }

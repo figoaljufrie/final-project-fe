@@ -1,19 +1,25 @@
 // Backend DTOs (matching backend structure)
 export interface SalesReportRequest {
   propertyId?: number;
+  userId?: number;
   startDate?: string;
   endDate?: string;
   sortBy?: "date" | "totalSales";
   sortOrder?: "asc" | "desc";
-  page?: number;
-  limit?: number;
+  includeGrowth?: boolean;
 }
 
 export interface SalesReportResponse {
   totalSales: number;
   totalBookings: number;
+  totalGuests: number;
   averageBookingValue: number;
   reports: SalesReportItem[];
+  growthMetrics?: {
+    revenueGrowth: number;
+    bookingGrowth: number;
+    guestGrowth: number;
+  };
   pagination: {
     page: number;
     limit: number;
@@ -28,15 +34,29 @@ export interface SalesReportItem {
   name: string;
   totalSales: number;
   totalBookings: number;
+  totalGuests: number;
   averageValue: number;
   date: string;
-  details?: Record<string, unknown>;
+  details?: {
+    propertyId?: number;
+    propertyName?: string;
+    userId?: number;
+    userName?: string;
+    userEmail?: string;
+    bookingId?: number;
+    bookingNo?: string;
+    totalGuests?: number;
+    nights?: number;
+    items?: BookingItemDetail[];
+  };
 }
 
 export interface PropertyReportRequest {
   propertyId?: number;
   startDate?: string;
   endDate?: string;
+  includeCalendar?: boolean;
+  includeOccupancy?: boolean;
 }
 
 export interface PropertyReportResponse {
@@ -52,6 +72,10 @@ export interface PropertyReportItem {
   bookedRooms: number;
   occupancyRate: number;
   totalRevenue: number;
+  averageDailyRate: number;
+  revenuePerAvailableRoom: number;
+  totalGuests: number;
+  averageStayDuration: number;
 }
 
 export interface CalendarAvailability {
@@ -67,7 +91,36 @@ export interface RoomAvailabilityItem {
   totalUnits: number;
   bookedUnits: number;
   availableUnits: number;
-  status: "available" | "fully_booked" | "partially_booked";
+  status: "available" | "fully_booked" | "partially_booked" | "unavailable";
+  reason?: string | null;
+  bookings?: BookingItem[];
+  isAvailable?: boolean;
+  customPrice?: number | null;
+  priceModifier?: number | null;
+}
+
+export interface BookingItem {
+  unitCount: number;
+  status: string;
+  bookingNo: string;
+  totalGuests: number;
+}
+
+export interface BookingItemDetail {
+  id: number;
+  roomId: number;
+  unitCount: number;
+  unitPrice: number;
+  nights: number;
+  subTotal: number;
+  room: {
+    id: number;
+    name: string;
+    property: {
+      id: number;
+      name: string;
+    };
+  };
 }
 
 // Frontend-specific interfaces for UI
@@ -110,5 +163,8 @@ export interface ReportFilters {
   startDate?: string;
   endDate?: string;
   propertyId?: number;
-  reportType?: "sales" | "property" | "bookings" | "guests";
+  userId?: number;
+  sortBy?: "date" | "totalSales";
+  sortOrder?: "asc" | "desc";
+  reportType?: "sales" | "property";
 }

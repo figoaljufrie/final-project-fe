@@ -104,10 +104,7 @@ export default function ReportKPICards({
                 </p>
                 <p className="text-2xl font-bold text-gray-900 mb-2">
                   {isLoading ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 bg-gradient-to-br from-rose-500 to-rose-600 rounded-full animate-pulse"></div>
-                      <span className="text-gray-400">Loading...</span>
-                    </div>
+                    <span className="text-gray-400">Loading...</span>
                   ) : (
                     card.value
                   )}

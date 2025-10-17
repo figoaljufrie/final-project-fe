@@ -61,7 +61,17 @@ export class ReportService {
   static async getSalesReport(
     filters: SalesReportRequest = {}
   ): Promise<SalesReportResponse> {
-    const response = await api.get("/reports/sales", { params: filters });
+    console.log("🌐 API call to /reports/sales with params:", {
+      ...filters,
+      includeGrowth: true
+    });
+    const response = await api.get("/reports/sales", { 
+      params: {
+        ...filters,
+        includeGrowth: true // Always include growth metrics
+      }
+    });
+    console.log("📡 API response received:", response.data);
     return response.data.data || response.data;
   }
 
@@ -70,21 +80,28 @@ export class ReportService {
     filters: PropertyReportRequest = {}
   ): Promise<PropertyReportResponse> {
     const response = await api.get("/reports/property", {
-      params: filters,
+      params: {
+        ...filters,
+        includeCalendar: true,
+        includeOccupancy: true
+      },
     });
     return response.data.data || response.data;
   }
 
-  // Transform backend data to frontend format
   static async getSalesReportForUI(filters: ReportFilters = {}) {
     try {
+      console.log("📊 ReportService.getSalesReportForUI called with filters:", filters);
       const salesReport = await this.getSalesReport({
         propertyId: filters.propertyId,
+        userId: filters.userId,
         startDate: filters.startDate,
         endDate: filters.endDate,
-        sortBy: "date",
-        sortOrder: "desc",
+        sortBy: filters.sortBy || "date",
+        sortOrder: filters.sortOrder || "desc",
+        includeGrowth: true,
       });
+      console.log("📈 Sales report data received:", salesReport);
 
       // Calculate average occupancy based on reports data
       const averageOccupancy = this.calculateAverageOccupancyFromReports(
@@ -94,17 +111,12 @@ export class ReportService {
       const kpiData: SalesReportData = {
         totalRevenue: salesReport.totalSales || 0,
         totalBookings: salesReport.totalBookings || 0,
-        totalGuests: salesReport.reports.reduce(
-          (sum, item) =>
-            sum +
-            ((item.details as { totalGuests?: number })?.totalGuests || 0),
-          0
-        ),
+        totalGuests: salesReport.totalGuests || 0,
         averageOccupancy: averageOccupancy,
-        revenueGrowth: 0,
-        bookingGrowth: 0,
-        guestGrowth: 0,
-        occupancyGrowth: 0,
+        revenueGrowth: salesReport.growthMetrics?.revenueGrowth || 0,
+        bookingGrowth: salesReport.growthMetrics?.bookingGrowth || 0,
+        guestGrowth: salesReport.growthMetrics?.guestGrowth || 0,
+        occupancyGrowth: 0, // Calculate separately if needed
       };
 
       const monthlyData = ReportTransformers.groupByMonth(salesReport.reports);
@@ -156,6 +168,25 @@ export class ReportService {
         startDate,
         endDate
       );
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Get calendar data with booking information
+  static async getCalendarWithBookings(
+    roomIds: number[],
+    startDate: string,
+    endDate: string
+  ) {
+    try {
+      const response = await api.post("/reports/calendar/bookings", {
+        roomIds,
+        startDate,
+        endDate,
+      });
+
+      return response.data.data || response.data;
     } catch (error) {
       throw error;
     }
