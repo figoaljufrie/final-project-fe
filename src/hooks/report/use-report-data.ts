@@ -63,7 +63,7 @@ export function useReportData(filters: ReportFilters = {}) {
     } finally {
       setIsLoading(false);
     }
-  }, [filters.startDate, filters.endDate, filters.propertyId]);
+  }, [filters]);
 
   useEffect(() => {
     loadReportData();

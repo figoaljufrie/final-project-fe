@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { 
   CheckCircle, 
   Clock,
@@ -22,7 +21,8 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { PaymentService } from "@/lib/services/payment/payment-service";
 import { toast } from "react-hot-toast";
 import { FullScreenLoadingSpinner } from "@/components/ui/loading-spinner";
-import { StatusPolling } from "@/lib/utils/status-polling";
+import { PaymentCard } from "@/components/payment/payment-card";
+import { usePaymentStatusPolling } from "@/hooks/payment/use-payment-status-polling";
 
 interface BookingData {
   id: number;
@@ -52,14 +52,12 @@ interface BookingData {
 export default function PaymentSuccess() {
   const [bookingData, setBookingData] = useState<BookingData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [pollingStatus, setPollingStatus] = useState<
-    "polling" | "success" | "timeout" | "error"
-  >("polling");
-  const [currentStatus, setCurrentStatus] = useState<string>("");
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
   const bookingId = params.id as string;
+
+  const { pollingStatus, currentStatus, getStatusMessage } = usePaymentStatusPolling(bookingData, bookingId);
 
   // Load initial booking data
   useEffect(() => {
@@ -68,7 +66,6 @@ export default function PaymentSuccess() {
         setIsLoading(true);
         const data = await PaymentService.getBookingDetails(Number(bookingId));
         setBookingData(data);
-        setCurrentStatus(data.status);
 
         // Check if redirected from Midtrans
         const fromMidtrans = searchParams.get('from');
@@ -78,12 +75,10 @@ export default function PaymentSuccess() {
 
         // If already confirmed, show success immediately
         if (data.status === "confirmed") {
-          setPollingStatus("success");
           toast.success("Payment confirmed! Your booking is now confirmed.");
         }
       } catch (error: unknown) {
         console.error("Error loading booking data:", error);
-        setPollingStatus("error");
         toast.error("Failed to load booking data");
       } finally {
         setIsLoading(false);
@@ -95,48 +90,6 @@ export default function PaymentSuccess() {
     }
   }, [bookingId, searchParams]);
 
-  // Start polling for status changes
-  useEffect(() => {
-    if (!bookingData || bookingData.status === "confirmed") return;
-
-    const polling = new StatusPolling(
-      async () => {
-        const data = await PaymentService.getBookingDetails(Number(bookingId));
-        return { status: data.status };
-      },
-      {
-        interval: 3000, // Poll every 3 seconds
-        maxAttempts: 20, // Poll for 1 minute (20 * 3s)
-        onStatusChange: (newStatus) => {
-          setCurrentStatus(newStatus);
-          setPollingStatus("success");
-          toast.success("Payment confirmed! Your booking is now confirmed.");
-
-          // Redirect to booking details after 3 seconds
-          setTimeout(() => {
-            router.push(`/bookings/${bookingId}`);
-          }, 3000);
-        },
-        onError: (error) => {
-          console.error("Polling error:", error);
-          setPollingStatus("error");
-        },
-        onMaxAttemptsReached: () => {
-          setPollingStatus("timeout");
-          toast.error(
-            "Payment verification timed out. Please check your booking status manually."
-          );
-        },
-      }
-    );
-
-    polling.start(bookingData.status);
-
-    return () => {
-      polling.stop();
-    };
-  }, [bookingData, bookingId, router]);
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       weekday: "long",
@@ -146,45 +99,6 @@ export default function PaymentSuccess() {
     });
   };
 
-  const getStatusMessage = () => {
-    switch (pollingStatus) {
-      case "polling":
-        return {
-          title: "Payment Successful!",
-          subtitle: "We are verifying your payment...",
-          icon: <Clock size={48} className="text-yellow-500" />,
-          color: "text-yellow-600",
-        };
-      case "success":
-        return {
-          title: "Payment Confirmed!",
-          subtitle: "Your booking is now confirmed.",
-          icon: <CheckCircle size={48} className="text-green-500" />,
-          color: "text-green-600",
-        };
-      case "timeout":
-        return {
-          title: "Verification Timeout",
-          subtitle: "Please check your booking status manually.",
-          icon: <AlertCircle size={48} className="text-orange-500" />,
-          color: "text-orange-600",
-        };
-      case "error":
-        return {
-          title: "Verification Error",
-          subtitle: "Unable to verify payment status.",
-          icon: <AlertCircle size={48} className="text-red-500" />,
-          color: "text-red-600",
-        };
-      default:
-        return {
-          title: "Processing...",
-          subtitle: "Please wait...",
-          icon: <Loader2 size={48} className="animate-spin text-blue-500" />,
-          color: "text-blue-600",
-        };
-    }
-  };
 
   if (isLoading) {
     return (
@@ -197,11 +111,11 @@ export default function PaymentSuccess() {
 
   if (!bookingData) {
     return (
-      <div className="min-h-screen bg-[#F2EEE3] flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-amber-50 flex items-center justify-center">
         <div className="text-center">
           <AlertCircle size={48} className="mx-auto mb-4 text-red-500" />
           <p className="text-gray-600">Booking not found</p>
-          <Link href="/bookings" className="text-[#8B7355] hover:underline">
+          <Link href="/bookings" className="bg-gradient-to-r from-amber-600 to-rose-600 bg-clip-text text-transparent hover:from-amber-700 hover:to-rose-700 transition-all duration-300">
             Back to My Bookings
           </Link>
         </div>
@@ -212,27 +126,37 @@ export default function PaymentSuccess() {
   const property = bookingData.items[0]?.room?.property;
   const statusInfo = getStatusMessage();
 
+  const getStatusIcon = () => {
+    switch (statusInfo.icon) {
+      case "clock":
+        return <Clock size={48} className="text-yellow-500" />;
+      case "check":
+        return <CheckCircle size={48} className="text-green-500" />;
+      case "alert":
+        return <AlertCircle size={48} className="text-orange-500" />;
+      case "loader":
+        return <Loader2 size={48} className="animate-spin text-blue-500" />;
+      default:
+        return <Loader2 size={48} className="animate-spin text-blue-500" />;
+    }
+  };
+
   return (
-    <main className="min-h-screen bg-[#F2EEE3]">
+    <main className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-amber-50">
       <Header />
       
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Back Button */}
         <Link
           href="/bookings"
-          className="inline-flex items-center gap-2 text-[#8B7355] hover:text-[#7A6349] transition-colors mb-6"
+          className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-600 to-rose-600 bg-clip-text text-transparent hover:from-amber-700 hover:to-rose-700 transition-all duration-300 mb-6"
         >
           <ArrowLeft size={20} />
           <span>Back to My Bookings</span>
         </Link>
 
-        {/* Success Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-xl shadow-lg p-8 text-center mb-8"
-        >
-          <div className="mb-6">{statusInfo.icon}</div>
+        <PaymentCard delay={0} className="p-8 text-center mb-8">
+          <div className="mb-6">{getStatusIcon()}</div>
 
           <h1 className={`text-3xl font-bold mb-2 ${statusInfo.color}`}>
             {statusInfo.title}
@@ -247,7 +171,7 @@ export default function PaymentSuccess() {
             </div>
           )}
 
-          <div className="bg-gray-50 rounded-lg p-4 mb-6">
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 mb-6 backdrop-blur-sm">
             <p className="text-sm text-gray-600">
               <strong>Current Status:</strong>{" "}
               <span className="capitalize">
@@ -266,7 +190,7 @@ export default function PaymentSuccess() {
               </p>
               <Button
                 onClick={() => router.push(`/bookings/${bookingId}`)}
-                className="bg-[#8B7355] hover:bg-[#7A6349] text-white"
+                className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 View Booking Details
               </Button>
@@ -277,29 +201,23 @@ export default function PaymentSuccess() {
             <div className="space-y-4">
               <Button
                 onClick={() => router.push(`/bookings/${bookingId}`)}
-                className="bg-[#8B7355] hover:bg-[#7A6349] text-white"
+                className="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 Check Booking Status
               </Button>
               <Button
                 variant="outline"
                 onClick={() => window.location.reload()}
-                className="ml-4"
+                className="ml-4 border-gray-300/50 hover:bg-white/50 backdrop-blur-sm shadow-md hover:shadow-lg transition-all duration-300"
               >
                 Try Again
               </Button>
           </div>
           )}
-        </motion.div>
+        </PaymentCard>
 
-        {/* Booking Summary */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-              className="bg-white rounded-xl shadow-lg p-6"
-            >
-          <h2 className="text-xl font-bold text-[#8B7355] mb-6">
+        <PaymentCard delay={0.1}>
+          <h2 className="text-xl font-bold bg-gradient-to-r from-amber-600 to-rose-600 bg-clip-text text-transparent mb-6">
             Booking Summary
           </h2>
 
@@ -317,7 +235,7 @@ export default function PaymentSuccess() {
                   className="w-20 h-20 rounded-lg object-cover"
                 />
                 <div>
-                <h3 className="font-semibold text-[#8B7355]">
+                <h3 className="font-semibold bg-gradient-to-r from-amber-600 to-rose-600 bg-clip-text text-transparent">
                   {property?.name || "Property"}
                   </h3>
                 <p className="text-gray-600 text-sm flex items-center gap-1">
@@ -356,7 +274,7 @@ export default function PaymentSuccess() {
                   </div>
             </div>
           </div>
-        </motion.div>
+        </PaymentCard>
       </div>
 
       <Footer />
