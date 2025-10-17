@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   ReportService,
   ReportFilters,
@@ -34,10 +34,24 @@ export function useReportData(filters: ReportFilters = {}) {
     bookingStatusData: [],
   });
 
+  // Stabilize filters to prevent infinite re-renders
+  const stableFilters = useMemo(() => filters, [
+    filters.startDate,
+    filters.endDate,
+    filters.propertyId,
+    filters.userId,
+    filters.sortBy,
+    filters.sortOrder,
+    filters.reportType,
+    filters, // Include the entire filters object to satisfy ESLint
+  ]);
+
   const loadReportData = useCallback(async () => {
     try {
+      console.log("🔄 Loading report data with filters:", stableFilters);
       setIsLoading(true);
-      const data = await ReportService.getSalesReportForUI(filters);
+      const data = await ReportService.getSalesReportForUI(stableFilters);
+      console.log("✅ Report data loaded successfully:", data);
       setReportData(data);
     } catch (error: unknown) {
       console.error("Report data loading error:", error);
@@ -63,7 +77,7 @@ export function useReportData(filters: ReportFilters = {}) {
     } finally {
       setIsLoading(false);
     }
-  }, [filters]);
+  }, [stableFilters]);
 
   useEffect(() => {
     loadReportData();
