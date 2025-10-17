@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -13,12 +12,17 @@ import type {
   UpdatePropertyPayload,
 } from "@/lib/types/inventory/property-types";
 
-// ✅ CREATE
 export function useCreateProperty() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: CreatePropertyPayload) => createProperty(payload),
+    mutationFn: ({
+      payload,
+      files,
+    }: {
+      payload: CreatePropertyPayload;
+      files?: File[];
+    }) => createProperty(payload, files),
     onSuccess: () => {
       toast.success("Property created successfully!");
       queryClient.invalidateQueries({ queryKey: ["tenantProperties"] });

@@ -17,7 +17,7 @@ export default function PropertyDetailPage() {
 
   const { data: property, isLoading: propertyLoading } =
     usePropertyDetail(propertyId);
-  const { data: rooms, isLoading: roomsLoading } = useRooms(propertyId);
+  const { data: rooms, isLoading: roomsLoading, refetch: refetchRooms } = useRooms(propertyId);
 
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const [isUpdateModalOpen, setUpdateModalOpen] = useState(false);
@@ -88,7 +88,10 @@ export default function PropertyDetailPage() {
         isOpen={isCreateModalOpen}
         onClose={() => setCreateModalOpen(false)}
         propertyId={propertyId}
-        onCreated={() => setCreateModalOpen(false)}
+        onCreated={() => {
+          setCreateModalOpen(false);
+          refetchRooms(); // refresh the list after creating a new room
+        }}
       />
 
       {/* 🧩 Update Room Modal */}
@@ -98,7 +101,10 @@ export default function PropertyDetailPage() {
           onClose={() => setUpdateModalOpen(false)}
           propertyId={propertyId}
           roomId={selectedRoomId}
-          onUpdated={() => setUpdateModalOpen(false)}
+          onUpdated={() => {
+            setUpdateModalOpen(false);
+            refetchRooms(); // refresh the list after updating a room
+          }}
         />
       )}
     </motion.div>

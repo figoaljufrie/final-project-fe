@@ -6,7 +6,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { Loader2, X } from "lucide-react";
 import RoomGallery from "../../room-gallery/room-index";
-import ImageUploader from "./image-uploader";
 import RoomInfoForm from "./form-info-room";
 
 interface UpdateRoomModalProps {
@@ -28,17 +27,7 @@ export default function UpdateRoomModal({
 }: UpdateRoomModalProps) {
   const queryClient = useQueryClient();
 
-  const {
-    form,
-    setForm,
-    existingImages,
-    setExistingImages,
-    newImages,
-    setNewImages,
-    isSubmitting,
-    setIsSubmitting,
-    loading,
-  } = useRoomData({ propertyId, roomId, isOpen });
+  const { form, setForm, loading, isSubmitting, setIsSubmitting } = useRoomData({ propertyId, roomId, isOpen });
 
   if (!isOpen) return null;
 
@@ -52,11 +41,12 @@ export default function UpdateRoomModal({
           exit={{ opacity: 0 }}
         >
           <motion.div
-            className="bg-white/90 rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6"
+            className="bg-white/90 rounded-2xl shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto p-6"
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
           >
+            {/* Modal Header */}
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold text-gray-900">Update Room</h2>
               <button onClick={onClose}>
@@ -70,20 +60,10 @@ export default function UpdateRoomModal({
               </div>
             ) : (
               <>
+                {/* Room Gallery (includes add, delete, set primary, lightbox, scroll) */}
                 <RoomGallery roomId={roomId} propertyId={propertyId} />
 
-                <ImageUploader
-                  propertyId={propertyId}
-                  roomId={roomId}
-                  existingImages={existingImages}
-                  setExistingImages={setExistingImages}
-                  newImages={newImages}
-                  setNewImages={setNewImages}
-                  isSubmitting={isSubmitting}
-                  setIsSubmitting={setIsSubmitting}
-                  queryClient={queryClient}
-                />
-
+                {/* Room Info Form */}
                 <RoomInfoForm
                   propertyId={propertyId}
                   roomId={roomId}
@@ -96,6 +76,7 @@ export default function UpdateRoomModal({
                   queryClient={queryClient}
                 />
 
+                {/* Any additional children */}
                 {children && <div className="mt-6">{children}</div>}
               </>
             )}

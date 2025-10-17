@@ -7,49 +7,37 @@ import type {
   UpdateRoomPayload,
 } from "@/lib/types/inventory/room-type";
 
-function forFormData(
-  payload: CreateRoomPayload | UpdateRoomPayload,
-  images?: RoomImagePayload[]
-): FormData {
-  const formData = new FormData();
-
-  if (payload.name) formData.append("name", payload.name);
-  if (payload.capacity !== undefined)
-    formData.append("capacity", String(payload.capacity));
-  if (payload.basePrice !== undefined)
-    formData.append("basePrice", String(payload.basePrice));
-  if (payload.description) formData.append("description", payload.description);
-  if (payload.totalUnits !== undefined)
-    formData.append("totalUnits", String(payload.totalUnits));
-
-  if (images && images.length > 0) {
-    const meta = images.map((img) => ({
-      isPrimary: img.isPrimary,
-      order: img.order,
-      altText: img.altText,
-    }));
-
-    formData.append("imageMeta", JSON.stringify(meta));
-
-    images.forEach((img) => {
-      formData.append("images", img.file);
-    });
-  }
-
-  return formData;
-}
+import { uploadRoomImages } from "../images/room-image-service";
 
 export async function createRoom(
   propertyId: number,
   payload: CreateRoomPayload
 ): Promise<RoomDetail> {
-  const formData = forFormData(payload, payload.images);
-  const { data } = await api.post(`/properties/${propertyId}/rooms`, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-  return data.data;
+  const images = payload.images;
+  const roomPayload = { ...payload, images: undefined };
+
+  const { data } = await api.post(
+    `/properties/${propertyId}/rooms`,
+    roomPayload
+  );
+  const roomId = data.data.id as number;
+
+  // Upload images if any
+  if (images && images.length > 0) {
+    const files = images.map((img) => img.file);
+    await uploadRoomImages(propertyId, roomId, files);
+  }
+
+  // Refetch full room detail
+  const { data: full } = await api.get(
+    `/properties/${propertyId}/rooms/${roomId}`
+  );
+  return full.data;
 }
 
+/**
+ * List rooms for a property
+ */
 export const listsRoomsByProperty = async (
   propertyId: number
 ): Promise<RoomListItem[]> => {
@@ -80,21 +68,26 @@ export async function getRoomDetail(
   const { data } = await api.get(`/properties/${propertyId}/rooms/${roomId}`);
   return data.data;
 }
+
 export async function updateRoom(
   propertyId: number,
   roomId: number,
   payload: UpdateRoomPayload,
   images?: RoomImagePayload[]
 ): Promise<RoomDetail> {
-  const formData = forFormData(payload, images);
-  const { data } = await api.patch(
-    `/properties/${propertyId}/rooms/${roomId}`,
-    formData,
-    {
-      headers: { "Content-Type": "multipart/form-data" },
-    }
+  const roomPayload: UpdateRoomPayload = { ...payload };
+
+  await api.patch(`/properties/${propertyId}/rooms/${roomId}`, roomPayload);
+
+  if (images && images.length > 0) {
+    const files = images.map((img) => img.file);
+    await uploadRoomImages(propertyId, roomId, files);
+  }
+
+  const { data: full } = await api.get(
+    `/properties/${propertyId}/rooms/${roomId}`
   );
-  return data.data;
+  return full.data;
 }
 
 export async function deleteRoom(
@@ -102,43 +95,4 @@ export async function deleteRoom(
   roomId: number
 ): Promise<void> {
   await api.delete(`/properties/${propertyId}/rooms/${roomId}`);
-}
-
-export async function updateRoomImages(
-  propertyId: number,
-  roomId: number,
-  images: RoomImagePayload[]
-): Promise<RoomDetail> {
-  const formData = new FormData();
-
-  const meta = images.map((img) => ({
-    isPrimary: img.isPrimary,
-    order: img.order,
-    altText: img.altText,
-  }));
-  formData.append("imageMeta", JSON.stringify(meta));
-
-  images.forEach((img) => {
-    formData.append("images", img.file);
-  });
-
-  const { data } = await api.patch(
-    `/properties/${propertyId}/rooms/${roomId}/images`,
-    formData,
-    {
-      headers: { "Content-Type": "multipart/form-data" },
-    }
-  );
-
-  return data.data;
-}
-
-export async function deleteRoomImage(
-  propertyId: number,
-  roomId: number,
-  imageId: number
-): Promise<void> {
-  await api.delete(
-    `/properties/${propertyId}/rooms/${roomId}/images/${imageId}`
-  );
 }

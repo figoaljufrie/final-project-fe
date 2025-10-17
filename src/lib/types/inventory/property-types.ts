@@ -24,14 +24,17 @@ export interface UpdatePropertyPayload {
   category?: PropertyCategory;
   city?: string;
   address?: string;
+  province?: string;
   latitude?: number | null;
   longitude?: number | null;
   published?: boolean;
 }
 
 export interface PropertyImage {
+  id: number;
   url: string;
   altText: string | null;
+  publicId: string | null;
   isPrimary: boolean;
 }
 
