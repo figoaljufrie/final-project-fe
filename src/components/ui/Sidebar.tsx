@@ -21,6 +21,7 @@ import {
   CalendarDays,
 } from "lucide-react";
 import clsx from "clsx";
+import { useMe } from "@/hooks/user-auth/profile/use-get-me";
 
 const navigation = [
   {
@@ -96,6 +97,8 @@ export default function Sidebar({
 
   const isCollapsed =
     externalCollapsed !== undefined ? externalCollapsed : internalCollapsed;
+
+  const { data: me } = useMe();
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -289,8 +292,16 @@ export default function Sidebar({
                 isCollapsed ? "justify-center" : "space-x-3"
               )}
             >
-              <div className="w-8 h-8 bg-gradient-to-br from-gray-400 to-gray-600 rounded-full flex items-center justify-center">
-                <User className="h-4 w-4 text-white" />
+              <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-gray-200">
+                {me?.avatarUrl ? (
+                  <img
+                    src={me.avatarUrl}
+                    alt={me.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <User className="h-4 w-4 text-white" />
+                )}
               </div>
               <AnimatePresence>
                 {!isCollapsed && (
@@ -303,10 +314,10 @@ export default function Sidebar({
                     className="flex-1 min-w-0"
                   >
                     <p className="text-sm font-medium text-gray-900 truncate">
-                      Tenant User
+                      {me?.name || "Tenant User"}
                     </p>
                     <p className="text-xs text-gray-500 truncate">
-                      tenant@nginepin.com
+                      {me?.email || "tenant@nginepin.com"}
                     </p>
                   </motion.div>
                 )}
