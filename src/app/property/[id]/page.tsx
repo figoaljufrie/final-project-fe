@@ -12,30 +12,32 @@ import { usePropertyDetail } from "@/hooks/Inventory/property/query/use-property
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { FullScreenLoadingSpinner } from "@/components/ui/loading-spinner";
+import { ReviewService, ReviewData } from "@/lib/services/review/review-service";
 
-// Host interface
 interface Host {
   name: string;
   rating: number;
   reviews: number;
 }
 
-// Import ReviewService
-import { ReviewService, ReviewData } from "@/lib/services/review/review-service";
-
 export default function PropertyDetailsPage() {
   const params = useParams();
   const propertyId = Number(params.id);
 
+  // Date state (lifted to top level)
+  const [checkIn, setCheckIn] = useState("");
+  const [checkOut, setCheckOut] = useState("");
+  
+  // Room selection state
+  const [selectedRooms, setSelectedRooms] = useState<Set<number>>(new Set());
+
+  // Fetch property with dates
   const {
     data: propertyData,
     isLoading,
     isError,
     refetch,
-  } = usePropertyDetail(propertyId);
-
-  // Room selection state (lifted up)
-  const [selectedRooms, setSelectedRooms] = useState<Set<number>>(new Set());
+  } = usePropertyDetail(propertyId, checkIn, checkOut);
 
   // Host state
   const [host, setHost] = useState<Host | null>(null);
@@ -90,7 +92,6 @@ export default function PropertyDetailsPage() {
         });
       } catch (error) {
         console.error("Error fetching reviews:", error);
-        // Fallback to empty state
         setReviews([]);
         setReviewStats({ averageRating: 0, totalReviews: 0 });
       } finally {
@@ -103,6 +104,13 @@ export default function PropertyDetailsPage() {
     }
   }, [propertyId]);
 
+  // Refetch when dates change
+  useEffect(() => {
+    if (checkIn && checkOut) {
+      refetch();
+    }
+  }, [checkIn, checkOut, refetch]);
+
   if (isLoading) {
     return (
       <FullScreenLoadingSpinner
@@ -111,6 +119,7 @@ export default function PropertyDetailsPage() {
       />
     );
   }
+  
   if (isError || !propertyData)
     return (
       <section className="py-16 text-center text-red-500">
@@ -122,10 +131,18 @@ export default function PropertyDetailsPage() {
   // Map rooms for BookingCard with required shape
   const bookingRooms =
     propertyData.rooms?.map(
-      (r: { id: number; name?: string; basePrice?: number }) => ({
+      (r: { 
+        id: number; 
+        name?: string; 
+        basePrice?: number;
+        calculatedPrice?: number | null;
+        isAvailable?: boolean;
+      }) => ({
         id: r.id,
         name: r.name ?? `Room ${r.id}`,
         basePrice: r.basePrice ?? 0,
+        calculatedPrice: r.calculatedPrice,
+        isAvailable: r.isAvailable,
       })
     ) ?? [];
 
@@ -157,10 +174,28 @@ export default function PropertyDetailsPage() {
             {/* Room Selection */}
             <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-6 border border-gray-200/50 shadow-lg">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Select Rooms</h2>
+              
+              {/* Date Selection Notice */}
+              {(!checkIn || !checkOut) && (
+                <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                  <div className="flex items-center gap-2 text-amber-800">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-sm font-medium">
+                      Please select check-in and check-out dates to see availability and pricing
+                    </span>
+                  </div>
+                </div>
+              )}
+              
               <RoomSelection
                 propertyId={propertyId}
                 selectedRooms={selectedRooms}
                 setSelectedRooms={setSelectedRooms}
+                checkIn={checkIn}
+                checkOut={checkOut}
+                roomsData={propertyData.rooms}
               />
             </div>
 
@@ -267,6 +302,10 @@ export default function PropertyDetailsPage() {
                 selectedRooms={selectedRooms}
                 rooms={bookingRooms}
                 propertyId={propertyId}
+                checkIn={checkIn}
+                checkOut={checkOut}
+                onCheckInChange={setCheckIn}
+                onCheckOutChange={setCheckOut}
               />
             </div>
           </div>

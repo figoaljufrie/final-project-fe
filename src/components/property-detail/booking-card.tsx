@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Minus } from "lucide-react";
+import { Plus, Minus, Calendar, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCreateBooking } from "@/hooks/booking/use-create-booking";
 import { useAuthStore } from "@/stores/auth-store";
@@ -9,31 +9,59 @@ import { toast } from "react-hot-toast";
 
 interface BookingCardProps {
   selectedRooms?: Set<number>;
-  rooms?: Array<{ id: number; name: string; basePrice: number }>;
+  rooms?: Array<{ 
+    id: number; 
+    name: string; 
+    basePrice: number;
+    calculatedPrice?: number | null;
+    isAvailable?: boolean;
+  }>;
   propertyId?: number;
+  checkIn?: string;
+  checkOut?: string;
+  onCheckInChange?: (date: string) => void;
+  onCheckOutChange?: (date: string) => void;
 }
 
 export default function BookingCard({
   selectedRooms = new Set(),
   rooms = [],
   propertyId,
+  checkIn = "",
+  checkOut = "",
+  onCheckInChange,
+  onCheckOutChange,
 }: BookingCardProps) {
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(2);
   const [paymentMethod, setPaymentMethod] = useState<"manual_transfer" | "payment_gateway">("payment_gateway");
   
   const { createBooking, isCreating } = useCreateBooking();
   const { user } = useAuthStore();
 
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split('T')[0];
+
   const calculateTotalPrice = () => {
     return Array.from(selectedRooms).reduce((total, roomId) => {
       const room = rooms.find((r) => r.id === roomId);
-      return total + (room?.basePrice || 0);
+      if (!room) return total;
+      
+      // Use calculated price if available and dates are selected
+      const price = checkIn && checkOut && room.calculatedPrice !== null && room.calculatedPrice !== undefined
+        ? room.calculatedPrice
+        : room.basePrice;
+      
+      return total + price;
     }, 0);
   };
 
   const totalPrice = calculateTotalPrice();
+
+  // Check if any selected room is unavailable
+  const hasUnavailableRooms = Array.from(selectedRooms).some(roomId => {
+    const room = rooms.find(r => r.id === roomId);
+    return room?.isAvailable === false;
+  });
 
   const handleBook = async () => {
     if (!user) {
@@ -48,6 +76,11 @@ export default function BookingCard({
 
     if (!checkIn || !checkOut) {
       toast.error("Please select check-in and check-out dates");
+      return;
+    }
+
+    if (hasUnavailableRooms) {
+      toast.error("One or more selected rooms are not available for the chosen dates");
       return;
     }
 
@@ -71,7 +104,7 @@ export default function BookingCard({
         checkIn,
         checkOut,
         totalGuests: guests,
-        unitCount: 1, // For now, assume 1 unit per room
+        unitCount: 1,
         paymentMethod,
         notes: `Booking for ${guests} guests`,
       });
@@ -84,11 +117,9 @@ export default function BookingCard({
     <div className="bg-white/95 backdrop-blur-xl rounded-2xl border border-gray-200/50 p-8 sticky top-24 shadow-xl hover:shadow-2xl transition-all duration-300">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 bg-gradient-to-br from-rose-500 to-rose-600 rounded-xl flex items-center justify-center">
-          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-          </svg>
+          <Calendar className="w-5 h-5 text-white" />
         </div>
-        <h3 className="text-xl font-bold text-gray-900">Room Price</h3>
+        <h3 className="text-xl font-bold text-gray-900">Book Your Stay</h3>
       </div>
 
       {/* Check-in/Check-out */}
@@ -101,7 +132,8 @@ export default function BookingCard({
             <input
               type="date"
               value={checkIn}
-              onChange={(e) => setCheckIn(e.target.value)}
+              min={today}
+              onChange={(e) => onCheckInChange?.(e.target.value)}
               className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-rose-500 focus:ring-4 focus:ring-rose-500/20 transition-all duration-300 bg-gray-50/50 hover:bg-white"
             />
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -119,7 +151,8 @@ export default function BookingCard({
             <input
               type="date"
               value={checkOut}
-              onChange={(e) => setCheckOut(e.target.value)}
+              min={checkIn || today}
+              onChange={(e) => onCheckOutChange?.(e.target.value)}
               className="w-full border-2 border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-rose-500 focus:ring-4 focus:ring-rose-500/20 transition-all duration-300 bg-gray-50/50 hover:bg-white"
             />
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -130,6 +163,30 @@ export default function BookingCard({
           </div>
         </div>
       </div>
+
+      {/* Date Selection Warning */}
+      {(!checkIn || !checkOut) && (
+        <div className="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-xl">
+          <div className="flex items-start gap-2 text-blue-800">
+            <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+            <p className="text-xs">
+              Select dates to see accurate pricing and availability
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Unavailable Rooms Warning */}
+      {hasUnavailableRooms && checkIn && checkOut && (
+        <div className="mb-6 p-3 bg-red-50 border border-red-200 rounded-xl">
+          <div className="flex items-start gap-2 text-red-800">
+            <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+            <p className="text-xs font-medium">
+              Some selected rooms are not available for these dates
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Guests */}
       <div className="mb-6">
@@ -173,10 +230,32 @@ export default function BookingCard({
             {Array.from(selectedRooms).map((roomId) => {
               const room = rooms.find((r) => r.id === roomId);
               if (!room) return null;
+              
+              const displayPrice = checkIn && checkOut && room.calculatedPrice !== null && room.calculatedPrice !== undefined
+                ? room.calculatedPrice
+                : room.basePrice;
+              
+              const hasPeakSeason = checkIn && checkOut && room.calculatedPrice !== null && room.calculatedPrice !== room.basePrice;
+              const isUnavailable = room.isAvailable === false;
+              
               return (
-                <div key={roomId} className="flex justify-between items-center text-sm">
-                  <span className="text-gray-700 font-medium">{room.name}</span>
-                  <span className="text-rose-600 font-semibold">Rp {room.basePrice.toLocaleString("id-ID")}/night</span>
+                <div key={roomId} className="space-y-1">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className={`font-medium ${isUnavailable ? 'text-red-600' : 'text-gray-700'}`}>
+                      {room.name}
+                      {isUnavailable && <span className="ml-2 text-xs">(Unavailable)</span>}
+                    </span>
+                    <span className="text-rose-600 font-semibold">
+                      Rp {displayPrice.toLocaleString("id-ID")}/night
+                    </span>
+                  </div>
+                  {hasPeakSeason && !isUnavailable && (
+                    <div className="flex items-center gap-1 text-xs text-amber-700">
+                      <span className="px-2 py-0.5 bg-amber-100 rounded-full">
+                        Peak season pricing
+                      </span>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -238,12 +317,17 @@ export default function BookingCard({
           </span>
         </div>
         <div className="text-sm text-gray-500 text-right">per night</div>
+        {checkIn && checkOut && selectedRooms.size > 0 && (
+          <div className="mt-2 text-xs text-gray-400 text-right">
+            Prices include peak season rates if applicable
+          </div>
+        )}
       </div>
 
       {/* Book Button */}
       <Button
         onClick={handleBook}
-        disabled={selectedRooms.size === 0 || !checkIn || !checkOut || isCreating}
+        disabled={selectedRooms.size === 0 || !checkIn || !checkOut || isCreating || hasUnavailableRooms}
         className="w-full bg-gradient-to-r from-rose-500 via-rose-600 to-pink-600 text-white py-4 rounded-xl font-bold hover:from-rose-600 hover:via-rose-700 hover:to-pink-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl hover:shadow-2xl transform hover:scale-[1.02] active:scale-[0.98]"
       >
         {isCreating ? (
@@ -254,9 +338,9 @@ export default function BookingCard({
         ) : (
           <div className="flex items-center justify-center gap-2">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
-            Book Now
+            {hasUnavailableRooms ? 'Room(s) Unavailable' : 'Book Now'}
           </div>
         )}
       </Button>
