@@ -173,11 +173,11 @@ export default function DateRangePicker({
     <div className={clsx("relative", className)}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-4 py-3 text-left bg-white border border-gray-300 rounded-lg shadow-sm hover:border-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all duration-200 hover:shadow-md"
+        className="w-full flex items-center justify-between px-3 py-2 text-left bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
       >
         <span
           className={clsx(
-            "text-sm font-medium",
+            "text-sm text-gray-700",
             selectedRange.startDate || selectedRange.endDate
               ? "text-gray-900"
               : "text-gray-500"
@@ -185,7 +185,7 @@ export default function DateRangePicker({
         >
           {formatDisplayText()}
         </span>
-        <Calendar className="h-5 w-5 text-gray-400" />
+        <Calendar className="h-4 w-4 text-gray-500" />
       </button>
 
       {isOpen && (

@@ -81,5 +81,27 @@ export async function validateSession(): Promise<User> {
 
 // --- Logout ---
 export async function logout() {
-  await api.post("/auth/logout");
+  try {
+    await api.post("/auth/logout");
+  } catch (error) {
+    console.error("Logout API error:", error);
+  } finally {
+    // Clear all cookies and localStorage
+    if (typeof window !== 'undefined') {
+      // Clear all cookies
+      document.cookie.split(";").forEach((cookie) => {
+        const eqPos = cookie.indexOf("=");
+        const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+        document.cookie = `${name.trim()}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+        document.cookie = `${name.trim()}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname}`;
+        document.cookie = `${name.trim()}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.${window.location.hostname}`;
+      });
+
+      // Clear localStorage
+      localStorage.clear();
+      
+      // Clear sessionStorage
+      sessionStorage.clear();
+    }
+  }
 }
