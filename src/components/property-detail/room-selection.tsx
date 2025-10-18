@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { Users, AlertCircle, CheckCircle, XCircle } from "lucide-react";
 import Image from "next/image";
+import { RoomWithAvailability } from "@/lib/types/inventory/room-type";
 
 interface RoomSelectionProps {
   propertyId: number;
@@ -10,11 +11,10 @@ interface RoomSelectionProps {
   setSelectedRooms: React.Dispatch<React.SetStateAction<Set<number>>>;
   checkIn?: string;
   checkOut?: string;
-  roomsData?: any[];
+  roomsData?: RoomWithAvailability[];
 }
 
 export default function RoomSelection({
-  propertyId,
   selectedRooms,
   setSelectedRooms,
   checkIn,
@@ -46,16 +46,22 @@ export default function RoomSelection({
         availabilityStatus,
         availableUnits,
         displayPrice:
-          hasDateRange && room.calculatedPrice !== null
+          hasDateRange &&
+          room.calculatedPrice !== null &&
+          room.calculatedPrice !== undefined
             ? room.calculatedPrice
             : room.basePrice,
         hasPeakSeason:
           hasDateRange &&
           room.calculatedPrice !== null &&
+          room.calculatedPrice !== undefined &&
           room.calculatedPrice !== room.basePrice,
         image:
-          room.images?.[0]?.url ||
-          room.image ||
+          (Array.isArray(room.images)
+            ? room.images[0]?.url
+            : typeof room.images === "string"
+            ? room.images
+            : undefined) ||
           "https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=300&h=200&fit=crop&crop=center",
       };
     });

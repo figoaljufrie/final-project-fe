@@ -24,6 +24,7 @@ import clsx from "clsx";
 import { useMe } from "@/hooks/user-auth/profile/use-get-me";
 import { useLogout } from "@/hooks/user-auth/useLogout";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const navigation = [
   {
@@ -133,15 +134,6 @@ export default function Sidebar({
       return pathname === "/dashboard";
     }
     return pathname.startsWith(href);
-  };
-
-  const onLogout = async () => {
-    try {
-      await handleLogout();
-      router.push("/");
-    } catch (err) {
-      console.error("Logout failed:", err);
-    }
   };
 
   return (
@@ -308,10 +300,12 @@ export default function Sidebar({
             >
               <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-gray-200">
                 {me?.avatarUrl ? (
-                  <img
+                  <Image
                     src={me.avatarUrl}
                     alt={me.name}
-                    className="w-full h-full object-cover"
+                    width={32}
+                    height={32}
+                    className="object-cover"
                   />
                 ) : (
                   <User className="h-4 w-4 text-white" />

@@ -1,4 +1,5 @@
 import { PropertyCategory } from "../enums/enums-type";
+import { RoomForPropertyList, RoomWithAvailability } from "./room-type";
 
 export enum PriceSort {
   ASC = "asc",
@@ -39,12 +40,6 @@ export interface PropertyImage {
   order?: number;
 }
 
-export interface RoomForPropertyList {
-  id: number;
-  basePrice: number;
-  capacity: number;
-}
-
 export interface PropertyDetail {
   id: number;
   tenantId: number;
@@ -61,7 +56,7 @@ export interface PropertyDetail {
   createdAt: Date;
   updatedAt: Date;
   images: PropertyImage[];
-  rooms: RoomForPropertyList[];
+  rooms: RoomWithAvailability[];
 }
 
 export interface PropertyListItem {

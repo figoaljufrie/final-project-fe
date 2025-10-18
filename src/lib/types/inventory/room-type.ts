@@ -55,3 +55,19 @@ export interface UpdateRoomPayload {
   description?: string;
   totalUnits?: number;
 }
+
+export interface RoomForPropertyList {
+  id: number;
+  basePrice: number;
+  capacity: number;
+}
+
+export interface RoomWithAvailability extends RoomForPropertyList {
+  name: string;
+  totalUnits: number;
+  calculatedPrice?: number | null;
+  isAvailable?: boolean;
+  bookedUnits?: number;
+  images?: RoomImage[];
+  description?: string | null;
+}
