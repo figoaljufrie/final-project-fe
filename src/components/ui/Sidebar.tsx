@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import clsx from "clsx";
 import { useMe } from "@/hooks/user-auth/profile/use-get-me";
+import { useLogout } from "@/hooks/user-auth/useLogout";
+import { useRouter } from "next/navigation";
 
 const navigation = [
   {
@@ -76,8 +78,9 @@ const userMenu = [
   },
   {
     name: "Logout",
-    href: "/logout",
+    href: "#",
     icon: LogOut,
+    action: "logout",
   },
 ];
 
@@ -94,11 +97,13 @@ export default function Sidebar({
   const [internalCollapsed, setInternalCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  const router = useRouter();
 
   const isCollapsed =
     externalCollapsed !== undefined ? externalCollapsed : internalCollapsed;
 
   const { data: me } = useMe();
+  const { handleLogout } = useLogout();
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -128,6 +133,15 @@ export default function Sidebar({
       return pathname === "/dashboard";
     }
     return pathname.startsWith(href);
+  };
+
+  const onLogout = async () => {
+    try {
+      await handleLogout();
+      router.push("/");
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
   };
 
   return (
@@ -327,10 +341,23 @@ export default function Sidebar({
             <div className="space-y-1">
               {userMenu.map((item) => {
                 const Icon = item.icon;
+                const isLogout = item.action === "logout";
+                const handleClick = async (e: React.MouseEvent) => {
+                  if (isLogout) {
+                    e.preventDefault();
+                    try {
+                      await handleLogout();
+                      setTimeout(() => router.push("/"), 300); // short delay for UX
+                    } catch (error) {
+                      console.error("Logout failed:", error);
+                    }
+                  }
+                };
                 return (
                   <Link
                     key={item.name}
-                    href={item.href}
+                    href={isLogout ? "#" : item.href}
+                    onClick={handleClick}
                     className={clsx(
                       "group flex items-center rounded-lg transition-all duration-200 relative",
                       "hover:bg-gray-100 text-gray-700 hover:text-gray-900",

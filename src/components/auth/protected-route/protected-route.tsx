@@ -39,11 +39,14 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
     // ========== 1️⃣ GUEST/NON-AUTHENTICATED ==========
     if (!user) {
-      if (isPublicRoute) {
+      const isProfileRoute = pathname.startsWith("/profile");
+      if (isPublicRoute && !isProfileRoute) {
         setIsAuthorized(true);
         return;
       }
-
+      if (isProfileRoute) {
+        router.replace("/auth/login");
+      }
       // Redirect to login for protected routes
       router.replace("/auth/login");
       return;
