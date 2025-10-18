@@ -36,6 +36,7 @@ export interface PropertyImage {
   altText: string | null;
   publicId: string | null;
   isPrimary: boolean;
+  order?: number;
 }
 
 export interface RoomForPropertyList {
@@ -67,11 +68,15 @@ export interface PropertyListItem {
   id: number;
   name: string;
   city: string | null;
+  province: string | null; // ✅ Added
+  address: string | null; // ✅ Added
+  latitude: number | null; // ✅ Added
+  longitude: number | null; // ✅ Added
   published: boolean;
-  category: PropertyCategory;
+  category: string; // match backend $Enums.PropertyCategory
   minPrice: number | null;
   rooms: RoomForPropertyList[];
-  images?: PropertyImage[];
+  images: PropertyImage[]; // ✅ Added
 }
 
 export interface PropertySearchQuery {
