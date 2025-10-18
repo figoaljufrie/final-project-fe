@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowUpDown } from "lucide-react";
 
 interface SortControlsProps {
   sortBy: "date" | "totalSales";
@@ -25,34 +25,27 @@ export default function SortControls({
     setIsOpen(false);
   };
 
-  const handleSortOrderToggle = () => {
-    onSortChange(sortBy, sortOrder === "asc" ? "desc" : "asc");
-  };
 
   const currentSortLabel = sortOptions.find(option => option.value === sortBy)?.label || "Date";
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="space-y-2">
       {/* Sort By Dropdown */}
       <div className="relative">
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+        <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+          className="flex items-center justify-between w-full px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
         >
+          <span className="text-sm text-gray-700">{currentSortLabel}</span>
           <ArrowUpDown className="w-4 h-4 text-gray-500" />
-          <span className="text-sm font-medium text-gray-700">
-            Sort by: {currentSortLabel}
-          </span>
-        </motion.button>
+        </button>
 
         {isOpen && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[140px]"
+            className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 w-full"
           >
             <div className="p-1">
               {sortOptions.map((option) => (
@@ -73,20 +66,6 @@ export default function SortControls({
         )}
       </div>
 
-      {/* Sort Order Toggle */}
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={handleSortOrderToggle}
-        className="p-2 bg-white border border-gray-200 rounded-lg hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-        title={`Sort ${sortOrder === "asc" ? "Descending" : "Ascending"}`}
-      >
-        {sortOrder === "asc" ? (
-          <ArrowUp className="w-4 h-4 text-gray-500" />
-        ) : (
-          <ArrowDown className="w-4 h-4 text-gray-500" />
-        )}
-      </motion.button>
     </div>
   );
 }

@@ -81,7 +81,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         pathname.startsWith(route)
       );
 
-      if (isAllowed) {
+      if (isAllowed || isPublicRoute) {
         setIsAuthorized(true);
         return;
       }

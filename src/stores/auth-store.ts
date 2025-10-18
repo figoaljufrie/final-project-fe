@@ -42,10 +42,16 @@ export const useAuthStore = create<AuthState>()(
       set({ loading: true });
       try {
         await authService.logout();
-      } catch {
-        // Ignore
+      } catch (error) {
+        console.error("Logout error:", error);
       } finally {
-        set({ user: null, loading: false, hydrated: true });
+        // Clear user state and force re-hydration
+        set({ user: null, loading: false, hydrated: false });
+        
+        // Force redirect to login page
+        if (typeof window !== 'undefined') {
+          window.location.href = '/auth/login';
+        }
       }
     },
 

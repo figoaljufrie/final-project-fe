@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Users, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 interface User {
   id: number;
@@ -39,24 +39,19 @@ export default function UserSelector({
 
   return (
     <div className="relative">
-      <motion.button
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
+      <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-lg hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+        className="w-full flex items-center justify-between px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
       >
-        <div className="flex items-center gap-3">
-          <Users className="w-4 h-4 text-gray-500" />
-          <span className="text-sm font-medium text-gray-700">
-            {selectedUser ? selectedUser.name : "All Users"}
-          </span>
-        </div>
+        <span className="text-sm text-gray-700">
+          {selectedUser ? selectedUser.name : "All Users"}
+        </span>
         <ChevronDown
-          className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
+          className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
           }`}
         />
-      </motion.button>
+      </button>
 
       {isOpen && (
         <motion.div
@@ -65,7 +60,7 @@ export default function UserSelector({
           exit={{ opacity: 0, y: -10 }}
           className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto"
         >
-          <div className="p-2">
+          <div className="p-1">
             <button
               onClick={() => {
                 onUserChange(undefined);

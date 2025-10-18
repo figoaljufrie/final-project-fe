@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ChevronDown, MapPin, Building } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useTenantProperties } from "@/hooks/report/use-tenant-properties";
 
 interface PropertySelectorProps {
@@ -27,14 +27,8 @@ export default function PropertySelector({
   if (isLoading) {
     return (
       <div className={`relative ${className}`}>
-        <div className="bg-white/95 backdrop-blur-xl rounded-xl p-4 border border-gray-200/50 shadow-lg">
-          <div className="flex items-center space-x-3">
-            <div className="w-5 h-5 bg-gray-200 rounded animate-pulse"></div>
-            <div className="flex-1">
-              <div className="h-4 bg-gray-200 rounded animate-pulse mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded animate-pulse w-2/3"></div>
-            </div>
-          </div>
+        <div className="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg animate-pulse">
+          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
         </div>
       </div>
     );
@@ -42,87 +36,52 @@ export default function PropertySelector({
 
   return (
     <div className={`relative ${className}`}>
-      <motion.button
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
+      <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full bg-white/95 backdrop-blur-xl rounded-xl p-4 border border-gray-200/50 shadow-lg hover:shadow-xl transition-all duration-200 text-left"
+        className="w-full flex items-center justify-between px-3 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-sm"
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-rose-500 to-rose-600 rounded-xl flex items-center justify-center shadow-lg">
-              <Building className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-gray-900">
-                {selectedProperty ? selectedProperty.name : "All Properties"}
-              </h3>
-              <p className="text-sm text-gray-500 flex items-center">
-                <MapPin className="w-3 h-3 mr-1" />
-                {selectedProperty ? selectedProperty.address : `${properties.length} properties`}
-              </p>
-            </div>
-          </div>
-          <ChevronDown 
-            className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${
-              isOpen ? "rotate-180" : ""
-            }`} 
-          />
-        </div>
-      </motion.button>
+        <span className="text-sm text-gray-700">
+          {selectedProperty ? selectedProperty.name : "All Properties"}
+        </span>
+        <ChevronDown 
+          className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${
+            isOpen ? "rotate-180" : ""
+          }`} 
+        />
+      </button>
 
       {isOpen && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
-          className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl rounded-xl border border-gray-200/50 shadow-xl z-50 max-h-64 overflow-y-auto"
+          className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto"
         >
-          <div className="p-2">
-            <motion.button
-              whileHover={{ backgroundColor: "rgba(244, 114, 182, 0.1)" }}
+          <div className="p-1">
+            <button
               onClick={() => handlePropertySelect(undefined)}
-              className={`w-full p-3 rounded-lg text-left transition-colors ${
+              className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors duration-200 ${
                 !selectedPropertyId 
-                  ? "bg-rose-50 text-rose-700 border border-rose-200" 
-                  : "hover:bg-gray-50"
+                  ? "bg-blue-50 text-blue-700 font-medium" 
+                  : "text-gray-700 hover:bg-gray-50"
               }`}
             >
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-gray-400 to-gray-500 rounded-lg flex items-center justify-center">
-                  <Building className="w-4 h-4 text-white" />
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900">All Properties</p>
-                  <p className="text-sm text-gray-500">{properties.length} properties</p>
-                </div>
-              </div>
-            </motion.button>
+              All Properties
+            </button>
 
             {properties.map((property) => (
-              <motion.button
+              <button
                 key={property.id}
-                whileHover={{ backgroundColor: "rgba(244, 114, 182, 0.1)" }}
                 onClick={() => handlePropertySelect(property.id)}
-                className={`w-full p-3 rounded-lg text-left transition-colors ${
+                className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors duration-200 ${
                   selectedPropertyId === property.id 
-                    ? "bg-rose-50 text-rose-700 border border-rose-200" 
-                    : "hover:bg-gray-50"
+                    ? "bg-blue-50 text-blue-700 font-medium" 
+                    : "text-gray-700 hover:bg-gray-50"
                 }`}
               >
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-gradient-to-br from-rose-500 to-rose-600 rounded-lg flex items-center justify-center">
-                    <Building className="w-4 h-4 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 truncate">{property.name}</p>
-                    <p className="text-sm text-gray-500 flex items-center">
-                      <MapPin className="w-3 h-3 mr-1 flex-shrink-0" />
-                      <span className="truncate">{property.address}</span>
-                    </p>
-                  </div>
-                </div>
-              </motion.button>
+                <div className="font-medium">{property.name}</div>
+                <div className="text-xs text-gray-500">{property.address}</div>
+              </button>
             ))}
           </div>
         </motion.div>

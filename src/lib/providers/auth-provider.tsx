@@ -3,6 +3,7 @@ import { QueryProvider } from "./query-provider";
 import { ReactNode, useEffect, useState } from "react";
 import { useAuthStore } from "@/stores/auth-store";
 import { ProtectedRoute } from "@/components/auth/protected-route/protected-route";
+import { AuthRedirect } from "@/components/auth/auth-redirect";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { hydrate, hydrated } = useAuthStore();
@@ -25,6 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <QueryProvider>
+      <AuthRedirect />
       <ProtectedRoute>{children}</ProtectedRoute>
     </QueryProvider>
   );

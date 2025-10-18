@@ -35,16 +35,7 @@ export function useReportData(filters: ReportFilters = {}) {
   });
 
   // Stabilize filters to prevent infinite re-renders
-  const stableFilters = useMemo(() => filters, [
-    filters.startDate,
-    filters.endDate,
-    filters.propertyId,
-    filters.userId,
-    filters.sortBy,
-    filters.sortOrder,
-    filters.reportType,
-    filters, // Include the entire filters object to satisfy ESLint
-  ]);
+  const stableFilters = useMemo(() => filters, [filters]);
 
   const loadReportData = useCallback(async () => {
     try {

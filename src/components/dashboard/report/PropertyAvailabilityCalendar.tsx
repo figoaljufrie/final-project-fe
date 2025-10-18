@@ -6,7 +6,6 @@ import {
   ChevronRight,
   MapPin,
   Users,
-  Download,
   RefreshCw,
   Eye,
   EyeOff,
@@ -17,7 +16,6 @@ import {
 } from "@/lib/services/report/report-service";
 import { useTenantProperties } from "@/hooks/report/use-tenant-properties";
 import { toast } from "react-hot-toast";
-import { ExportUtils } from "@/lib/utils/export-utils";
 
 interface PropertyAvailabilityCalendarProps {
   propertyId?: number;
@@ -161,23 +159,6 @@ export default function PropertyAvailabilityCalendar({
     }
   };
 
-  const handleExportCalendar = async () => {
-    if (!propertyData || !propertyData.calendar) {
-      toast.error("No calendar data to export");
-      return;
-    }
-
-    try {
-      await ExportUtils.exportCalendarToExcel(
-        propertyData.calendar,
-        `property-calendar-${currentMonth.getFullYear()}-${currentMonth.getMonth() + 1}.xlsx`
-      );
-      toast.success("Calendar exported successfully");
-    } catch (error) {
-      console.error("Export error:", error);
-      toast.error("Failed to export calendar");
-    }
-  };
 
   const getRoomDetails = (date: Date) => {
     if (!propertyData) return [];
@@ -230,14 +211,6 @@ export default function PropertyAvailabilityCalendar({
             className="p-2 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50"
           >
             <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleExportCalendar}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            <Download className="h-4 w-4" />
           </motion.button>
           <motion.button
             whileHover={{ scale: 1.05 }}
